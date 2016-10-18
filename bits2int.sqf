@@ -1,13 +1,13 @@
-/////////////////////////////// fnc_bits2int /////////////////////// 2016-10-17
+/////////////////////////////// fnc_bits2int /////////////////////// 2016-10-18
 /*  Convert a binary string of 1's and 0's to an integer.  */
 /////////////////////////////////////////////////////////////
-private [             //                                                //
-         "_bits",     // String     [IN]                               ////
-	 "_bitsArr",  // Array[int]                                   //////
-	 "_alen",     // int                                         ///  ///
-	 "_i",        // int                                        ///    ///
-	 "_acc"       // int        [OUT]                          ///      ///
-];  //////////////////////////////////////// <dwringer@gmail.com> ///        //
+private [             //                                               //
+         "_bits",     // String     [IN]                              ////
+	 "_bitsArr",  // Array[int]                                  //////
+	 "_alen",     // int                                        ///  ///
+	 "_i",        // int                                       ///    ///
+	 "_acc"       // int        [OUT]                         ///      ///
+];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
 _bits = _this;
 _bitsArr = toArray _bits;
 _alen = count _bitsArr;

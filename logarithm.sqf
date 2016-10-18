@@ -1,16 +1,17 @@
-///////////////////////////// fnc_logarithm //////////////////////// 2016-10-17
-/*  Takes the logarithm in any given base: [[base=e], num] call...  */
+///////////////////////////// fnc_logarithm //////////////////////// 2016-10-18
+/*  Finds the logarithm in any given base: [[base=e], num] call...  */
 //////////////////////////////////////////////////////////////////////
 private [                 //
          "_argc",         // int
-         "_base",         // int   [IN/1]                               //
-         "_number",       // float [IN/2]                              //// 
-         "_numerator",    // float                                    ////// 
-         "_denominator",  // float                                   ///  ///  
-         "_e",            // float                                  ///    ///
-         "_result"        // float [OUT]                           ///      ///
-];  //////////////////////////////////////// <dwringer@gmail.com> ///        //
-_e = 2.718281828459045235360287471352;
+         "_base",         // int   [IN/1]                              //
+         "_number",       // float [IN/2]                             //// 
+         "_numerator",    // float                                   ////// 
+         "_denominator",  // float                                  ///  ///  
+         "_e",            // float                                 ///    ///
+         "_result"        // float [OUT]                          ///      ///
+];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
+#include <include\constants.hpp>
+_e = E;
 _argc = count _this;
 switch (_argc) do {
 	case 1: {

@@ -8,7 +8,7 @@ civKilled = 0;
 fnc_civLeaders = compile preprocessfile "civLeaders.sqf";
 
 fnc_logarithm = compile preprocessfile "logarithm.sqf";
-fnc_bin2int = compile preprocessfile "bits2int.sqf";
+fnc_bits2int = compile preprocessfile "bits2int.sqf";
 fnc_randint = compile preprocessfile "randint.sqf";
 
 
@@ -32,6 +32,7 @@ DWR_fnc_BuyMagazine = compile preprocessfile "DWR_fnc_BuyMagazine.sqf";
 execVM "randomWeather.sqf";
 ([[["sunrise", "sunset"] select floor random 2], []]
  select floor random 2) execVM "randomTime.sqf";
+
 
 /*
 [] spawn {

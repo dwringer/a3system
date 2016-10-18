@@ -1,4 +1,4 @@
-///////////////////////////// fnc_randint ////////////////////////// 2016-10-17
+///////////////////////////// fnc_randint ////////////////////////// 2016-10-18
 /*  Random integer with von Neumann whitening applied  */
 /////////////////////////////////////////////////////////
 private [              //
@@ -6,13 +6,13 @@ private [              //
         "_min",        // int [IN   /B1]
         "_max",        // int [IN/A1/B2]
         "_numString",  // String
-        "_a",          // int                                           //
-        "_b",          // int                                          //// 
-        "_chars",      // int                                         ////// 
-        "_test",       // String                                     ///  ///  
-        "_val",        // int                                       ///    ///
-        "_rtn"         // int [OUT]                                ///      ///
-];  //////////////////////////////////////// <dwringer@gmail.com> ///        //
+        "_a",          // int                                          //
+        "_b",          // int                                         //// 
+        "_chars",      // int                                        ////// 
+        "_test",       // String                                    ///  ///  
+        "_val",        // int                                      ///    ///
+        "_rtn"         // int [OUT]                               ///      ///
+];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
 _argc = count _this;
 _min = 0;
 _max = 0;
