@@ -1,0 +1,29 @@
+///////////////////////////// fnc_logarithm //////////////////////// 2016-10-17
+/*  Takes the logarithm in any given base: [[base=e], num] call...  */
+//////////////////////////////////////////////////////////////////////
+private [                 //
+         "_argc",         // int
+         "_base",         // int   [IN/1]                               //
+         "_number",       // float [IN/2]                              //// 
+         "_numerator",    // float                                    ////// 
+         "_denominator",  // float                                   ///  ///  
+         "_e",            // float                                  ///    ///
+         "_result"        // float [OUT]                           ///      ///
+];  //////////////////////////////////////// <dwringer@gmail.com> ///        //
+_e = 2.718281828459045235360287471352;
+_argc = count _this;
+switch (_argc) do {
+	case 1: {
+		_base = _e;
+		_number = _this select 0;
+	};
+	case 2: {
+		_base = _this select 0;
+		_number = _this select 1;
+	};
+};
+/* Formula: (log b x) = (log a x) / (log a b) */
+_numerator = log _number;
+_denominator = log _base;
+_result = _numerator / _denominator;
+_result;  // RETURN ///////////////////////////////////////////////////////////
