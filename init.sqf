@@ -12,8 +12,8 @@ fnc_bits2int = compile preprocessfile "bits2int.sqf";
 fnc_randint = compile preprocessfile "randint.sqf";
 
 
-fnc_mkcivs = compile preprocessfile "mkcivs.sqf";
-fnc_rmcivs = compile preprocessfile "rmcivs.sqf";
+fnc_mkcivs = compile preprocessfile "fnc_mkcivs.sqf";
+//fnc_rmcivs = compile preprocessfile "rmcivs.sqf";
 Sentinel_mkCivs = false;
 // fnc_civtriggers = compile preprocessfile "civtriggers.sqf";
 

@@ -30,20 +30,20 @@ sleep random 5;
 while {!(_man getVariable "hasRebelled")} do {
 	_grpOld = group _man;
 	_distCurr = 0;
-
-	{_tx = (position _x select 0) - (_posStart select 0);
-	 _ty = (position _x select 1) - (_posStart select 1);
-	 _td = sqrt ((_tx * _tx) + (_ty * _ty));
-	 _distCurr = _distCurr max _td;} 
-		forEach units _grpOld;
-
+        {
+		_tx = (position _x select 0) - (_posStart select 0);
+		_ty = (position _x select 1) - (_posStart select 1);
+		_td = sqrt ((_tx * _tx) + (_ty * _ty));
+		_distCurr = _distCurr max _td;
+	} forEach units _grpOld;
 	if (_distCurr >= _distMax) then {
 		_grpNew = createGroup (side _man);
 		_wptReturn = _grpNew addWaypoint [_posStart, 0];
 		_wptReturn setWaypointType "MOVE";
 		_wptReturn setWaypointSpeed "LIMITED";
 		_wptReturn setWaypointCompletionRadius _distRet;
-		_wptDismiss = _grpNew addWaypoint [waypointPosition _wptReturn, 0];
+		_wptDismiss = _grpNew addWaypoint [
+		        waypointPosition _wptReturn, 0];
 		_wptDismiss setWaypointType "DISMISS";
 		_wptDismiss setWaypointSpeed "NORMAL";
 		_wptDismiss setWaypointCompletionRadius _distRet;

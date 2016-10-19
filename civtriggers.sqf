@@ -2,15 +2,15 @@
 /*  Create spawn/despawn triggers for ambient civilians   */
 ////////////////////////////////////////////////////////////
 private [                 //
-         _logic,          // [IN/0]
-         _lo,             // [IN/1]
-         _hi,             // [IN/2]
-         _size,           // [IN/3]                                    //
-         _rPlacement,     // [IN/4]                                   //// 
-         _rSpawn,         // [IN/5]                                  ////// 
-         _rDespawn,       // [IN/6]                                 ///  ///  
-         _spawnTrigger,   //                                       ///    ///
-         _despawnTrigger  //                                      ///      ///
+         _logic,          // vehicle [IN/0]
+         _lo,             // int     [IN/1]
+         _hi,             // int     [IN/2]
+         _size,           // int     [IN/3]                            //
+         _rPlacement,     // float   [IN/4]                           //// 
+         _rSpawn,         // float   [IN/5]                          ////// 
+         _rDespawn,       // float   [IN/6]                         ///  ///  
+         _spawnTrigger,   // trigger                               ///    ///
+         _despawnTrigger  // trigger                              ///      ///
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
 _logic = _this select 0;
 _lo = _this select 1;
@@ -24,7 +24,8 @@ call compile format ["Bool_civSpawn_%1_%2 = false;", _lo, _hi];
 
 _spawnTrigger = createTrigger ["EmptyDetector", position _logic];
 _spawnTrigger setTriggerArea [_rSpawn, _rSpawn, 0, false];
-_spawnTrigger setTriggerActivation ["ANY", "PRESENT", true];
+_spawnTrigger setTriggerActivation ["GROUP", "PRESENT", true];
+_spawnTrigger triggerAttachVehicle[player];
 _spawnTrigger setTriggerStatements [
         format ["(player in thisList) and !Bool_civSpawn_%1_%2", _lo, _hi],
         format ["_nil = [%1, %2, %3, %4, %5]",
