@@ -1,0 +1,23 @@
+////////////////////////////// dg_synced.sqf /////////////////////// 2016-10-19
+/*   Find synchronized objects flagged with "dg_isNode"   */
+////////////////////////////////////////////////////////////
+private [                                                      
+         _node,                                                        //
+         _synced,                                                     //// 
+         _non_nodes,                                                 ////// 
+         _ni                                                        ///  ///  
+                                                                   ///    ///
+                                                                  ///      ///
+];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
+_node = _this select 0;
+
+_synced = synchronizedObjects _node;
+_non_nodes = [];
+for "_i" from 0 to ((count _synced) - 1) do {
+	_ni = _synced select _i;
+	if (not (_nd getVariable "dg_isNode")) then {
+		_non_nodes = _non_nodes + [_ni]
+        };
+	_synced = _synced - _non_nodes;
+};
+_synced;  // RETURN ///////////////////////////////////////////////////////////

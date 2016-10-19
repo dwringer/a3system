@@ -3,22 +3,29 @@
 ////////////////////////////////////////////////////////////
 private [                 //
          _logic,          // vehicle [IN/0]
-         _lo,             // int     [IN/1]
-         _hi,             // int     [IN/2]
-         _size,           // int     [IN/3]                            //
-         _rPlacement,     // float   [IN/4]                           //// 
-         _rSpawn,         // float   [IN/5]                          ////// 
-         _rDespawn,       // float   [IN/6]                         ///  ///  
+         _lo,             // int     
+         _hi,             // int     
+         _ct,             // int     [IN/1]
+         _size,           // int     [IN/2]                            //
+         _rPlacement,     // float   [IN/3]                           //// 
+         _rSpawn,         // float   [IN/4]                          ////// 
+         _rDespawn,       // float   [IN/5]                         ///  ///  
          _spawnTrigger,   // trigger                               ///    ///
          _despawnTrigger  // trigger                              ///      ///
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
 _logic = _this select 0;
-_lo = _this select 1;
-_hi = _this select 2;
-_size = _this select 3;
-_rPlacement = _this select 4;
-_rSpawn = _this select 5;
-_rDespawn = _this select 6;
+_ct = _this select 1;
+_size = _this select 2;
+_rPlacement = _this select 3;
+_rSpawn = _this select 4;
+_rDespawn = _this select 5;
+
+waitUntil {not Sentinel_civTriggers};
+Sentinel_civTriggers = true;
+_lo = Index_civGroups;
+_hi = _lo + _ct;
+Index_civGroups = _hi + 1;
+Sentinel_civTriggers = false;
 
 call compile format ["Bool_civSpawn_%1_%2 = false;", _lo, _hi];
 

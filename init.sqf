@@ -14,7 +14,10 @@ fnc_randint = compile preprocessfile "randint.sqf";
 
 fnc_mkcivs = compile preprocessfile "fnc_mkcivs.sqf";
 //fnc_rmcivs = compile preprocessfile "rmcivs.sqf";
+Sentinel_civTriggers = false;
 Sentinel_mkCivs = false;
+Index_civGroups = 0;
+
 // fnc_civtriggers = compile preprocessfile "civtriggers.sqf";
 
 //fnc_rebel = compile preprocessfile "rebel.sqf";
