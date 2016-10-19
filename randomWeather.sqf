@@ -11,7 +11,7 @@
 private ["_fm", "_kfm", "_rm", "_krm", "_sm", "_ksm"];
 
 //fogMod+const
-_fm = random [0, 0.05, [.68, 1.] select floor random [0, 0.1, 2]];
+_fm = random [0, 0.025, [.5, 1.] select floor random [0, 0.1, 2]];
 _fm = _fm * _fm * _fm;
 
 //rainMod+const:

@@ -82,13 +82,13 @@ _wptArm setWaypointStatements ["true", format [
 
     {(leader _grpOPFOR) setSkill [_x select 0, _x select 1];}
     forEach [[""general"",    .8],
-	     [""commanding"", .8],
+	     [""commanding"", .9],
 	     [""courage"", .8],
 	     [""endurance"", 1.0],
 	     [""spotTime"", 1.0],
 	     [""aimingSpeed"", 1.0],
 	     [""aimingAccuracy"", 1.0],
-             [""spotDistance"", 0.3],
+             [""spotDistance"", 0.7 + random .3],
              [""aimingShake"", 1.0],
              [""reloadSpeed"", 1.0]];
 		    
@@ -96,14 +96,14 @@ _wptArm setWaypointStatements ["true", format [
      _y = _x;
      {_y setSkill [_x select 0, _x select 1];}
      forEach [[""general"", .5 + random .5],
- 	      [""commanding"", .35],
-	      [""courage"", .3 + random .4],
+ 	      [""commanding"", .65 + random .35],
+	      [""courage"", .6 + random .4],
 	      [""endurance"", .8],
 	      [""spotTime"", 1.0],
 	      [""aimingSpeed"", 1.0],
 	      [""aimingAccuracy"", .5 + random .3],
-              [""spotDistance"", 1.0],
-              [""aimingShake"", .5 + random .3],
+              [""spotDistance"", .7 + random .3],
+              [""aimingShake"", .5 + random .5],
               [""reloadSpeed"", 1.0]];}
     	forEach ((units _grpOPFOR) - [leader _grpOPFOR]);",
 

@@ -13,12 +13,9 @@ fnc_randint = compile preprocessfile "randint.sqf";
 
 
 fnc_mkcivs = compile preprocessfile "mkcivs.sqf";
-fnc_rmcivs = compile preprocessfile "rmCivs.sqf";
+fnc_rmcivs = compile preprocessfile "rmcivs.sqf";
 Sentinel_mkCivs = false;
-Bool_civSpawn_0_3 = false;
-Bool_civSpawn_4_7 = false;
-Bool_civSpawn_8_11 = false;
-Bool_civSpawn_12_15 = false;
+// fnc_civtriggers = compile preprocessfile "civtriggers.sqf";
 
 //fnc_rebel = compile preprocessfile "rebel.sqf";
 //fnc_layAmbush = compile preprocessfile "layAmbush.sqf";
