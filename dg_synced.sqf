@@ -1,16 +1,15 @@
 ////////////////////////////// dg_synced.sqf /////////////////////// 2016-10-19
 /*   Find synchronized objects flagged with "dg_isNode"   */
 ////////////////////////////////////////////////////////////
-private [                                                      
-         _node,                                                        //
-         _synced,                                                     //// 
-         _non_nodes,                                                 ////// 
-         _ni                                                        ///  ///  
-                                                                   ///    ///
-                                                                  ///      ///
+private [             //                                       
+         _node,       // vehicle   [IN]                                //
+         _synced,     // vehicle[] [OUT]                              //// 
+         _non_nodes,  // vehicle[]                                   ////// 
+         _ni          // vehicle                                    ///  ///  
+                      //                                           ///    ///
+                      //                                          ///      ///
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
 _node = _this select 0;
-
 _synced = synchronizedObjects _node;
 _non_nodes = [];
 for "_i" from 0 to ((count _synced) - 1) do {
