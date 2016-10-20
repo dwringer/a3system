@@ -3,6 +3,7 @@
 #include <include\directed_graph.hpp>
 #include <include\mkcivs.hpp>
 #include <include\weapon_shop.hpp>
+#include <include\asinc.hpp>
 
 if (!isServer) exitWith {};
 

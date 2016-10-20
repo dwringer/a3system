@@ -1,6 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////
 /// Styles
 ///////////////////////////////////////////////////////////////////////////
+#ifndef __GUI_STYLES__
+#define __GUI_STYLES__
 #define GUI_GRID_X	(0)
 #define GUI_GRID_Y	(0)
 #define GUI_GRID_W	(0.025)
@@ -96,11 +98,13 @@
 #define MB_BUTTON_OK      1
 #define MB_BUTTON_CANCEL  2
 #define MB_BUTTON_USER    4
-
+#endif
 
 ///////////////////////////////////////////////////////////////////////////
 /// Base Classes
 ///////////////////////////////////////////////////////////////////////////
+#ifndef __GUI_BASE_CLASSES__
+#define __GUI_BASE_CLASSES__
 class RscText
 {
 	access = 0;
@@ -1126,7 +1130,10 @@ class RscControlsGroup
 	shadow = 0;
 	style = 16;
 };
+#endif
 
+#ifndef __GUI_BOX_CLASS__
+#define __GUI_BOX_CLASS__
 class BOX
 { 
    type = CT_STATIC;
@@ -1140,3 +1147,4 @@ class BOX
     text = ""; 
 
 };
+#endif

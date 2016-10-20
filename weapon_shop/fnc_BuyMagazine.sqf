@@ -24,7 +24,7 @@ if (_prc <= _cash) then {
 	sleep 0.05;
 	if (_mags == (count magazines player)) then {
 		//player setVariable ["DWR_PlayerCash", _cash];
-		if (not isNil DWR_WeaponBox) then {
+		if (not isNil "DWR_WeaponBox") then {
 			DWR_WeaponBox addMagazineCargo [(_w select 0), 1];
 		};
 		true;
