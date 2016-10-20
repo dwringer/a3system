@@ -1,5 +1,0 @@
-private ["_start"];
-_start = spawn {
-	waitUntil {time > 1};
-	_nil = execVM "asinc\dialogEngineStart.sqf";
-};
