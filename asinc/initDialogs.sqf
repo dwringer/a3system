@@ -1,13 +1,24 @@
-#define TEXT(STATE,WORDS) setVariable [format ["dialogText%1", STATE], WORDS]
-#define RESP(STATE,NUM,WORDS) setvariable [format ["dialogResp%1%2", STATE, NUM], WORDS]
-#define ACT(STATE,NUM,DEST) setvariable [format ["dialogAct%1%2", STATE, NUM], [DEST, ""]]
-cman setVariable ["dialogState", "AA"];
-cman setVariable ["dialogStart", "AA"];
-cman setVariable ["dialogName", "Crewman"];
-cman TEXT("AA", "Hey man, how's it going?");
-cman ACT("AA", 1, "AA");
-cman ACT("AA", 2, "AA");
-cman ACT("AA", 3, "AA");
+#define TEXT(STATE,WORDS)  \
+        setVariable [format ["dialogText%1", STATE], WORDS]
+#define RESP(STATE,NUM,WORDS)  \
+        setvariable [format ["dialogResp%1%2", STATE, NUM], WORDS]
+#define ACT(STATE,NUM,DEST)  \
+        setvariable [format ["dialogAct%1%2", STATE, NUM], [DEST, ""]]
+#define INIT(MAN, NAME, STATE)  \
+        _nil = MAN execVM "asinc\dialogEnable.sqf";  \
+        MAN setVariable ["dialogState", STATE];  \
+        MAN setVariable ["dialogStart", STATE];  \
+        MAN setVariable ["dialogName", NAME]
+#define STEADY_STATE(MAN, STATE)  \
+        MAN ACT(STATE, 1, STATE);  \
+        MAN ACT(STATE, 2, STATE);  \
+        MAN ACT(STATE, 3, STATE)
+
+INIT(cman, "Crewman", "AA");
+#define CMAN_AA "Hey man, how's it going?"
+cman TEXT("AA", CMAN_AA);
+STEADY_STATE(cman, "AA");
+
 /*
 AirportGuard setVariable ["dialogState", "AA"];
 AirportGuard setVariable ["dialogStart", "AA"];
