@@ -1,10 +1,11 @@
 # a3system
-To add the ambient civilian subsystem, put the following files in your mission
-path (Alongside mission.sqm):
+To add the ambient civilian subsystem, ensure the following files are in your
+mission path:
 ```html
         init.sqf
+        mission.sqm
         include\mkcivs.hpp
-	mkcivs\*.*
+        mkcivs\*.*
 ```
 
 Then, place the following at the top of your misson's init.sqf file:
