@@ -1,4 +1,16 @@
 # a3system
+To add the ambient civilian subsystem, put the following files in your mission
+path (Alongside mission.sqm):
+```html
+        init.sqf
+        include\mkcivs.hpp
+	mkcivs\*.*
+```
+
+Then, place the following at the top of your misson's init.sqf file:
+```html
+        #include <include\mkcivs.hpp>
+```
 
 To create an ambient civilian zone, place a Game Logic at the center and in
 its initialization field, put the following:
