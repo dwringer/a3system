@@ -20,6 +20,7 @@ _rPlacement = _this select 3;
 _rSpawn = _this select 4;
 _rDespawn = _this select 5;
 
+waitUntil {not isNil "Sentinel_civTriggers"};
 waitUntil {not Sentinel_civTriggers};
 Sentinel_civTriggers = true;
 _lo = Index_civGroups;

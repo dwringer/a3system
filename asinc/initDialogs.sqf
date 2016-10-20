@@ -9,6 +9,8 @@
         MAN setVariable ["dialogState", STATE];  \
         MAN setVariable ["dialogStart", STATE];  \
         MAN setVariable ["dialogName", NAME]
+#define INIT_AS(MAN, AS)  \
+        _nil = [MAN, AS] execVM "asinc\dialogEnable.sqf"
 #define STEADY_STATE(MAN, STATE)  \
         MAN ACT(STATE, 1, STATE);  \
         MAN ACT(STATE, 2, STATE);  \
@@ -18,6 +20,8 @@ INIT(cman, "Crewman", "AA");
 #define CMAN_AA "Hey man, how's it going?"
 cman TEXT("AA", CMAN_AA);
 STEADY_STATE(cman, "AA");
+
+INIT_AS(cman_1, cman);
 
 /*
 AirportGuard setVariable ["dialogState", "AA"];
