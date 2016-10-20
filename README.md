@@ -37,7 +37,7 @@ Then, set up a trigger and in its on-activation field put the following:
 To set up an IED, create or select an object to specify its target and a trigger
 to activate the bomb.  In the trigger on-activation field put one of these:
 ```html
-        _nil = [target] execVM "mkcivs\bomb.sqf";  // Standard, or
+        _nil = [<target-name>] execVM "mkcivs\bomb.sqf";  // Standard, or
 
-        _nil = [target] execVM "mkcivs\fragbomb.sqf";  // Fragmentation
+        _nil = [<target-name>] execVM "mkcivs\fragbomb.sqf";  // Fragmentation
 ```
