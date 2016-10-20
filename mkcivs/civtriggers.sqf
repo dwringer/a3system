@@ -1,17 +1,17 @@
 ///////////////////////////// civtriggers.sqf ////////////////////// 2016-10-18
 /*  Create spawn/despawn triggers for ambient civilians   */
 ////////////////////////////////////////////////////////////
-private [                 //
-         _logic,          // vehicle [IN/0]
-         _lo,             // int     
-         _hi,             // int     
-         _ct,             // int     [IN/1]
-         _size,           // int     [IN/2]                            //
-         _rPlacement,     // float   [IN/3]                           //// 
-         _rSpawn,         // float   [IN/4]                          ////// 
-         _rDespawn,       // float   [IN/5]                         ///  ///  
-         _spawnTrigger,   // trigger                               ///    ///
-         _despawnTrigger  // trigger                              ///      ///
+private [                   //
+         "_logic",          // vehicle [IN/0]
+         "_lo",             // int     
+         "_hi",             // int     
+         "_ct",             // int     [IN/1]
+         "_size",           // int     [IN/2]                          //
+         "_rPlacement",     // float   [IN/3]                         //// 
+         "_rSpawn",         // float   [IN/4]                        ////// 
+         "_rDespawn",       // float   [IN/5]                       ///  ///  
+         "_spawnTrigger",   // trigger                             ///    ///
+         "_despawnTrigger"  // trigger                            ///      ///
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
 _logic = _this select 0;
 _ct = _this select 1;
@@ -47,7 +47,7 @@ _despawnTrigger setTriggerActivation ["GROUP", "NOT PRESENT", true];
 _despawnTrigger triggerAttachVehicle[player];
 _despawnTrigger setTriggerStatements [
         format ["this and Bool_civSpawn_%1_%2", _lo, _hi],
-        format ["_nil = [%1, %2, %3] execVM ""rmcivs.sqf""; ",
+        format ["_nil = [%1, %2, %3] execVM ""mkcivs\rmcivs.sqf""; ",
                 _lo, _hi, _size] +
         format ["Bool_civSpawn_%1_%2 = false;", _lo, _hi],
         ""

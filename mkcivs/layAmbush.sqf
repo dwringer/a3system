@@ -36,7 +36,7 @@ _acc = [];
 		[_x, _nearest, _j] spawn {
 			sleep (5 * (_this select 2));
 			[_this select 0,
-			 _this select 1] execVM "rebel.sqf";
+			 _this select 1] execVM "mkcivs\rebel.sqf";
 		};
 		_acc = _acc + [_x];
 	};

@@ -15,6 +15,8 @@
 	Return:
 		true
 */
+#include <include\props.hpp>
+
 private ["_lo", "_hi", "_sz", "_p", "_r",
 	 "_civs", "_tst", "_center", "_acc",
 	 "_ck", "_g", "_r", "_wptDismiss",
@@ -31,15 +33,7 @@ _p  = position (_this select 3);
 _r  = _this select 4;
 
 // Available civs:
-_civs = [
-      "C_man_polo_2_F",
-      "C_man_polo_3_F",
-      "C_man_polo_4_F",
-      "C_man_polo_5_F",
-      "C_man_polo_6_F",
-      "C_man_1_1_F",
-      "C_man_1_2_F",
-      "C_man_1_3_F"];
+_civs = CIVILIANS;
 
 // Assert side exists, get sideLogic grp handle
 _tst = createGroup civilian;
@@ -93,7 +87,7 @@ for "_i" from _lo to _hi do {
     };
     
     // Initialize the group
-    [_ldr, _r / 2] execVM "wrangle.sqf";};
+    [_ldr, _r / 2] execVM "mkcivs\wrangle.sqf";};
 
 // Finalize creation
 deleteGroup _tst; // done with logic group

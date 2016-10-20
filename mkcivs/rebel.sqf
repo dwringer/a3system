@@ -26,15 +26,24 @@ _grpThis = group _grpLdr;
 
 ///////////
 // WEAPONS:
-_wpnLdr = WEAPON_A;
-_wpnMen = WEAPON_B;
+_wpnLdr = SMALL_ARMS;
+_wpnLdr = _wpnLdr select ([count _wpnLdr] call fnc_randint);
+_wpnMen = SMALL_ARMS;
+_wpnMen = _wpnMen select ([count _wpnMen] call fnc_randint);
 //////////
 
 ///////
 //AMMO:
-_mgznLdr = AMMO_A;
-_mgznMen = AMMO_B;
+_mgznLdr = getArray(configfile >> "cfgWeapons" >> _wpnLdr >> "magazines");
+_mgznLdr = _mgznLdr select ([count _mgznLdr] call fnc_randint);
+_mgznMen = getArray(configfile >> "cfgWeapons" >> _wpnMen >> "magazines");
+_mgznMen = _mgznMen select ([count _mgznMen] call fnc_randint);
 ///////
+
+_wpnLdr = """" + _wpnLdr + """";
+_wpnMen = """" + _wpnMen + """";
+_mgznLdr = """" + _mgznLdr + """";
+_mgznMen = """" + _mgznMen + """";
 
 {_x allowFleeing 0;} forEach units _grpThis;
 {_x setVariable ["hasRebelled", true];} forEach units _grpThis;

@@ -1,46 +1,27 @@
-#include <desrc\ga.h>
+#include <desrc\ga.h>  // Currently unused.
+#include <include\directed_graph.hpp>
+#include <include\randint.hpp>
+#include <include\mkcivs.hpp>
 
 if (!isServer) exitWith {};
 
-civArray = [];
-civKilled = 0;
 
-fnc_civLeaders = compile preprocessfile "civLeaders.sqf";
+/* Compile functions in order of call dependence: */
+DWR_fnc_BuyWeapon = compile preprocessfile "fnc_BuyWeapon.sqf";
+DWR_fnc_BuyMagazine = compile preprocessfile "fnc_BuyMagazine.sqf";
 
-fnc_logarithm = compile preprocessfile "logarithm.sqf";
-fnc_bits2int = compile preprocessfile "bits2int.sqf";
-fnc_randint = compile preprocessfile "randint.sqf";
-
-
-fnc_mkcivs = compile preprocessfile "fnc_mkcivs.sqf";
-//fnc_rmcivs = compile preprocessfile "rmcivs.sqf";
-Sentinel_civTriggers = false;
-Sentinel_mkCivs = false;
-Index_civGroups = 0;
-
+// fnc_rmcivs = compile preprocessfile "rmcivs.sqf";
 // fnc_civtriggers = compile preprocessfile "civtriggers.sqf";
-
 //fnc_rebel = compile preprocessfile "rebel.sqf";
 //fnc_layAmbush = compile preprocessfile "layAmbush.sqf";
 
+
+
+/* Prepare variables for shop usage: */
 player setVariable ["DWR_PlayerCash", 1000];
 player setVariable ["DWR_BoughtItem", false];
  
-DWR_fnc_BuyWeapon = compile preprocessfile "DWR_fnc_BuyWeapon.sqf";
-DWR_fnc_BuyMagazine = compile preprocessfile "DWR_fnc_BuyMagazine.sqf";
 
 execVM "randomWeather.sqf";
 ([[["sunrise", "sunset"] select floor random 2], []]
  select floor random 2) execVM "randomTime.sqf";
-
-
-/*
-[] spawn {
-	_grp = group campMan;
-	while {({alive _x} count (units _grp)) > 0} do {
-		sleep 4.20;};
-	hint "MISSION SUCCESS\nFunds Deposited: $600";
-	player setVariable ["DWR_PlayerCash",
-			    600 + (player getVariable "DWR_PlayerCash")];
-};
-*/
