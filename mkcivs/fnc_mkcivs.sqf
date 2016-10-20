@@ -22,6 +22,7 @@ private ["_lo", "_hi", "_sz", "_p", "_r",
 	 "_ck", "_g", "_r", "_wptDismiss",
 	 "_ldr", "_hdg", "_civ", "_i", "_j"];
 
+waitUntil {not isNil "Sentinel_mkCivs"};
 waitUntil {not Sentinel_mkCivs};
 Sentinel_mkCivs = true;
 
