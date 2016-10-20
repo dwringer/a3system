@@ -74,7 +74,7 @@ switch (_m) do {
 		_mn = "December";};
 	default {};};
 
-_ssArr = [_y, _m, _d] call compile preprocessFile "rube_fn_sun.sqf";
+_ssArr = [_y, _m, _d] call compile preprocessFile "misc\rube_fn_sun.sqf";
 _sr = _ssArr select 0; // sunrise [h,m]
 _ss = _ssArr select 1; // sunset [h,m]
 

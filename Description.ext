@@ -1,6 +1,7 @@
-#include "include\defines.hpp" 
-#include "include\dialogs.hpp" 
+#include "include\weapon_shop_defines.hpp" 
+#include "include\weapon_shop_dialogs.hpp" 
 
+/*
 class CfgMusic
 {
   tracks[]={calm,sturm};
@@ -15,7 +16,8 @@ class CfgMusic
     sound[] = {\Music\musSturm.ogg,db+1, 1.0};
   };
 };
-
+*/
+/*
 class cfgSounds
 {
 	sounds[] = {};
@@ -37,3 +39,4 @@ class cfgSounds
 	};
 
 };
+*/

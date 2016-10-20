@@ -7,7 +7,7 @@
 
 	Params:
 */
-playSound "shopHI";
+// playSound "shopHI";
 
 _nil = createDialog "DWR_ShopClass"; 
 ctrlSetText [1000, format ["Funds:      $%1", player getVariable "DWR_PlayerCash"]]; 
@@ -108,4 +108,4 @@ while {ctrlVisible 1500} do {
 sleep 0.01;	  
 };
 
-playSound "shopBYE";
+// playSound "shopBYE";

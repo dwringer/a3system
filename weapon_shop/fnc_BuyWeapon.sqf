@@ -49,7 +49,9 @@ if (_prc <= _cash) then {
 	player addWeapon (_w select 0);
 	if ((count weapons player) <= (count _olds)) then {
 		removeAllWeapons player;
-		{DWR_WeaponBox addWeaponCargo [_x, 1];} forEach _olds;
+		if (not isNil DWR_WeaponBox) then {
+	                {DWR_WeaponBox addWeaponCargo [_x, 1];} forEach _olds;
+		};
 		{
 			if (_x=="this") then {
 				_mags = getArray(configfile >> "cfgWeapons" >>
