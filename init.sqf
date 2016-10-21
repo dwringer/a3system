@@ -1,5 +1,6 @@
-#include <desrc\ga.h>  // Currently unused.
+#include <desrc\ga.h>
 #include <include\randint.hpp>
+#include <include\vectools.hpp>
 #include <include\directed_graph.hpp>
 #include <include\mkcivs.hpp>
 #include <include\weapon_shop.hpp>
