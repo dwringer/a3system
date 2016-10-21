@@ -1,12 +1,12 @@
 ////////////////////////////// fnc_closest ///////////////////////// 2016-10-21
 /*  Return n nearest neighbors of an object in an array   */
 ////////////////////////////////////////////////////////////
-private [         //  NOT TESTED ! NOT TESTED ! NOT TESTED ! NOT TESTED ! 
+private [         //
          "_obj",  // Object   [IN/A1/B1]                               //
          "_arr",  // Array    [IN/A2/B2]                              //// 
          "_num",  // int      [IN/A3]                                ////// 
          "_cmp",  // Function                                       ///  ///  
-         "_acc",  // Array    [OUT]                                ///    ///
+         "_acc"   // Array    [OUT]                                ///    ///
                   //                                              ///      ///
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
 _obj = _this select 0;

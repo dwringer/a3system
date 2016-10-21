@@ -1,7 +1,7 @@
 ////////////////////////////// fnc_choose ////////////////////////// 2016-10-21
 /*  Choose randomly from an array with [array[, n]] call ...  */
 ////////////////////////////////////////////////////////////////
-private [              //  NOT TESTED ! NOT TESTED ! NOT TESTED ! NOT TESTED !
+private [              //
          "_arr",       // Array [IN/A1/B1]                             //
          "_choice",    // Array [OUT]                                 //// 
          "_argc",      // int                                        ////// 
@@ -18,7 +18,7 @@ switch (_argc) do {
 	};
 	case 2: {
 		_choice = [];
-		for "_i" from 0 to ((this select 1) - 1) do {
+		for "_i" from 0 to ((_this select 1) - 1) do {
 			_choice = _choice + [_shuffled select _i];
 		}
 	};

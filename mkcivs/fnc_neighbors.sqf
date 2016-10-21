@@ -1,22 +1,25 @@
 ///////////////////////////// fnc_neighbors //////////////////////// 2016-10-21
 /*  Given an array, obj, & dist, find neighbors of obj in arr  */
 /////////////////////////////////////////////////////////////////
-private [                //  NOT TESTED ! NOT TESTED ! NOT TESTED ! NOT TESTED
-         "_candidates",  // Array   [IN/0]                             //
-         "_obj",         // Vehicle [IN/1]                            //// 
+private [                //
+         "_candidates",  // Array   [IN/1]                             //
+         "_obj",         // Vehicle [IN/0]                            //// 
          "_dist",        // float   [IN/2]                           ////// 
-         "_neighbors",   // Array   [OUT]                           ///  ///  
+         "_neighbors"    // Array   [OUT]                           ///  ///  
                          //                                        ///    ///
                          //                                       ///      ///
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
-_candidates = _this select 0;
-_obj = _this select 1;
+_obj = _this select 0;
+_candidates = _this select 1;
 _dist = _this select 2;
-_neighbors = []
+_neighbors = [];
 {
 	if ((_obj distance _x) <= _dist) then {
 		_neighbors = _neighbors + [_x];
 	};
 } forEach _candidates;
-_neighbors = _neighbors sort true;
+_neighbors = [_neighbors,
+              [["_a", "_b", "_obj"],
+               "((_a distance _obj) < (_b distance _obj))"] call fnc_lambda,
+              [_obj]] call fnc_sorted;
 _neighbors;  // RETURN ////////////////////////////////////////////////////////

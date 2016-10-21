@@ -1,7 +1,7 @@
 ////////////////////////////// fnc_sorted ////////////////////////// 2016-10-21
 /*  Sort an array using the provided comparator function  */
 ////////////////////////////////////////////////////////////
-private [                //  NOT TESTED ! NOT TESTED ! NOT TESTED ! NOT TESTED
+private [                //
          "_arr",         // Array [IN/A1/B1]
          "_comp",        // Code  [IN/A2/B2]
          "_alen",        // int
