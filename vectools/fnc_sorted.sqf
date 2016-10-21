@@ -2,11 +2,11 @@
 /*  Sort an array using the provided comparator function  */
 ////////////////////////////////////////////////////////////
 private [                //  NOT TESTED ! NOT TESTED ! NOT TESTED ! NOT TESTED
-         "_arr",         // Array   [IN/A1/B1]
-         "_comp",        // String  [IN/A2/B2]
+         "_arr",         // Array [IN/A1/B1]
+         "_comp",        // Code  [IN/A2/B2]
          "_alen",        // int
-         "_extra_vars",  // Array   [IN/A3]                            //
-         "_acc",         // Array   [OUT]                             //// 
+         "_extra_vars",  // Array [IN/A3]                              //
+         "_acc",         // Array [OUT]                               //// 
          "_best",        // int                                      ////// 
          "_elt",         // Element                                 ///  ///  
          "_a",           // Element                                ///    ///
@@ -20,8 +20,6 @@ if ((count _this) == 3) then {
 } else {
 	_extra_vars = [];
 };
-//                 Bool<--Code<-String<-Array^
-//#define COMPARISON call compile format ([_comp, _a, _b] + _extra_vars)
 _acc = [];
 for "_i" from 0 to (_alen - 1) do {
 	_best = 0;
