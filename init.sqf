@@ -1,4 +1,5 @@
 #include <desrc\ga.h>
+#include <include\lambda.hpp>
 #include <include\randint.hpp>
 #include <include\vectools.hpp>
 #include <include\directed_graph.hpp>

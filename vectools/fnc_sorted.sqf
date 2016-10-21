@@ -1,7 +1,7 @@
 ////////////////////////////// fnc_sorted ////////////////////////// 2016-10-21
-/*  Sort an array using the provided comparator string  */
-//////////////////////////////////////////////////////////
-private [                //
+/*  Sort an array using the provided comparator function  */
+////////////////////////////////////////////////////////////
+private [                //  NOT TESTED ! NOT TESTED ! NOT TESTED ! NOT TESTED
          "_arr",         // Array   [IN/A1/B1]
          "_comp",        // String  [IN/A2/B2]
          "_alen",        // int
@@ -21,7 +21,7 @@ if ((count _this) == 3) then {
 	_extra_vars = [];
 };
 //                 Bool<--Code<-String<-Array^
-#define COMPARISON call compile format ([_comp, _a, _b] + _extra_vars)
+//#define COMPARISON call compile format ([_comp, _a, _b] + _extra_vars)
 _acc = [];
 for "_i" from 0 to (_alen - 1) do {
 	_best = 0;
@@ -29,7 +29,7 @@ for "_i" from 0 to (_alen - 1) do {
 		_elt = _arr select _j;
 		_a = _elt;
 		_b = _arr select _best;
-		if (COMPARISON) then {
+		if (([_a, _b] + _extra_vars) call _comp) then {
 			_best = _j;
 		};
 	};
