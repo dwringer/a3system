@@ -169,11 +169,14 @@ File setup:
 ```html
         init.sqf
         mission.sqm
+        include\randint.hpp
         include\vectools.hpp
+        randint\*.*
         vectools\*.*
 ```
 Setup of init.sqf:
 ```html
+        #include <include\randint.hpp>
         #include <include\vectools.hpp>
 ```
 
