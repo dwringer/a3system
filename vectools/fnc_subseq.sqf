@@ -24,7 +24,7 @@ if (_lower_bound < 0) then {
 	_lower_bound = (count _arr) + _lower_bound;
 };
 if (_upper_bound < 0) then {
-	_upper_bound = (count _arr) + (_upper_bound + 1);
+	_upper_bound = (count _arr) + _upper_bound;
 };
 _acc = [];
 for "_i" from _lower_bound to (_upper_bound - 1) do {

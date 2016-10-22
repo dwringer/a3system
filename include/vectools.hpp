@@ -7,3 +7,5 @@ fnc_alist_get = compile preprocessfile "vectools\fnc_alist_get.sqf";
 fnc_alist_set = compile preprocessfile "vectools\fnc_alist_set.sqf";
 fnc_zip = compile preprocessfile "vectools\fnc_zip.sqf";
 fnc_enumerate = compile preprocessfile "vectools\fnc_enumerate.sqf";
+fnc_homogenize = compile preprocessfile "vectools\fnc_homogenize.sqf";
+fnc_dehomogenize = compile preprocessfile "vectools\fnc_dehomogenize.sqf";
