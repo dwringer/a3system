@@ -58,6 +58,39 @@ The following two lines should be in init.sqf:
         #include <include\directed_graph.hpp>
 ```
 
+# lambda
+This is a barebones implementation of a functional programming layer on top of
+SQF.  In addition to fnc_lambda for creating anonymous functions, we have
+fnc_map, fnc_reduce, and fnc_filter for processing arrays.
+
+There are only a few things to keep in mind - the functions created with
+fnc_lambda will always take an array of parameters (never an atomic value).
+Code for fnc_lambda cannot close over variables, so anything you want accessed
+from within the lambda body must be added as an additional parameter to the
+anonymous function and then handed off to anything that will be using the
+function so it can be plugged-in at call time.  See vectools\fnc_sorted for an
+example of how additional parameters are passed to the comparator function
+(which ordinarily expects only two).
+
+Files needed:
+```html
+        init.sqf
+        mission.sqm
+        include\lambda.hpp
+        lambda\*.*
+```
+Headers required in init.sqf:
+```html
+        #include <include\lambda.hpp>
+```
+Setting up an anonymous function of three variables to compute the volume of
+a cube:
+```html
+        _fn = [["_l", "_w", "_h"], "(_l * _w * _h)"] call fnc_lambda;
+        _vol = [2, 2, 2] call _fn;
+        // _vol = 8
+```
+
 # misc
 Here are a few scripts that are not part of any comprehensive module.
 - randomTime.sqf - sets the simulation to sunrise, sunset, or any random time.
@@ -116,6 +149,33 @@ made as to the quality of these random numbers except that they are quite
 probably worse than the stock PRNG.  There is a crude attempt to apply von
 Neumann's whitening algorithm to randomly selected bits generated with the
 stock function. See directed_graph for setup information.
+
+#vectools
+This is a module of various functions used to manipulate arrays.  Many of these
+derive syntax from Python functions, and the usage with respect to lower and
+upper bound specifiers is the same.  Particularly, the subsequence function
+is inclusive of the lower bound only (contrast this with SQF control structures
+in which a for-from-to-do-loop covers both lower and upper bounds).  Negative
+values can also be used for indexing from the right instead of left just as in
+Python.
+- fnc_alist_get/fnc_alist_set - Use array of value pairs as a dictionary.
+- fnc_choose - Choose [n=1] values at random from an array.
+- fnc_range - Generate a range of integers, with optional step size.
+- fnc_sorted - Sort array with a given comparator function of at least two
+                 variables.  If > 2, an array of extra variables to insert to
+		 each comparison call must be provided.
+- fnc_subseq - Return a subsequence of an array (supports negative indices).
+File setup:
+```html
+        init.sqf
+        mission.sqm
+        include\vectools.hpp
+        vectools\*.*
+```
+Setup of init.sqf:
+```html
+        #include <include\vectools.hpp>
+```
 
 # weapon_shop
 This is a simple dialog module to allow the purchasing of weapons and their
