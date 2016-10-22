@@ -2,10 +2,10 @@
 /*  Transform coordinates to homogeneous representation  */
 ///////////////////////////////////////////////////////////
 private [                //                                    
-         "_coord_list",  //                                            //
-         "_columns",     //                                           //// 
-         "_newcol",      //                                          ////// 
-         "_coords"       //                                         ///  ///  
+         "_coord_list",  // Arrays [IN]                                //
+         "_columns",     // Arrays                                    //// 
+         "_newcol",      // Array                                    ////// 
+         "_coords"       // Arrays [OUT]                            ///  ///  
                          //                                        ///    ///
                          //                                       ///      ///
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///

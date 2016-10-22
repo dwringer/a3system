@@ -2,11 +2,11 @@
 /*  Transform coordinates from homogeneous representation */
 ////////////////////////////////////////////////////////////
 private [                //                                    
-         "_coord_list",  //                                            //
-         "_acc",         //                                           //// 
-         "_row",         //                                          ////// 
-         "_last",        //                                         ///  ///  
-         "_coord"        //                                        ///    ///
+         "_coord_list",  // Arrays [IN]                                //
+         "_acc",         // Arrays [OUT]                              //// 
+         "_row",         // Array                                    ////// 
+         "_last",        // Number                                  ///  ///  
+         "_coord"        // Array                                  ///    ///
                          //                                       ///      ///
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
 _coord_list = _this;
@@ -19,4 +19,4 @@ for "_i" from 0 to ((count _coord_list) - 1) do {
                   _coord] call fnc_map;
 	_acc = _acc + [_coord];
 };
-_acc;
+_acc;  // RETURN //////////////////////////////////////////////////////////////
