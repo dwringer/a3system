@@ -145,10 +145,10 @@ to activate the bomb.  In the trigger on-activation field put one of these:
 # randint
 This module is purely experimental and does nothing but attempt to add another
 flavor to the random number generation in the simulation.  No guarantees are
-made as to the quality of these random numbers except that they are quite
-probably worse than the stock PRNG.  There is a crude attempt to apply von
-Neumann's whitening algorithm to randomly selected bits generated with the
-stock function. See directed_graph for setup information.
+made as to the quality of these random numbers except that they are possibly
+worse than the stock PRNG.  There is a crude attempt to apply von Neumann's
+whitening algorithm to randomly selected bits generated with the stock
+function. See directed_graph or vectools for setup overview.
 
 #vectools
 This is a module of various functions used to manipulate arrays.  Many of these
