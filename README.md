@@ -22,7 +22,9 @@ And the following at the head of init.sqf:
         #include <include\asinc.hpp>
 ```
 Now edit asinc\initDialogs.sqf following the example to fill in dialog
-state variables and enable the dialog system on individual units.
+state variables and enable the dialog system on individual units.  Currently
+this file expects a unit named "cman" somewhere in the editor, so expect an
+error message if this is included without taking care of it.
 
 # desrc
 This is not documented and highly experimental - use at your own risk.  With
