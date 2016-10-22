@@ -1,6 +1,6 @@
 ////////////////////////////// fnc_subseq ////////////////////////// 2016-10-21
-/*  Get a subsequence of an array between specified indices  */
-///////////////////////////////////////////////////////////////
+/*  Pythonic subsequence of an array from [lo .. hi)  */
+////////////////////////////////////////////////////////
 private [                 //                                   
          "_arr",          // Array [IN/A0/B0]                          //
          "_lower_bound",  // int   [IN/A1]                            //// 
@@ -21,13 +21,13 @@ switch (count _this) do {
 	};
 };
 if (_lower_bound < 0) then {
-	_lower_bound = ((count _arr) - 1) + _lower_bound;
+	_lower_bound = (count _arr) + _lower_bound;
 };
-if (_upper_bound <= 0) then {
-	_upper_bound = ((count _arr) - 1) + _upper_bound;
+if (_upper_bound < 0) then {
+	_upper_bound = (count _arr) + (_upper_bound + 1);
 };
 _acc = [];
-for "_i" from _lower_bound to _upper_bound do {
+for "_i" from _lower_bound to (_upper_bound - 1) do {
 	_acc = _acc + [_arr select _i];
 };
 _acc;  // RETURN //////////////////////////////////////////////////////////////
