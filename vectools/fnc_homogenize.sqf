@@ -11,8 +11,9 @@ private [                //
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
 _coord_list = _this;
 _columns = _coord_list call fnc_zip;
-_newcol = [[["_"], "1.0"] call fnc_lambda,
-           [count _coord_list] call fnc_range] call fnc_map;
+_newcol = [[["_last"], "_last"] call fnc_lambda,
+           [count _coord_list] call fnc_range,
+           [1]] call fnc_mapwith;
 _columns = _columns + [_newcol];
 _coords = _columns call fnc_zip;
 _coords;  // RETURN ///////////////////////////////////////////////////////////

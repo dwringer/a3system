@@ -1,4 +1,5 @@
 #include <desrc\ga.h>
+#include <include\alist.hpp>
 #include <include\lambda.hpp>
 #include <include\randint.hpp>
 #include <include\vectools.hpp>
