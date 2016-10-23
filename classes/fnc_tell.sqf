@@ -1,13 +1,13 @@
-/////////////////////////////               ////////////////////////     -  -  
-/*   */
-//////////////////////////////////////////////////////////////////
-private [                                                      
-         "_instance",                                                  //
-         "_message",                                                  //// 
-         "_parameters",                                              ////// 
-         "_classes",                                                ///  ///  
-         "_methods",                                               ///    ///
-         "_results"                                               ///      ///
+/////////////////////////////// fnc_tell /////////////////////////// 2016-10-23
+/*  Send a message to an object, collecting the result   */
+///////////////////////////////////////////////////////////
+private [                //                                    
+         "_instance",    // Vehicle  [IN/0]                            //
+         "_message",     // String   [IN/1]                           //// 
+         "_parameters",  // Array    [IN/2[,3..]]                    ////// 
+         "_classes",     // alists                                  ///  ///  
+         "_methods",     // alist                                  ///    ///
+         "_results"      // Array or element [OUT]                ///      ///
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
 _instance = _this select 0;
 _message = _this select 1;
@@ -24,4 +24,4 @@ _results = [[["_m", "_inst", "_params"],
 if ((count _results) == 1) then {
 	_results = _results select 0;
 };
-_results;
+_results;  // RETURN //////////////////////////////////////////////////////////

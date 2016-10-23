@@ -1,13 +1,13 @@
-/////////////////////////////               ////////////////////////     -  -  
-/*   */
-//////////////////////////////////////////////////////////////////
-private [                                                      
-         "_instance",                                                  //
-         "_class_name",                                               //// 
-         "_init_args",                                               ////// 
-         "_init_",                                                  ///  ///  
-         "_return"                                                 ///    ///
-                                                                  ///      ///
+///////////////////////////// fnc_instance ///////////////////////// 2016-10-23
+/*   Instantiate object as a given class, running initialization  */
+////////////////////////////////////////////////////////////////////
+private [                //                                    
+         "_instance",    // Vehicle  [IN/0]                            //
+         "_class_name",  // String   [IN/1]                           //// 
+         "_init_args",   // Array    [[IN/2[,3..]]]                  ////// 
+         "_init_",       // Function                                ///  ///  
+         "_return"       // Any      [OUT]                         ///    ///
+                         //                                       ///      ///
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
 _instance = _this select 0;
 _class_name = _this select 1;
@@ -22,4 +22,4 @@ if (not isNil "_init_") then {
 } else {
 	_return = nil;
 };
-_return;
+_return;  // RETURN ///////////////////////////////////////////////////////////
