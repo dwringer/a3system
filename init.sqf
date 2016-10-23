@@ -9,6 +9,7 @@
 #include <include\asinc.hpp>
 #include <include\classes.hpp>
 #include <include\WeaponCacheProp.hpp>
+ClassesInitialized = true;
 
 if (!isServer) exitWith {};
 
