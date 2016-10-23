@@ -34,7 +34,7 @@ _acc = [];
 		} forEach units group _x;
 		_j = _j + 1;
 		[_x, _nearest, _j] spawn {
-			sleep (5 * (_this select 2));
+			sleep (0.5 * (_this select 2));
 			[_this select 0,
 			 _this select 1] execVM "mkcivs\rebel.sqf";
 		};
