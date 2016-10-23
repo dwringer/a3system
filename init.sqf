@@ -8,6 +8,7 @@
 #include <include\weapon_shop.hpp>
 #include <include\asinc.hpp>
 #include <include\classes.hpp>
+#include <include\WeaponCacheProp.hpp>
 
 if (!isServer) exitWith {};
 
