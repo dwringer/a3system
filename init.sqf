@@ -7,6 +7,7 @@
 #include <include\mkcivs.hpp>
 #include <include\weapon_shop.hpp>
 #include <include\asinc.hpp>
+#include <include\classes.hpp>
 
 if (!isServer) exitWith {};
 
