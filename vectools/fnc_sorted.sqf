@@ -8,11 +8,15 @@ private [                //
          "_extra_vars",  // Array [IN/A3]                              //
          "_acc",         // Array [OUT]                               //// 
          "_best",        // int                                      ////// 
-         "_elt",         // Element                                 ///  ///  
+         "_acopy",       // Element                                 ///  ///  
          "_a",           // Element                                ///    ///
          "_b"            // Element                               ///      ///
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
 _arr = _this select 0;
+_acopy = [];
+for "_i" from 0 to ((count _arr) - 1) do {
+	_acopy = _acopy + [_arr select _i];
+};
 _comp = _this select 1;
 _alen = count _arr;
 if ((count _this) == 3) then {
@@ -24,15 +28,14 @@ _acc = [];
 for "_i" from 0 to (_alen - 1) do {
 	_best = 0;
 	for "_j" from 1 to ((count _arr) - 1) do {
-		_elt = _arr select _j;
-		_a = _elt;
+		_a = _arr select _j;
 		_b = _arr select _best;
 		if (([_a, _b] + _extra_vars) call _comp) then {
 			_best = _j;
 		};
 	};
-	_acc = _acc + [_arr select _best];
-	_arr set [_best, "#DELETE!"];
-	_arr = _arr - ["#DELETE!"];
+	_acc = _acc + [_acopy select _best];
+	_acopy set [_best, "#DELETE!"];
+	_acopy = _acopy - ["#DELETE!"];
 };
 _acc;  // RETURN //////////////////////////////////////////////////////////////
