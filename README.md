@@ -1,3 +1,15 @@
+# alist
+- fnc_alist_get/fnc_alist_set - Use array of value pairs as a dictionary.
+Folder structure:
+```html
+        include\alist.hpp
+		alist\*.*
+```
+Config init.sqf:
+```html
+#include <include\alist.hpp>
+```
+
 # asinc
 This system adds simple conversation windows and a rudimentary state machine
 for managing dialog trees on NPC's.  The goal is extreme simplicity and
@@ -212,7 +224,6 @@ is inclusive of the lower bound only (contrast this with SQF control structures
 in which a for-from-to-do-loop covers both lower and upper bounds).  Negative
 values can also be used for indexing from the right instead of left just as in
 Python.
-- fnc_alist_get/fnc_alist_set - Use array of value pairs as a dictionary.
 - fnc_choose - Choose [n=1] values at random from an array.
 - fnc_range - Generate a range of integers, with optional step size.
 - fnc_shuffle - Return a shuffled copy of an array.
