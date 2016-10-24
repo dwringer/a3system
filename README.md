@@ -26,6 +26,51 @@ state variables and enable the dialog system on individual units.  Currently
 this file expects a unit named "cman" somewhere in the editor, so expect an
 error message if this is included without taking care of it.
 
+# classes
+This is a highly experimental but very powerful module to enable a simplistic
+system of classes to support primitive custom object-oriented-programming
+beyond the confines of the game's object system and separate functions.  Now
+it is possible to assign game objects as instances of one or more class,
+responding appropriately to methods defined on those classes.  In these
+examples, class definitions are grouped in the classdef/ folder in a single
+file per class listing the initialization and other methods for each instance.
+Dependencies:
+```html
+        init.sqf
+        mission.sqm
+        include\alist.hpp
+		include\classes.hpp
+		include\lambda.hpp
+		include\vectools.hpp // Used for one of the examples
+		alist\*.*
+		classes\*.*
+		lambda\*.*
+		vectools\*.*
+```
+
+Init.sqf configuration:
+```html
+        #include <include\alist.hpp>
+        #include <include\lambda.hpp>
+        #include <include\vectools.hpp>
+        #include <include\classes.hpp>
+        #include <classdef\Dictionary.hpp>
+		#include <classdef\... >
+		 ...
+        ClassesInitialized = true;
+```
+
+To use the provided Dictionary class example, drop a game logic in the editor,
+then in its initialization field put:
+```html
+    _nil = this spawn {
+	    waitUntil {not isNil "ClassesInitialized"};
+		[_this, "Dictionary"] call fnc_instance;
+	};
+```
+
+This module, like all of these modules, is still under development.
+
 # desrc
 This is not documented and highly experimental - use at your own risk.  With
 the right triggers these functions can be used to evolve vantage positions
@@ -63,16 +108,16 @@ The following two lines should be in init.sqf:
 # lambda
 This is a barebones implementation of a functional programming layer on top of
 SQF.  In addition to fnc_lambda for creating anonymous functions, we have
-fnc_map, fnc_reduce, and fnc_filter for processing arrays.
+fnc_map and fnc_mapwith, fnc_reduce, and fnc_filter for processing arrays.
 
 There are only a few things to keep in mind - the functions created with
 fnc_lambda will always take an array of parameters (never an atomic value).
 Code for fnc_lambda cannot close over variables, so anything you want accessed
 from within the lambda body must be added as an additional parameter to the
 anonymous function and then handed off to anything that will be using the
-function so it can be plugged-in at call time.  See vectools\fnc_sorted for an
-example of how additional parameters are passed to the comparator function
-(which ordinarily expects only two).
+function so it can be plugged-in at call time.  The typical pattern can be seen
+in mkcivs\fnc_closest and vectools\fnc_sorted, and an extra-parameters argument
+is available in fnc_mapwith, fnc_reduce, and fnc_filter.
 
 Files needed:
 ```html
@@ -144,6 +189,13 @@ to activate the bomb.  In the trigger on-activation field put one of these:
         _nil = [<target-name>] execVM "mkcivs\fragbomb.sqf";  // Fragmentation
 ```
 
+I included a couple of functions with this module that make use of the features
+in lambda/: fnc_neighbors and fnc_closest.  fnc_neighbors accepts a target 
+object, array, and distance parameter, returning all objects from the array 
+within the specified distance of the target.  fnc_closest works similarly but
+accepts an (optional) integer _n_ instead of distance, returning the [n]
+closest objects.
+
 # randint
 This module is purely experimental and does nothing but attempt to add another
 flavor to the random number generation in the simulation.  No guarantees are
@@ -152,7 +204,7 @@ worse than the stock PRNG.  There is a crude attempt to apply von Neumann's
 whitening algorithm to randomly selected bits generated with the stock
 function. See directed_graph or vectools for setup overview.
 
-#vectools
+# vectools
 This is a module of various functions used to manipulate arrays.  Many of these
 derive syntax from Python functions, and the usage with respect to lower and
 upper bound specifiers is the same.  Particularly, the subsequence function
@@ -163,10 +215,16 @@ Python.
 - fnc_alist_get/fnc_alist_set - Use array of value pairs as a dictionary.
 - fnc_choose - Choose [n=1] values at random from an array.
 - fnc_range - Generate a range of integers, with optional step size.
+- fnc_shuffle - Return a shuffled copy of an array.
 - fnc_sorted - Sort array with a given comparator function of at least two
                  variables.  If > 2, an array of extra variables to insert to
 		 each comparison call must be provided.
 - fnc_subseq - Return a subsequence of an array (supports negative indices).
+- fnc_zip - Matrix transpose, or, transform n-lists-of-m to m-lists-of-n.
+- fnc_homogenize - Take a list of coordinates and convert to homogeneous 
+representation.
+- fnc_dehomogenize - Take a list of homogeneous coordinates and divide each by
+its last element, then remove the last element.
 File setup:
 ```html
         init.sqf

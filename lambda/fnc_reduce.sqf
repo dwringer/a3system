@@ -24,9 +24,9 @@ _acc;  // RETURN //////////////////////////////////////////////////////////////
 
 /*
  A rather convoluted example:
-    [([["_a", "_b"], "(_a + _b)"] call fnc_lambdastr),
-     [[["_x"], "(_x * _x)"] call fnc_lambdastr,
-      [[["_x", "_y"], "((_x + _y) % 2 == 1)"] call fnc_lambdastr,
+    [([["_a", "_b"], {_a + _b}] call fnc_lambda),
+     [[["_x"], {_x * _x}] call fnc_lambda,
+      [[["_x", "_y"], {(_x + _y) % 2 == 1)} call fnc_lambda,
        [10] call fnc_range,
        [2]] call fnc_filter] call fnc_map] call fnc_reduce
 */
