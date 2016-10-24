@@ -87,13 +87,13 @@ named "TestDictionary" in the editor):
         [TestDictionary, "set", "test key", "some test data"] call fnc_tell;
 
         // Look up the stored value from a key:
-	_v = [TestDictionary, "get", "test key"] call fnc_tell;
+        _v = [TestDictionary, "get", "test key"] call fnc_tell;
 
         // Get all keys stored in the dictionary:
-	_keys = [TestDictionary, "keys"] call fnc_tell;
+        _keys = [TestDictionary, "keys"] call fnc_tell;
 
         // Get an alist of all key, value pairs stored using this interface:
-	_kvps = [TestDictionary, "items"] call fnc_tell;
+        _kvps = [TestDictionary, "items"] call fnc_tell;
 ```
 
 This module, like all of these modules, is still under development.
