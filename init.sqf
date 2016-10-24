@@ -9,9 +9,10 @@
 #include <include\asinc.hpp>
 
 #include <include\classes.hpp>
-#include <classdef\WeaponCacheProp.hpp>
-#include <classdef\WorldEntity.hpp>
-#include <classdef\Victim.hpp>
+#include <classdef\testWorldEntity.hpp>
+#include <classdef\mkcivsWeaponCache.hpp>
+#include <classdef\mkcivsVictim.hpp>
+#include <classdef\Dictionary.hpp>
 ClassesInitialized = true;
 
 if (!isServer) exitWith {};

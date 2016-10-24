@@ -1,6 +1,6 @@
 WeaponCaches = [];
 
-["WeaponCacheProp",
+["WeaponCache",
  [["_o"],
   "_o spawn {
        WeaponCaches = WeaponCaches + [_this];
@@ -8,6 +8,6 @@ WeaponCaches = [];
    str _o
   "] call fnc_lambda] call fnc_class;
 
-["WeaponCacheProp",
+["WeaponCache",
  "positionString",
  [["_o"], "str position _o"] call fnc_lambda] call fnc_method;
