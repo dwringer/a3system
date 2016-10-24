@@ -8,3 +8,6 @@ WeaponCaches = [];
    str _o
   "] call fnc_lambda] call fnc_class;
 
+["WeaponCacheProp",
+ "positionString",
+ [["_o"], "str position _o"] call fnc_lambda] call fnc_method;

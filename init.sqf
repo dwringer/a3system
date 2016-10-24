@@ -7,8 +7,10 @@
 #include <include\mkcivs.hpp>
 #include <include\weapon_shop.hpp>
 #include <include\asinc.hpp>
+
 #include <include\classes.hpp>
-#include <include\WeaponCacheProp.hpp>
+#include <classdef\WeaponCacheProp.hpp>
+#include <classdef\WorldEntity.hpp>
 ClassesInitialized = true;
 
 if (!isServer) exitWith {};
