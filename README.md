@@ -80,6 +80,21 @@ then in its initialization field put:
 		[_this, "Dictionary"] call fnc_instance;
 	};
 ```
+Some example usage of the dictionary is as follows (assuming the Game Logic was
+named "TestDictionary" in the editor):
+```html
+        // Add a key, value to the dictionary:
+        [TestDictionary, "set", "test key", "some test data"] call fnc_tell;
+
+        // Look up the stored value from a key:
+	_v = [TestDictionary, "get", "test key"] call fnc_tell;
+
+        // Get all keys stored in the dictionary:
+	_keys = [TestDictionary, "keys"] call fnc_tell;
+
+        // Get an alist of all key, value pairs stored using this interface:
+	_kvps = [TestDictionary, "items"] call fnc_tell;
+```
 
 This module, like all of these modules, is still under development.
 
