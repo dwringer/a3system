@@ -5,8 +5,8 @@ WeaponCaches = [];
 		WeaponCaches = WeaponCaches + [_this];
         };
 	str _o
-}] call fnc_lambda2] call fnc_class;
+}] call fnc_lambda] call fnc_class;
 
 ["WeaponCache", "positionString", [["_o"], {
         str position _o
-}] call fnc_lambda2] call fnc_method;
+}] call fnc_lambda] call fnc_method;

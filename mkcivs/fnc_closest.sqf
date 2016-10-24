@@ -21,7 +21,7 @@ if ((count _this) == 3) then {
 	_num = 1;
 };
 _cmp = [["_a", "_b", "_obj"],
-        "((_a distance _obj) < (_b distance _obj))"] call fnc_lambda;
+        "((_a distance _obj) < (_b distance _obj))"] call fnc_lambdastr;
 _acopy  = [_acopy, _cmp, [_obj]] call fnc_sorted;
 _acc = [];
 for "_i" from 0 to (_num - 1) do {

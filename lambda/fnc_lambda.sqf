@@ -10,7 +10,7 @@ private [                //
                          //                                       ///      ///
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
 _parameters = _this select 0;
-_code = _this select 1;
+_code = (_this select 1) call fnc_decompile;
 _context = "";
 _guard = "private [";
 for "_i" from 0 to ((count _parameters) - 2) do {
@@ -27,5 +27,5 @@ _func;  // RETURN /////////////////////////////////////////////////////////////
 
 /* EX:
     _sum = [3, 4, 5] call ([["_x", "_y", "_z"], 
-                            "_x + _y + _z"] call fnc_lambda);
+                            {_x + _y + _z}] call fnc_lambda);
 */

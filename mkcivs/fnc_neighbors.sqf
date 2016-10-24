@@ -20,6 +20,6 @@ _neighbors = [];
 } forEach _candidates;
 _neighbors = [_neighbors,
               [["_a", "_b", "_obj"],
-               "((_a distance _obj) < (_b distance _obj))"] call fnc_lambda,
+               "((_a distance _obj) < (_b distance _obj))"] call fnc_lambdastr,
               [_obj]] call fnc_sorted;
 _neighbors;  // RETURN ////////////////////////////////////////////////////////

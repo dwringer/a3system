@@ -11,4 +11,4 @@
 	};
     };
     str _o
-}] call fnc_lambda2] call fnc_class;
+}] call fnc_lambda] call fnc_class;
