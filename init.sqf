@@ -11,6 +11,7 @@
 #include <include\classes.hpp>
 #include <classdef\WeaponCacheProp.hpp>
 #include <classdef\WorldEntity.hpp>
+#include <classdef\Victim.hpp>
 ClassesInitialized = true;
 
 if (!isServer) exitWith {};
