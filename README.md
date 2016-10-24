@@ -160,7 +160,7 @@ Headers required in init.sqf:
 Setting up an anonymous function of three variables to compute the volume of
 a cube:
 ```html
-        _fn = [["_l", "_w", "_h"], "(_l * _w * _h)"] call fnc_lambda;
+        _fn = [["_l", "_w", "_h"], {_l * _w * _h}] call fnc_lambda;
         _vol = [2, 2, 2] call _fn;
         // _vol = 8
 ```
