@@ -19,7 +19,7 @@ _init_ = ["__init__",
           [_class_name, Classes] call fnc_alist_get] call fnc_alist_get;
 if (not isNil "_init_") then {
 	_return = ([_instance] + _init_args) call _init_;
-} else {
-	_return = nil;
 };
-_return;  // RETURN ///////////////////////////////////////////////////////////
+if (not isNil "_return") then {
+	_return;
+};// RETURN /////////////////////////////////////////////////////////////////
