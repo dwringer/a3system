@@ -27,9 +27,9 @@ if ((count _this) == 3) then {
 _acc = [];
 for "_i" from 0 to (_alen - 1) do {
 	_best = 0;
-	for "_j" from 1 to ((count _arr) - 1) do {
-		_a = _arr select _j;
-		_b = _arr select _best;
+	for "_j" from 1 to ((count _acopy) - 1) do {
+		_a = _acopy select _j;
+		_b = _acopy select _best;
 		if (([_a, _b] + _extra_vars) call _comp) then {
 			_best = _j;
 		};
