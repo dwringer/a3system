@@ -41,6 +41,7 @@ DEFMETHOD("Dictionary", "get") ["_o", "_key"] DO {
 
 DEFMETHOD("Dictionary", "set") ["_o", "_key", "_value"] DO {
 	/* Set a key's value in dictionary's namespace */
+	// TODO: _ delete keys for values set to nil
         private ["_keys"];
 	_keys = _o getVariable "__keys__";
 	if (({_x == _key} count _keys) == 0) then {
@@ -59,11 +60,20 @@ DEFMETHOD("Dictionary", "keys") ["_o"] DO {
 
 DEFMETHOD("Dictionary", "items") ["_o"] DO {
 	/* Return a list of all stored key, value pairs */
+	// TODO: test updated method call
         private ["_keys", "_acc"];
 	_keys = [_o, "keys"] call fnc_tell;
-	_acc = [[["_k"], 
-		{[_o, "get", _k] call fnc_tell}] call fnc_lambda,
-		_keys] call fnc_map;
+
+	// The following line was updated and needs tested:
+	_acc = [[["_k", "_d"],  
+                {[_d, "get", _k] call fnc_tell}] call fnc_lambda,
+	        _keys, [_o]] call fnc_mapwith;
+
+	// The following line was tested but I think it can fail:
+	//_acc = [[["_k"],  // THIS WAS WORKING BUT SEEMS UNSAFE!
+	//	{[_o, "get", _k] call fnc_tell}] call fnc_lambda,
+	//	_keys] call fnc_map;  // WHEN IS _o RESOLVED?
+
 	[_keys, _acc] call fnc_zip
 } ENDMETHOD;
 
