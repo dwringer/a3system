@@ -11,7 +11,7 @@ ALIAS("OrderedDict", "_keys", "Dictionary", "keys");
 
 DEFMETHOD("OrderedDict", "keys") ["_o"] DO {
 	/* Sort the value returned by aliased Dictionary keys method */
-	_keys = _o getVariable "__keys__";
+	_keys = [_o, "_keys"] call fnc_tell;  // getVariable "__keys__";
 	_keys = [_keys,
                  [_o, "get", "fn_comparator"] call fnc_tell] call fnc_sorted;
 	_o setVariable ["__keys__", _keys];
