@@ -7,7 +7,16 @@ fnc_tell = compile preprocessfile "classes\fnc_tell.sqf";
 Classes = [];
 
 #define DEFCLASS(NAME)  [NAME, [
-#define DEFMETHOD(CLS, NAME) [CLS, NAME, [
-#define DO ,
-#define ENDCLASS ] call fnc_lambda] call fnc_class
-#define ENDMETHOD ] call fnc_lambda] call fnc_method
+#define DEFMETHOD(CLS, NAME)  [CLS, NAME, [
+#define DO  ,
+#define ENDCLASS  ] call fnc_lambda] call fnc_class
+#define ENDMETHOD  ] call fnc_lambda] call fnc_method
+
+// NEW, UNTESTED:
+#define SUPER(SUP, BASE)  [BASE, SUP] call fnc_instance
+#define SUPER_ARGS(SUP, BASE)  ([BASE, SUP] + 
+#define ENDARGS  ) call fnc_instance
+#define ALIAS(CLS, METH, SUP, SUPMETH)		\
+	[CLS, METH,  \
+         [SUPMETH, [SUP, Classes] call fnc_alist_get] call fnc_alist_get  \
+	] call fnc_method
