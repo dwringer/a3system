@@ -7,7 +7,7 @@ private [                //
          "_parameters",  // Array    [IN/2[,3..]]                    ////// 
          "_classes",     // alists                                  ///  ///  
          "_methods",     // alist                                  ///    ///
-         "_results"      // Array or element [OUT]                ///      ///
+         "_result"       // Element [OUT]                         ///      ///
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
 _instance = _this select 0;
 _message = _this select 1;
@@ -18,12 +18,7 @@ _classes = [[["_cname"],
 _methods = [[["_method_list", "_msg"],
              "[_msg, _method_list] call fnc_alist_get"] call fnc_lambdastr,
             _classes, [_message]] call fnc_mapwith;
-_results = [[["_m", "_inst", "_params"],
-             "([_inst] + _params) call _m"] call fnc_lambdastr,
-            _methods, [_instance, _parameters]] call fnc_mapwith;
-_results = [[["_x"], "not isNil ""_x"""] call fnc_lambdastr,
-            _results] call fnc_filter;
-if ((count _results) == 1) then {
-	_results = _results select 0;
-};
-_results;  // RETURN //////////////////////////////////////////////////////////
+_methods = [[["_x"], "not isNil ""_x"""] call fnc_lambdastr,
+            _methods] call fnc_filter;
+_result = ([_instance] + _parameters) call (_methods select 0);
+_result;  // RETURN //////////////////////////////////////////////////////////
