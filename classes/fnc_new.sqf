@@ -1,8 +1,7 @@
-///////////////////////////// fnc_instance ///////////////////////// 2016-10-23
-/*   Instantiate object as a given class, running initialization  */
-////////////////////////////////////////////////////////////////////
+/////////////////////////////// fnc_new //////////////////////////// 2016-10-23
+/*   Create and init a new gamelogic of given class  */
+///////////////////////////////////////////////////////
 private [                //                                    
-         "_instance",    // Vehicle  [IN/0]                           
          "_class_name",  // String   [IN/1]                           
          "_init_args",   // Array    [[IN/2[,3..]]                     //
          "_init_",       // Function                                  ////
@@ -11,17 +10,17 @@ private [                //
          "_curClasses",  // String                                 ///    ///
          "_return"       // Any      [OUT]                        ///      ///
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
-_instance = _this select 0;
-_class_name = _this select 1;
-_init_args = [_this, 2, 0] call fnc_subseq;
-if (isNil "_instance") then {
+_class_name = _this select 0;
+_init_args = [_this, 1, 0] call fnc_subseq;
+if (isNil "Group_ClassLogic") then {
 	_group = createGroup sideLogic;
 	if (isNil "_group") then {
 		_center = createCenter sideLogic;
 		_group = createGroup sideLogic;
 	};
-	_instance = "LOGIC" createUnit [[0.0, 0.0, 0.0], _group];
+	Group_ClassLogic = _group;
 };
+_instance = Group_ClassLogic createUnit ["LOGIC", [0.0, 0.0, 0.0], [], 0, ""];
 _curClasses = _instance getVariable ["class_names", []];
 _curClasses = _curClasses + [_class_name];
 _instance setVariable ["class_names", _curClasses];
@@ -32,4 +31,4 @@ if (not isNil "_init_") then {
 };
 if (not isNil "_return") then {
 	_return;
-};// RETURN /////////////////////////////////////////////////////////////////
+};  // RETURN /////////////////////////////////////////////////////////////////
