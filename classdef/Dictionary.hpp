@@ -1,15 +1,22 @@
-["Dictionary", [["_o"], {
+#define DEFCLASS(NAME)  [NAME, [
+#define DEFMETHOD(CLS, NAME) [CLS, NAME, [
+#define DO ,
+#define ENDCLASS ] call fnc_lambda] call fnc_class
+#define ENDMETHOD ] call fnc_lambda] call fnc_method
+
+
+DEFCLASS("Dictionary") ["_o"] DO {
 	_o setVariable ["__keys__", []];
 	_o
-}] call fnc_lambda] call fnc_class;
+} ENDCLASS;
 
 
-["Dictionary", "get", [["_o", "_key"], {
+DEFMETHOD("Dictionary", "get") ["_o", "_key"] DO {
         _o getVariable [_key, nil]
-}] call fnc_lambda] call fnc_method;
+} ENDMETHOD;
 
 
-["Dictionary", "set", [["_o", "_key", "_value"], {
+DEFMETHOD("Dictionary", "set") ["_o", "_key", "_value"] DO {
         private ["_keys"];
 	_keys = _o getVariable "__keys__";
 	if (({_x == _key} count _keys) == 0) then {
@@ -17,20 +24,20 @@
 		_o setVariable ["__keys__", _keys];
 	};
 	_o setVariable [_key, _value]
-}] call fnc_lambda] call fnc_method;
+} ENDMETHOD;
 
 
-["Dictionary", "keys", [["_o"], {
+DEFMETHOD("Dictionary", "keys") ["_o"] DO {
         _o getVariable "__keys__"
-}] call fnc_lambda] call fnc_method;
+} ENDMETHOD;
 
 
-["Dictionary", "items", [["_o"], {
+DEFMETHOD("Dictionary", "items") ["_o"] DO {
         private ["_keys", "_acc"];
 	_keys = [_o, "keys"] call fnc_tell;
 	_acc = [[["_k"], 
 		{[_o, "get", _k] call fnc_tell}] call fnc_lambda,
 		_keys] call fnc_map;
 	[_keys, _acc] call fnc_zip
-}] call fnc_lambda] call fnc_method;
+} ENDMETHOD;
 
