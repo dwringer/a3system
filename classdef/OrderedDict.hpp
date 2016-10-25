@@ -10,7 +10,9 @@
    get key       :: inherited from Dictionary
    set key value :: inherited from Dictionary
    keys          :: sorted version of keys inherited from Dictionary
-   items         :: like Dictionary items, but the keys are sorted first
+   items         :: inherited from Dictionary items, but since that method
+                      obtains its keys via a self method call, it now receives
+                      the sorted keys and works automatically!
 
   Example:
    MyODict = ["OrderedDictionary", 
@@ -53,15 +55,4 @@ DEFMETHOD("OrderedDict", "keys") ["_o"] DO {
                  [_o, "get", "fn_comparator"] call fnc_tell] call fnc_sorted;
 	_o setVariable ["__keys__", _keys];
 	_keys
-} ENDMETHOD;
-
-
-DEFMETHOD("OrderedDict", "items") ["_o"] DO {
-	/* Implicitly override the items method with sorted keys */
-	private ["_keys", "_acc"];
-        _keys = [_o, "keys"] call fnc_tell;
-	_acc = [[["_k", "_d"],
-                {[_d, "get", _k] call fnc_tell}] call fnc_lambda,
-	        _keys, [_o]] call fnc_mapwith;
-	[_keys, _acc] call fnc_zip
 } ENDMETHOD;
