@@ -53,11 +53,12 @@ Dependencies:
         include\alist.hpp
 		include\classes.hpp
 		include\lambda.hpp
-		include\vectools.hpp // Used for one of the examples
+		include\vectools.hpp  // Used for examples
 		alist\*.*
 		classes\*.*
+		classdef\*.*  // Example classes
 		lambda\*.*
-		vectools\*.*
+		vectools\*.*  // Used for examples
 ```
 
 Init.sqf configuration:
@@ -80,6 +81,18 @@ then in its initialization field put:
 		[_this, "Dictionary"] call fnc_instance;
 	};
 ```
+Now, in fact, classes can be created without a preexisting object using
+fnc_new.  Each new class will be created as a Game Logic in a dedicated group
+called Group_ClassLogic.  This is done like so:
+```html
+    // General form:
+    _newObject = ["ObjectClassname", <parameter-1>, <parameter-2>, ...]
+                     call fnc_new;
+
+    // Dictionary class example:
+    MyDict = ["Dictionary"] call fnc_new;  // (no parameters for constructor)
+```
+
 Some example usage of the dictionary is as follows (assuming the Game Logic was
 named "TestDictionary" in the editor):
 ```html
@@ -203,8 +216,8 @@ the area to represent weapon caches, giving each a unique name in the editor.
 Then, set up a trigger and in its on-activation field put the following:
 ```html
         _nil = [<civ-muster-distance-from-weapon-cache>,
-                [<weapon-cache-name-1>,
-                 <weapon-cache-name-2>,
+                [<weapon-cache-1>,
+                 <weapon-cache-2>,
                  ...]] execVM "mkcivs\layAmbush.sqf";
 ```
 
