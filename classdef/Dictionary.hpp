@@ -1,10 +1,3 @@
-#define DEFCLASS(NAME)  [NAME, [
-#define DEFMETHOD(CLS, NAME) [CLS, NAME, [
-#define DO ,
-#define ENDCLASS ] call fnc_lambda] call fnc_class
-#define ENDMETHOD ] call fnc_lambda] call fnc_method
-
-
 DEFCLASS("Dictionary") ["_o"] DO {
 	_o setVariable ["__keys__", []];
 	_o
