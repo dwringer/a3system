@@ -1,5 +1,7 @@
 /*
   Dictionary class
+      A thin layer of abstraction utilizing the game's built in object 
+  namespace storage capabilities and simplifying certain use cases.
 
   Methods:
    get key       :: look up the value stored in this object by key
@@ -24,53 +26,45 @@
    
 */
 
-DEFCLASS("Dictionary") ["_self"] DO {
-	/* Initialize the dictionary */
-	SUPER("ObjectRoot", _self);
-	_self
+DEFCLASS("Dictionary") ["_o"] DO {
+	/* Initialize the dictionary with an empty key array */
+	_o setVariable ["__keys__", []];
+	_o
 } ENDCLASS;
 
 
-DEFMETHOD("Dictionary", "set") ["_self", "_key", "_value"] DO {
-	/* Set a key's value in dictionary's namespace */
-	_key = format ["%1%2", "__dictValue_", _key];
-	[_self, "_setf", _key, _value] call fnc_tell
+DEFMETHOD("Dictionary", "get") ["_o", "_key"] DO {
+	/* Lookup method for dictionary values by key */
+        _o getVariable [_key, nil]
 } ENDMETHOD;
 
 
-DEFMETHOD("Dictionary", "get") ["_self", "_key"] DO {
-	/* Lookup method for dictionary values by key */
-	_key = format ["%1%2", "__dictValue_", _key];
-	[_self, "_getf", _key] call fnc_tell
+DEFMETHOD("Dictionary", "set") ["_o", "_key", "_value"] DO {
+	/* Set a key's value in dictionary's namespace */
+	// TODO: _ delete keys for values set to nil
+        private ["_keys"];
+	_keys = _o getVariable "__keys__";
+	if (({_x == _key} count _keys) == 0) then {
+	        _keys = _keys + [_key];
+		_o setVariable ["__keys__", _keys];
+	};
+	_o setVariable [_key, _value]
 } ENDMETHOD;
 
 
 DEFMETHOD("Dictionary", "keys") ["_o"] DO {
 	/* Return the recorded list of keys stored */
-	private ["_locals", "_keys", "_k", "_substr"];
-	_locals = [_self, "_locals"] call fnc_tell;
-	_keys = [];
-	{
-		_k = toArray _x;
-		if ((count _k) > 12) then {
-			_substr = [_k, 0, 12] call fnc_subseq;
-			if ((toString _substr) isEqualTo
-			    "__dictvalue_") then {
-				_substr = [_k, 12, 0] call fnc_subseq;
-				_keys = _keys + [toString _substr];
-			};
-		};
-	} forEach _locals;
-	_keys
+        _o getVariable "__keys__"
 } ENDMETHOD;
 
 
-DEFMETHOD("Dictionary", "items") ["_self"] DO {
+DEFMETHOD("Dictionary", "items") ["_o"] DO {
 	/* Return a list of all stored key, value pairs */
         private ["_keys", "_acc"];
-	_keys = [_self, "keys"] call fnc_tell;
+	_keys = [_o, "keys"] call fnc_tell;
 	_acc = [[["_k", "_d"],  
                 {[_d, "get", _k] call fnc_tell}] call fnc_lambda,
-	        _keys, [_self]] call fnc_mapwith;
+	        _keys, [_o]] call fnc_mapwith;
 	[_keys, _acc] call fnc_zip
 } ENDMETHOD;
+
