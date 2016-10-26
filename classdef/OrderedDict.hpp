@@ -15,7 +15,7 @@
                       the sorted keys and works automatically!
 
   Example:
-   MyODict = ["OrderedDictionary", 
+   MyODict = ["OrderedDict", 
               [["_a", "_b"], 
                {((toArray _a) select 0) < ((toArray _b) select 0)}
               ] call fnc_lambda] call fnc_new;

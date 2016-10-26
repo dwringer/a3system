@@ -68,9 +68,9 @@ Init.sqf configuration:
         #include <include\vectools.hpp>
         #include <include\classes.hpp>
         #include <classdef\Dictionary.hpp>
-		#include <classdef\... >
-		 ...
-        ClassesInitialized = true;
+        #include <classdef\... >
+          [... this is where classdefs should be imported ...]
+        ClassesInitialized = true;  // Allow starting units to initialize
 ```
 
 To use the provided Dictionary class example, drop a game logic in the editor,
@@ -108,6 +108,15 @@ named "TestDictionary" in the editor):
         // Get an alist of all key, value pairs stored using this interface:
         _kvps = [TestDictionary, "items"] call fnc_tell;
 ```
+In include\classes.hpp there is a series of macros to facilitate the
+construction of class definition files as found in classdef\ in Dictionary.hpp
+and some others.  These macros are not required at all, but provide a slightly
+cleaner syntax for making a file with several class or method definitions.  Do
+not think this means classes must be formed in this way - it is possible to
+declare and instantiate classes from scratch all while the simulation is
+running.  See classdef\testWorldEntity.hpp for a trivial class that shows how
+to initialize everything without the use of preprocessor macros (the syntax
+is not much different and I almost didn't include macros in the first place).
 
 This module, like all of these modules, is still under development.
 
