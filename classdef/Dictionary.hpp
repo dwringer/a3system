@@ -45,7 +45,7 @@ DEFMETHOD("Dictionary", "get") ["_self", "_key"] DO {
 } ENDMETHOD;
 
 
-DEFMETHOD("Dictionary", "keys") ["_o"] DO {
+DEFMETHOD("Dictionary", "keys") ["_self"] DO {
 	/* Return the recorded list of keys stored */
 	private ["_locals", "_keys", "_k", "_substr"];
 	_locals = [_self, "_locals"] call fnc_tell;
