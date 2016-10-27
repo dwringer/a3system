@@ -11,8 +11,6 @@ Classes = [];
 #define DO  ,
 #define ENDCLASS  ] call fnc_lambda] call fnc_class
 #define ENDMETHOD  ] call fnc_lambda] call fnc_method
-
-// NEW, UNTESTED:
 #define SUPER(SUP, BASE)  [BASE, SUP] call fnc_instance
 #define SUPER_ARGS(SUP, BASE)  ([BASE, SUP] + 
 #define ENDARGS  ) call fnc_instance

@@ -14,8 +14,6 @@
 #include <classdef\mkcivsVictim.hpp>
 #include <classdef\ObjectRoot.hpp>
 #include <classdef\Dictionary.hpp>
-//#include <classdef\exampleBaseObject.hpp>
-//#include <classdef\exampleOrderedDict.hpp>
 ClassesInitialized = true;
 
 if (!isServer) exitWith {};
