@@ -70,3 +70,11 @@ DEFMETHOD("ObjectRoot", "_locals") ["_self"] DO {
 	/* Return list of locally stored variable names */
 	_self getVariable "__locals__"
 } ENDMETHOD;
+
+
+DEFMETHOD("ObjectRoot", "_push_attr") ["_self", "_attribute", "_value"] DO {
+	/* UNTESTED:Append a value to attribute variable that is an array */
+	[_self, "_setf", _attribute,
+	 ([_self, "_getf", _attribute] call fnc_tell) +
+	 [_value]] call fnc_tell
+} ENDMETHOD;
