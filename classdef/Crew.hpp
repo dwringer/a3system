@@ -3,7 +3,15 @@
 
   Methods:
     assign unit role :: assign unit or vehicle to crew in specified role
-    
+  
+      This class is used to represent a dynamic vehicle crew (and any assigned
+  vehicles).  Add units to the group, assign one or more vehicles, and,
+  optionally, set one or more specific unit position assignments.  Then, the
+  group can be commanded to board, unload, or any number of other tasks (TBD)
+
+  Example:
+    N/A -  not tested
+
 */
 
 #define ROLE_ARRAY_ALIST [["vehicle", "vehicles"],  \
