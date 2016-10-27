@@ -2,9 +2,9 @@
   ObjectRoot class
 
   Methods:
-   _setf   :: setVariable in object's namespace, and record key
-   _getf   :: simple getVariable interface
-   _locals :: list of all recorded keys that have been stored
+   _setf var_name value :: setVariable in object's namespace, and record key
+   _getf var_name       :: simple getVariable interface
+   _locals              :: list of all recorded keys that have been stored
 
       This class is meant to act as the root of an object heirarchy, providing
   a standard interface for keeping instance variables in a namespace unique
