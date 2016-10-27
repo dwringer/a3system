@@ -7,6 +7,10 @@
    keys          :: return a list of all keys stored in this Dictionary
    items         :: return a list of all key, value pairs stored
 
+      This class uses an instance's attribute storage as a dictionary,
+  prefixing keys with an identifier so they can be distinguished from
+  class internals.  The interface is simple and based on Python methods.
+
   Example:
    MyDict = ["Dictionary"] call fnc_new;
    [MyDict, "set", "name", "John Doe"] call fnc_tell;
