@@ -78,3 +78,9 @@ DEFMETHOD("ObjectRoot", "_push_attr") ["_self", "_attribute", "_value"] DO {
 	 ([_self, "_getf", _attribute] call fnc_tell) +
 	 [_value]] call fnc_tell
 } ENDMETHOD;
+
+
+DEFMETHOD("ObjectRoot", "_class") ["_self"] DO {
+	/* UNTESTED:Return the class heirarchy for an instance */
+	_self getVariable "class_names"
+} ENDMETHOD;
