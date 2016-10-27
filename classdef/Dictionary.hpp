@@ -17,7 +17,7 @@
    [MyDict, "set", "age", 29] call fnc_tell;
    [MyDict, "set", "age", 30] call fnc_tell;
 
-   hint str [MyDict, "get", "age"];
+   hint str ([MyDict, "get", "age"] call fnc_tell)
    // ... outputs 30
 
    hint str ([MyDict, "keys"] call fnc_tell)
