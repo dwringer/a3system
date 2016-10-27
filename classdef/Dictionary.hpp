@@ -50,8 +50,8 @@ DEFMETHOD("Dictionary", "keys") ["_self"] DO {
 	private ["_locals", "_keys", "_k", "_substr"];
 	_locals = [_self, "_locals"] call fnc_tell;
 	_keys = [];
-	for "_i" from 0 to ((count _locals) - 1) do {
-		_k = toArray (_locals select _i);
+	{
+		_k = toArray _x;
 		if ((count _k) > 12) then {
 			_substr = [_k, 0, 12] call fnc_subseq;
 			if ((toString _substr) isEqualTo
@@ -60,7 +60,7 @@ DEFMETHOD("Dictionary", "keys") ["_self"] DO {
 				_keys = _keys + [toString _substr];
 			};
 		};
-	}; // forEach _locals;
+	} forEach _locals;
 	_keys
 } ENDMETHOD;
 
