@@ -1,9 +1,24 @@
+This repository contains a variety of scripts, functions, and classes to
+enhance the high-level abstraction capacity available in SQF (targeted for
+ArmA 3), as well as some assorted mission enhancement modules of varied
+quality.
+
+I have tried below to outline how to use each individual module,
+particularly how to set up the files required, but I cannot guarantee I have
+covered all the dependencies involved.  If you have trouble with a module,
+the first thing to try is to just add this entire repository to your mission
+folder.  All dependencies are included here, whether or not they are outlined
+below in the documentation.
+
+If you find a module with any undocumented dependencies, I would appreciate it
+if you let me know.  Thanks, and good luck!
+
 # alist
 - fnc_alist_get/fnc_alist_set - Use array of value pairs as a dictionary.
 Folder structure:
 ```html
         include\alist.hpp
-		alist\*.*
+        alist\*.*
 ```
 Config init.sqf:
 ```html
@@ -51,14 +66,14 @@ Dependencies:
         init.sqf
         mission.sqm
         include\alist.hpp
-		include\classes.hpp
-		include\lambda.hpp
-		include\vectools.hpp  // Used for examples
-		alist\*.*
-		classes\*.*
-		classdef\*.*  // Example classes
-		lambda\*.*
-		vectools\*.*  // Used for examples
+        include\classes.hpp
+        include\lambda.hpp
+        include\vectools.hpp  // Used for examples
+        alist\*.*
+        classes\*.*
+        classdef\*.*  // Example classes
+        lambda\*.*
+        vectools\*.*  // Used for examples
 ```
 
 Init.sqf configuration:
@@ -196,16 +211,26 @@ Here are a few scripts that are not part of any comprehensive module.
 
 # mkcivs
 To add the ambient civilian subsystem, ensure the following files are in your
-mission path:
+mission path (NOTE: This module requires the lambda, randint, & vectools
+modules):
 ```html
         init.sqf
         mission.sqm
+        include\lambda.hpp
         include\mkcivs.hpp
+        include\randint.hpp
+        include\vectools.hpp
+        lambda\*.*
         mkcivs\*.*
+        randint\*.*
+        vectools\*.*
 ```
 
 Then, place the following at the top of your misson's init.sqf file:
 ```html
+        #include <include\lambda.hpp>
+        #include <include\randint.hpp>
+        #include <include\vectools.hpp>
         #include <include\mkcivs.hpp>
 ```
 
@@ -243,7 +268,8 @@ in lambda/: fnc_neighbors and fnc_closest.  fnc_neighbors accepts a target
 object, array, and distance parameter, returning all objects from the array 
 within the specified distance of the target.  fnc_closest works similarly but
 accepts an (optional) integer _n_ instead of distance, returning the [n]
-closest objects.
+closest objects.  There are also special classes in classdef/ that can be used
+to help initialize mission props.
 
 # randint
 This module is purely experimental and does nothing but attempt to add another
@@ -251,7 +277,22 @@ flavor to the random number generation in the simulation.  No guarantees are
 made as to the quality of these random numbers except that they are possibly
 worse than the stock PRNG.  There is a crude attempt to apply von Neumann's
 whitening algorithm to randomly selected bits generated with the stock
-function. See directed_graph or vectools for setup overview.
+function.
+- fnc_bits2int - Convert a binary string to an integer
+- fnc_logarithm - Take the logarithm in any base of a number
+- fnc_randint - Random integer from [lo..hi)
+- fnc_choose - Choose [n=1] values at random from an array
+- fnc_shuffle - Return a shuffled copy of an array
+Folder setup:
+```html
+mission.sqm
+include\randint.hpp
+randint\*.*
+```
+Init.sqf setup:
+```html
+#include <randint.hpp>
+```
 
 # vectools
 This is a module of various functions used to manipulate arrays.  Many of these
@@ -261,9 +302,7 @@ is inclusive of the lower bound only (contrast this with SQF control structures
 in which a for-from-to-do-loop covers both lower and upper bounds).  Negative
 values can also be used for indexing from the right instead of left just as in
 Python.
-- fnc_choose - Choose [n=1] values at random from an array.
 - fnc_range - Generate a range of integers, with optional step size.
-- fnc_shuffle - Return a shuffled copy of an array.
 - fnc_sorted - Sort array with a given comparator function of at least two
                  variables.  If > 2, an array of extra variables to insert to
 		 each comparison call must be provided.
@@ -277,14 +316,14 @@ File setup:
 ```html
         init.sqf
         mission.sqm
-        include\randint.hpp
+        include\lambda.hpp
         include\vectools.hpp
-        randint\*.*
+        lambda\*.*
         vectools\*.*
 ```
 Setup of init.sqf:
 ```html
-        #include <include\randint.hpp>
+        #include <include\lambda.hpp>
         #include <include\vectools.hpp>
 ```
 
