@@ -16,10 +16,10 @@
       Obj = ["ObjectRoot"] call fnc_new;
       [Obj, "_setf", "a key", "associated data"] call fnc_tell;
       
-      hint str [Obj, "_getf", "a key"] call fnc_tell
+      hint str ([Obj, "_getf", "a key"] call fnc_tell)
       // ... outputs "associated data"
 
-      hint str [Obj, "_locals"] call fnc_tell
+      hint str ([Obj, "_locals"] call fnc_tell)
       // ... outputs ["a key"]
 
   Subclass example:
