@@ -3,9 +3,11 @@
     :: ObjectRoot <- nil
 
   Methods:
-   _setf var_name value :: setVariable in object's namespace, and record key
-   _getf var_name       :: simple getVariable interface
-   _locals              :: list of all recorded keys that have been stored
+   _setf var_name value      :: set variable in obj namespace and record key
+   _getf var_name            :: simple getVariable interface
+   _push_attr var_name value :: append to an array variable
+   _locals                   :: list of all recorded keys that have been stored
+   _class                    :: show object's class heirarchy array
 
       This class is meant to act as the root of an object heirarchy, providing
   a standard interface for keeping instance variables in a namespace unique
@@ -82,6 +84,6 @@ DEFMETHOD("ObjectRoot", "_push_attr") ["_self", "_attribute", "_value"] DO {
 
 
 DEFMETHOD("ObjectRoot", "_class") ["_self"] DO {
-	/* UNTESTED:Return the class heirarchy for an instance */
+	/* Return the class heirarchy for an instance */
 	_self getVariable "class_names"
 } ENDMETHOD;
