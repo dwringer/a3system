@@ -1,5 +1,6 @@
 /*
-  UNTESTED:UnitGroup class
+  UnitGroup class
+    :: UnitGroup -> ObjectRoot
 
   Methods:
     center_pos  :: Get the mean position of all group units
@@ -8,11 +9,19 @@
 
       This is an abstraction to represent a group of units.  This is distinct
   from unit groups in the typical sense - these groups exist independently and
-  are commanded separately through the class method interface.
+  are commanded separately through the class method interface. (TBD)
 
   Example:
-    N/A - not tested
+    uGrp = ["UnitGroup"] call fnc_new;
+    [uGrp, "add", player] call fnc_tell;
+    [uGrp, "add", man_1] call fnc_tell;
+    [uGrp, "add", man_2] call fnc_tell;
 
+    hint str ([uGrp, "_getf", "units"] call fnc_tell)
+    // ... outputs [<player name>, man_1, man_2]
+  
+    hint str ([uGrp, "center_pos"] call fnc_tell
+    // ... outputs mean position vector from all units
 */
 
 DEFCLASS("UnitGroup") ["_self"] DO {

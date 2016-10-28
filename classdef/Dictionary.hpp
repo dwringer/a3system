@@ -1,5 +1,6 @@
 /*
   Dictionary class
+    :: Dictionary -> ObjectRoot
 
   Methods:
    get key       :: look up the value stored in this object by key

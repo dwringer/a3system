@@ -14,6 +14,8 @@
 #include <classdef\mkcivsVictim.hpp>
 #include <classdef\ObjectRoot.hpp>
 #include <classdef\Dictionary.hpp>
+#include <classdef\UnitGroup.hpp>
+#include <classdef\CrewUnitGroup.hpp>
 ClassesInitialized = true;
 
 if (!isServer) exitWith {};

@@ -1,5 +1,6 @@
 /*
   ObjectRoot class
+    :: ObjectRoot <- nil
 
   Methods:
    _setf var_name value :: setVariable in object's namespace, and record key
