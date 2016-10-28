@@ -26,7 +26,7 @@
    // ... outputs ["fn_comparator", "test", "a test"]
    //     [This is the aliased dictionary keys method, and is unsorted.
    //      fn_comparator is used internally and is visible as an artifact
-   //      of how this class abuses everything about class heirarchy
+   //      of how this class abuses everything about class hierarchy
    //      design principles.  Did I mention not to use this class?]
 
    hint str([MyODict, "keys"] call fn_tell)

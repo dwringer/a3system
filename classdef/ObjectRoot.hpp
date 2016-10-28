@@ -7,9 +7,9 @@
    _getf var_name            :: simple getVariable interface
    _push_attr var_name value :: append to an array variable
    _locals                   :: list of all recorded keys that have been stored
-   _class                    :: show object's class heirarchy array
+   _class                    :: show object's class hierarchy array
 
-      This class is meant to act as the root of an object heirarchy, providing
+      This class is meant to act as the root of an object hierarchy, providing
   a standard interface for keeping instance variables in a namespace unique
   to each instance.  This is just a thin layer of abstraction over the built-in
   setVariable and getVariable functions (which are already object-oriented in
@@ -84,6 +84,6 @@ DEFMETHOD("ObjectRoot", "_push_attr") ["_self", "_attribute", "_value"] DO {
 
 
 DEFMETHOD("ObjectRoot", "_class") ["_self"] DO {
-	/* Return the class heirarchy for an instance */
+	/* Return the class hierarchy for an instance */
 	_self getVariable "class_names"
 } ENDMETHOD;
