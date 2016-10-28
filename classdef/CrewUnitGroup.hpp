@@ -65,23 +65,70 @@ DEFMETHOD("CrewUnitGroup", "assign") ["_self", "_unit", "_role"] DO {
 
 DEFMETHOD("CrewUnitGroup", "board_instant") ["_self"] DO {
 	/* Instantly embark */
-	private ["_vehicle", "_driver", "_gunner", "_cargo"];
-	_vehicle = [_self, "_getf", "vehicles"] call fnc_tell;
-	_driver = [_self, "_getf", "drivers"] call fnc_tell;
-	_gunner = [_self, "_getf", "gunners"] call fnc_tell;
-	_cargo = [_self, "_getf", "cargo"] call fnc_tell;
-	_vehicle = _vehicle select 0;
-	_cargo = _cargo +
-	         ([_driver, 1, 0] call fnc_subseq) +
-                 ([_gunner, 1, 0] call fnc_subseq);
-	_driver = _driver select 0;
-	_gunner = _gunner select 0;
-	_driver assignAsDriver _vehicle;
-	_driver moveInDriver _vehicle;
-	_gunner assignAsGunner _vehicle;
-	_gunner moveInGunner _vehicle;
-	{
-		_x assignAsCargo _vehicle;
-		_x moveInCargo _vehicle;
-	} forEach _cargo;
+	private ["_vehicles", "_drivers", "_gunners", "_cargos", "_positions",
+             	 "_vlen", "_vehicle", "_driver", "_gunner", "_cargo",
+          	 "_turret", "_turretPositions", "_turrets", "_cargoSeats",
+	         "_assignmentIndex"];
+	_vehicles = [_self, "_getf", "vehicles"] call fnc_tell;
+	_drivers = [_self, "_getf", "drivers"] call fnc_tell;
+	_gunners = [_self, "_getf", "gunners"] call fnc_tell;
+	_cargos = [_self, "_getf", "cargo"] call fnc_tell;
+	_gunners = _gunners + _cargos;
+	_vlen = count _vehicles;
+	_cargoSeats = [];
+	for "_i" from 0 to (_vlen - 1) do {
+		scopeName "vehicleBoarding";
+		_vehicle = _vehicles select _i;
+		_positions = fullCrew [_vehicle, "", true];
+		_driver = _drivers select 0;
+		_drivers = _drivers - [_driver];
+		_driver assignAsDriver _vehicle;
+		_driver moveInDriver _vehicle;
+		_turrets = allTurrets _vehicle;
+		_turretPositions = [];
+		for "_i" from 0 to ((count _turrets) - 1) do {
+			_turret = _turrets select _i;
+			if ((count _turret) == 1) then {
+				_turretPositions = _turretPositions + [[_i]];
+			} else {
+				for "_j" from 0 to ((count _turret) - 1) do {
+					_turretPositions = _turretPositions +
+							   [[_i, _j]];
+				};
+			};
+		};
+		_assignmentIndex = 0;
+		while {_assignmentIndex < ((count _gunners) min
+					   (count _turretPositions))} do {
+			(_gunners select _assignmentIndex) moveInTurret
+			[_vehicle, (_turretPositions select _assignmentIndex)];
+			_assignmentIndex = _assignmentIndex + 1;
+		};
+		_gunners = [_gunners, _assignmentIndex, 0] call fnc_subseq;
+		_cargoSeats = _cargoSeats +
+		              [(count _positions) - (_assignmentIndex + 1)];
+		if (((count _drivers) == 0) and
+                    (_i < (_vlen - 1)) and
+		    ((count _gunners) > 0)) then {
+			_drivers = _drivers + [_gunners select 0];
+			_gunners = [_gunners, 1, 0] call fnc_subseq;
+		};
+		if ((count _drivers) == 0) then {
+			breakOut "vehicleBoarding";
+		};
+        };
+	for "_i" from 0 to (_vlen - 1) do {
+		if ((count _cargoSeats) > _i) then {
+  			for "_j" from 0 to (_cargoSeats select _i) do {
+				if ((count _gunners) > 0) then {
+					_vehicle = _vehicles select _i;
+					_cargo = _gunners select 0;
+					_cargo assignAsCargo _vehicle;
+					_cargo moveInCargo _vehicle;
+					_gunners = [_gunners, 1, 0] call
+					           fnc_subseq;
+				};
+		        };
+		};
+	};
 } ENDMETHOD;
