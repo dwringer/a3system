@@ -119,7 +119,7 @@ DEFMETHOD("CrewUnitGroup", "board_instant") ["_self"] DO {
         };
 	for "_i" from 0 to (_vlen - 1) do {
 		if ((count _cargoSeats) > _i) then {
-  			for "_j" from 0 to (_cargoSeats select _i) do {
+			for "_j" from 0 to ((_cargoSeats select _i) - 1) do {
 				if ((count _gunners) > 0) then {
 					_vehicle = _vehicles select _i;
 					_cargo = _gunners select 0;
