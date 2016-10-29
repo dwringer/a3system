@@ -21,4 +21,6 @@ _methods = [[["_method_list", "_msg"],
 _methods = [[["_x"], "not isNil ""_x"""] call fnc_lambdastr,
             _methods] call fnc_filter;
 _result = ([_instance] + _parameters) call (_methods select 0);
-_result;  // RETURN //////////////////////////////////////////////////////////
+if (not isNil "_result") then {
+	_result;
+};  // RETURN //////////////////////////////////////////////////////////

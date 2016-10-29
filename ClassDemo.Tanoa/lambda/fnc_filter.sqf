@@ -1,6 +1,6 @@
 /////////////////////////////// fnc_filter ///////////////////////// 2016-10-21
-/*  Filter an array by application of a predicate   */
-//////////////////////////////////////////////////////
+/*  Filter an array by application of a predicate  */
+/////////////////////////////////////////////////////
 private [                //                                    
          "_fn",          // Function [IN/A0/B0]                        //
          "_arr",         // Array    [IN/A1/B1]                       //// 
@@ -19,8 +19,14 @@ if ((count _this) == 3) then {
 _acc = [];
 for "_i" from 0 to ((count _arr) - 1) do {
 	_elt = _arr select _i;
-	if (([_elt] + _extra_vars) call _fn) then {
-		_acc = _acc + [_elt];
+	if (not isNil "_elt") then {
+		if (([_elt] + _extra_vars) call _fn) then {
+			_acc = _acc + [_elt];
+		};
+        } else {
+		if (([nil] + _extra_vars) call _fn) then {
+			_acc = _acc + [_elt];
+		};
 	};
 };
 _acc;  // RETURN //////////////////////////////////////////////////////////////
