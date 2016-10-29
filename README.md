@@ -234,8 +234,8 @@ Then, place the following at the top of your misson's init.sqf file:
         #include <include\mkcivs.hpp>
 ```
 
-To create an ambient civilian zone, place a Game Logic at the center and in
-its initialization field, put the following:
+To create an ambient civilian zone, place a named Game Logic at the center and
+in its initialization field, put the following:
 ```html
         _nil = [this,
                 <#-of-groups>,
@@ -245,6 +245,7 @@ its initialization field, put the following:
                 <despawn-radius>] execVM "mkcivs\civtriggers.sqf";
 ```
 
+Because of the way civtriggers.sqf works, the Game Logic must be given a name.
 To set up an ambush from the ambient civilians, place one or more objects in
 the area to represent weapon caches, giving each a unique name in the editor.
 Then, set up a trigger and in its on-activation field put the following:
