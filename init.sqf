@@ -16,6 +16,7 @@
 #include <classdef\Dictionary.hpp>
 #include <classdef\UnitGroup.hpp>
 #include <classdef\CrewUnitGroup.hpp>
+#include <classdef\CivilianZone.hpp>
 ClassesInitialized = true;
 
 if (!isServer) exitWith {};
