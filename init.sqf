@@ -9,14 +9,13 @@
 #include <include\asinc.hpp>
 
 #include <include\classes.hpp>
-#include <classdef\testWorldEntity.hpp>
-#include <classdef\mkcivsWeaponCache.hpp>
-#include <classdef\mkcivsVictim.hpp>
 #include <classdef\ObjectRoot.hpp>
 #include <classdef\Dictionary.hpp>
 #include <classdef\UnitGroup.hpp>
 #include <classdef\CrewUnitGroup.hpp>
-#include <classdef\CivilianZone.hpp>
+#include <classdef\mkcivsWeaponCache.hpp>
+#include <classdef\mkcivsVictim.hpp>
+#include <classdef\mkcivsCivilianZone.hpp>
 ClassesInitialized = true;
 
 if (!isServer) exitWith {};
