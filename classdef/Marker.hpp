@@ -10,28 +10,67 @@ DEFCLASS("Marker") ["_self",
 } ENDCLASS;
 
 
+DEFMETHOD("Marker", "set_alpha") ["_self", "_alpha"] DO {
+	[_self, "_setf", "alpha", _alpha] call fnc_tell;
+	[_self, "redraw"] call fnc_tell;
+} ENDMETHOD;
+
+
 DEFMETHOD("Marker", "set_brush") ["_self", "_brush"] DO {
 	[_self, "_setf", "brush", _brush] call fnc_tell;
+	[_self, "redraw"] call fnc_tell;
 } ENDMETHOD;
 
 
 DEFMETHOD("Marker", "set_color") ["_self", "_color"] DO {
 	[_self, "_setf", "color", _color] call fnc_tell;
+	[_self, "redraw"] call fnc_tell;
 } ENDMETHOD;
 
 
-DEFMETHOD("Marker", "set_dir") ["_self", "_direction"] DO {
+DEFMETHOD("Marker", "set_direction") ["_self", "_direction"] DO {
 	[_self, "_setf", "direction", _direction] call fnc_tell;
+	[_self, "redraw"] call fnc_tell;
+} ENDMETHOD;
+
+
+DEFMETHOD("Marker", "set_position") ["_self", "_position"] DO {
+	[_self, "_setf", "position", _position] call fnc_tell;
+	[_self, "redraw"] call fnc_tell;
+} ENDMETHOD;
+
+
+DEFMETHOD("Marker", "set_shape") ["_self", "_shape"] DO {
+	[_self, "_setf", "shape", _shape] call fnc_tell;
+	[_self, "redraw"] call fnc_tell;
+} ENDMETHOD;
+
+
+DEFMETHOD("Marker", "set_size") ["_self", "_size"] DO {
+	[_self, "_setf", "size", _size] call fnc_tell;
+	[_self, "redraw"] call fnc_tell;
 } ENDMETHOD;
 
 
 DEFMETHOD("Marker", "set_text") ["_self", "_text"] DO {
 	[_self, "_setf", "text", _text] call fnc_tell;
+	[_self, "redraw"] call fnc_tell;
 } ENDMETHOD;
 
 
-DEFMETHOD("Marker", "set_alpha") ["_self", "_alpha"] DO {
-	[_self, "_setf", "alpha", _alpha] call fnc_tell;
+DEFMETHOD("Marker", "set_type") ["_self", "_type"] DO {
+	[_self, "_setf", "type", _type] call fnc_tell;
+	[_self, "redraw"] call fnc_tell;
+} ENDMETHOD;
+
+
+DEFMETHOD("Marker", "redraw") ["_self"] DO {
+	private ["_marker"];
+	_marker = [_self, "_getf", "marker"] call fnc_tell;
+	if (not isNil "_marker") then {
+		[_self, "hide"] call fnc_tell;
+		[_self, "show"] call fnc_tell;
+	};
 } ENDMETHOD;
 
 
