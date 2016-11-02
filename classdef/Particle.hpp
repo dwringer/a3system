@@ -1,6 +1,6 @@
 /*
   Particle class
-    :: Particle -> ObjectRoot
+    :: Particle -> Marker -> ObjectRoot
 
   Methods:
    set_position position :: Update position vector (through position length)
@@ -17,10 +17,16 @@
 
 DEFCLASS("Particle") ["_self"] DO {
 	/* Initialize the particle */
-	SUPER("ObjectRoot", _self);
+	SUPER_ARGS("Marker", _self)
+	        [position _self, "ELLIPSE", nil, [1, 1]]
+	ENDARGS;
 	[_self, "_setf", "extraDimensions", []] call fnc_tell;
+	[_self, "show"] call fnc_tell;
 	_self
 } ENDCLASS;
+
+
+ALIAS("Particle", "set_marker_position", "Marker", "set_position");
 
 
 DEFMETHOD("Particle", "set_position") ["_self", "_position"] DO {
@@ -34,6 +40,7 @@ DEFMETHOD("Particle", "set_position") ["_self", "_position"] DO {
 	};
 	_self setPos ([_position, 0, 3] call fnc_subseq);
 	[_self, "_setf", "extraDimensions", _newExtras] call fnc_tell;
+	[_self, "set_marker_position", _position] call fnc_tell;
 } ENDMETHOD;
 
 
