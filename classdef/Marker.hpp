@@ -1,7 +1,10 @@
-DEFCLASS("Marker") ["_self",
-		    "_name", "_position", "_shape", "_type", "_size"] DO {
+MarkerIndex = 0;
+
+DEFCLASS("Marker") ["_self", "_position", "_shape", "_type", "_size"] DO {
 	SUPER("ObjectRoot", _self);
-	[_self, "_setf", "name", _name] call fnc_tell;
+	[_self, "_setf", "name",
+	 format ["MarkerInstance%1", MarkerIndex]] call fnc_tell;
+	MarkerIndex = MarkerIndex + 1;
 	[_self, "_setf", "position", _position] call fnc_tell;
 	[_self, "_setf", "shape", _shape] call fnc_tell;
 	[_self, "_setf", "type", _type] call fnc_tell;
