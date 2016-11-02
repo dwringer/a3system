@@ -39,7 +39,7 @@ DEFCLASS("Optimizer") ["_self", "_n", "_particle_classname"] DO {
 
 DEFMETHOD("Optimizer", "get_position") ["_self"] DO {
 	/* Determine mean position of population and set to object */
-	private ["_positions", "_alen", " _position", "_component"];
+	private ["_positions", "_alen", "_position", "_component"];
 	_positions = [[["_x"], {position _x}] call fnc_lambda,
 		      [_self, "_getf", "population"] call fnc_tell
 		     ] call fnc_map;
