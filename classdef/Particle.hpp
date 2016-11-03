@@ -95,9 +95,9 @@ DEFMETHOD("Particle", "differential_evolve") ["_self", "_other",
 	_acc = [];
 	for "_i" from 0 to ((count _posX) - 1) do {
 		if ((random 1) < _frequency) then {
-			_acc = _acc + [_posA select _i +
-				       _weight * ((_posB select _i) -
-                                                  (_posC select _i))];
+			_acc = _acc + [(_posA select _i) +
+				       (_weight * ((_posB select _i) -
+                                                   (_posC select _i)))];
 		} else {
 			_acc = _acc + [_posX select _i];
 		};
