@@ -12,6 +12,8 @@
    conform_positions positions   :: Distribute population across positions
    conform_units units           :: Distribute population across unit positions
    perturb n radius              :: Perturb population by n-dimensional radius
+   add_objective objective_fn    :: Push objective function to each individual
+   evaluate_objectives           :: Matrix of all individuals' objective evals
 
       This class represents a generic optimization algorithm implementation.  A
   population of individuals is kept over which various evolutionary algorithms
@@ -177,4 +179,23 @@ DEFMETHOD("Optimizer", "perturb") ["_self", "_n", "_radius"] DO {
 		_newPos = _newPos + _constants;
 		[_population select _i, "set_position", _newPos] call fnc_tell;
 	};
+} ENDMETHOD;
+
+
+DEFMETHOD("Optimizer", "add_objective") ["_self", "_objective_fn"] DO {
+	/* Add objective function to each population member */
+	{
+		[_x, "add_objective", _objective_fn] call fnc_tell;
+	} forEach ([_self, "_getf", "population"] call fnc_tell);
+} ENDMETHOD;
+
+
+DEFMETHOD("Optimizer", "evaluate_objectives") ["_self"] DO {
+	/* Collect evaluations of each individual's objectives */
+	private ["_acc"];
+	_acc = [];
+	{
+		_acc = _acc + [[_x, "evaluate_objectives"] call fnc_tell];
+	} forEach ([_self, "_getf", "population"] call fnc_tell);
+	_acc
 } ENDMETHOD;

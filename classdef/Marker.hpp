@@ -2,6 +2,9 @@
   Marker Class
     :: Marker -> ObjectRoot
 
+  Globals:
+    MarkerIndex :: Integer to track count of instantiated markers (for naming)
+
   Methods:
     __init__ position shape type size :: Create the Marker instance (hidden)
     show                              :: Create and display the game marker
