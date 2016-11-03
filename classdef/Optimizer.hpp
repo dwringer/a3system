@@ -145,29 +145,31 @@ DEFMETHOD("Optimizer", "conform_units") ["_self", "_units"] DO {
 
 DEFMETHOD("Optimizer", "perturb") ["_self", "_n", "_radius"] DO {
 	/* Randomly perturb each population member up to radius in n-dims */
-	private ["_population", "_position", "_constants", "_variables",
-	         "_newPos"];
+	private ["_population", "_position", "_constants", "_newPos",
+		 "_posDelta"];
 	_population = [_self, "_getf", "population"] call fnc_tell;
 	for "_i" from 0 to ((count _population) - 1) do {
 		_position = [_population select _i,
 		             "get_position"] call fnc_tell;
 		_constants = [_position, _n, 0] call fnc_subseq;
-		_variables = [_position, 0, _n] call fnc_subseq;
-		while (true) do {
+		while {true} do {
 			scopeName "randomPlacement";
 			_newPos = [];
-			for "_j" from 0 to ((count _variables) - 1) do {
+			for "_j" from 0 to (_n - 1) do {
 				_newPos = _newPos +
-                                          [(_variables select _j) -
+                                          [(_position select _j) -
                     		           _radius +
                                            random (2 * _radius)];
        			};
+			_posDelta = [[["_a", "_b"],
+				      {_a - _b}] call fnc_lambda,
+				     _newPos, _position] call fnc_map;
 			if ((sqrt ([[["_a", "_b"],
 		                     {_a + _b}] call fnc_lambda,
                                     [[["_x"],
                                       {_x * _x}] call fnc_lambda,
-                                     _newPos] call fnc_map
-			           ] call fnc_reduce)) <=
+                                     _posDelta] call fnc_map
+				    ] call fnc_reduce)) <=
 			    _radius) then {
 				breakOut "randomPlacement";
                         };
