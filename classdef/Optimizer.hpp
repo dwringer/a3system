@@ -19,8 +19,23 @@
   population of individuals is kept over which various evolutionary algorithms
   can be applied.
 
-  Example:
-   N/A - untested - unimplemented
+  Example (WIP - not currently useful):
+      opti = ["Optimizer", 20, "Particle"] call fnc_new;
+      [opti, "conform_units", units group player] call fnc_tell;
+      [opti, "perturb", 2, 5] call fnc_tell;
+      [opti, "add_objective", 
+       [["_x"], 
+	{_x distance ((units group player) select 0)}
+       ] call fnc_lambda] call fnc_tell
+      [opti, "add_objective", 
+       [["_x"], 
+	{_x distance ((units group player) select 1)}
+       ] call fnc_lambda] call fnc_tell
+      [opti, "add_objective", 
+       [["_x"], 
+	{_x distance ((units group player) select 2)}
+       ] call fnc_lambda] call fnc_tell;
+      bins = [opti, "NSGA_bins"] call fnc_tell;
 
 */
 
@@ -198,4 +213,101 @@ DEFMETHOD("Optimizer", "evaluate_objectives") ["_self"] DO {
 		_acc = _acc + [[_x, "evaluate_objectives"] call fnc_tell];
 	} forEach ([_self, "_getf", "population"] call fnc_tell);
 	_acc
+} ENDMETHOD;
+
+
+DEFMETHOD("Optimizer", "MODE_step") ["_self"] DO {
+	/* Create a second population by differential evolution */
+	private ["_population", "_population2", "_others"];
+	_population = [_self, "_getf", "population"] call fnc_tell;
+	_population2 = [];
+	{
+		_others = [_population, 4] call fnc_choose;
+		switch (_x) do {
+			case (_others select 0): {
+				_others set [0, _others select 3];
+			};
+			case (_others select 1): {
+				_others set [1, _others select 3];
+			};
+			case (_others select 2): {
+				_others set [2, _others select 3];
+			};
+		};
+		_population2 = _population2 +
+		               [[_x, "differential_evolve",
+                                 _others select 0,
+		                 _others select 1,
+		                 _others select 2,
+                                 0.5, 0.5] call fnc_tell];
+	} forEach _population;
+	_population2
+} ENDMETHOD;
+
+
+DEFMETHOD("Optimizer", "NSGA_bins") ["_self"] DO {
+	/* NSGA fast non-dominated sort */
+	private ["_bins", "_population", "_domByN", "_y", "_dominated",
+	         "_binIndex", "_nextBin"];
+	_bins = [[]];
+	_population = [_self, "_getf", "population"] call fnc_tell;
+	{
+		_domByN = 0;
+		[_x, "_setf", "_NSGA_dominates", []] call fnc_tell;
+		for "_i" from 0 to ((count _population) - 1) do {
+			_y = _population select _i;
+			if (([[["_a", "_b"], {_a * _b}] call fnc_lambda,
+		              [[["_c", "_d"],
+                                {if (_c < _d) then {1} else {0}}
+			       ] call fnc_lambda,
+                               [_x, "evaluate_objectives"] call fnc_tell,
+			       [_y, "evaluate_objectives"] call fnc_tell
+			      ] call fnc_map
+                             ] call fnc_reduce) == 1) then {
+				[_x, "_push_attr", "_NSGA_dominates",
+				 _y] call fnc_tell;
+                        } else {
+		                if (([[["_a", "_b"],
+			               {_a * _b}] call fnc_lambda,
+				      [[["_c", "_d"],
+					{if (_c < _d) then {1} else {0}}
+				       ] call fnc_lambda,
+				       [_y, "evaluate_objectives"]
+				        call fnc_tell,
+				       [_x, "evaluate_objectives"]
+				        call fnc_tell
+				      ] call fnc_map
+				     ] call fnc_reduce) == 1) then {
+				_domByN = _domByN + 1;
+                                };
+                        };
+		};
+		[_x, "_setf", "_NSGA_domByN", _domByN] call fnc_tell;
+		if (_domByN == 0) then {
+			_bins set [0, (_bins select 0) + [_x]];
+		};
+	} forEach _population;
+	_binIndex = 0;
+        while {_binIndex < count _bins} do {
+	        _nextBin = [];
+                {
+			_dominated = [_x, "_getf",
+			              "_NSGA_dominates"] call fnc_tell;
+			for "_i" from 0 to ((count _dominated) - 1) do {
+				_y = _dominated select _i;
+				_domByN = ([_y, "_getf",
+				            "_NSGA_domByN"] call fnc_tell) - 1;
+				[_y, "_setf",
+				 "_NSGA_domByN", _domByN] call fnc_tell;
+				if (_domByN == 0) then {
+					_nextBin = _nextBin + [_y];
+				};
+			};
+		} forEach (_bins select _binIndex);
+		_binIndex = _binIndex + 1;
+		if ((count _nextBin) > 0) then {
+			_bins = _bins + [_nextBin];
+		};
+	};
+	_bins
 } ENDMETHOD;

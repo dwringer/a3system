@@ -77,7 +77,7 @@ DEFMETHOD("Particle", "evaluate_objectives") ["_self"] DO {
 	private ["_acc"];
 	_acc = [];
 	{
-	        _acc = _acc + [_self call _x];
+	        _acc = _acc + [[_self] call _x];
 	} forEach ([_self, "_getf", "objectives"] call fnc_tell);
 	_acc
 } ENDMETHOD;
