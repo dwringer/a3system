@@ -38,7 +38,7 @@
        [["_x"], 
 	{_x distance ((units group player) select 2)}
        ] call fnc_lambda] call fnc_tell;
-      bins = [opti, "NSGA_bins"] call fnc_tell;
+      bins = [opti, "non_dominated_sort"] call fnc_tell;
 
 */
 
@@ -316,30 +316,51 @@ DEFMETHOD("Optimizer", "non_dominated_sort") ["_self"] DO {
 } ENDMETHOD;
 
 
-/////////////////////////////////* UNTESTED! */////////////////////////////////
 DEFMETHOD("Optimizer", "MODE_step") ["_self"] DO {
-	/* Evolve population by multi-objective differential evolution */
-	private ["_bins", "_newPop", "_tgtLength", "_newLen", "_available"];
-	[_self, "_setf", "population",
-	 ([_self, "_getf", "population"] call fnc_tell) +
-	 ([_self, "de_candidates"] call fnc_tell)] call fnc_tell;
+	/* UNTESTED:Evolve by Multi-Objective Differential Evolution */
+	private ["_bins", "_population", "_newPop", "_tgtLength",
+	         "_newLength", "_available"];
+	_population = ([_self, "_getf", "population"] call fnc_tell) +
+	              ([_self, "de_candidates"] call fnc_tell);
+	[_self, "_setf", "population", _population] call fnc_tell;
 	_bins = [_self, "non_dominated_sort"] call fnc_tell;
 	_newPop = [];
 	_tgtLength = (count _population) / 2.0;
 	for "_i" from 0 to ((count _bins) - 1) do {
-			_newLen = count _newPop;
-			if ((_newLen + (count (_bins select _i))) <=
-			    _tgtLength) then {
-				_newPop = _newPop + (_bins select _i);
-			else {
-				_available = _bins select _i;
-				// <TODO: SORT AVAILABLE (CROWDING?)>
-				_newPop = _newPop +
-					  ([_available, 0,
-					    _tgtLength -
-					    _newLen] call fnc_subseq);
-			};
+		_newLength = count _newPop;
+		if ((_newLength + (count (_bins select _i))) <=
+		    _tgtLength) then {
+			_newPop = _newPop + (_bins select _i);
+		} else {
+			_available = _bins select _i;
+			{
+				[_x, "_setf", "_distAvg",
+				 [[["_a", "_b"], {_a + _b}] call fnc_lambda,
+				  [[["_c", "_d", "_len"],
+				    {(_c distance _d) / _len}] call fnc_lambda,
+				   _available,
+				   [_x, count _available]
+				  ] call fnc_mapwith] call fnc_reduce
+				] call fnc_tell;
+			} forEach _available;
+			_available = [_available,
+				      [["_a", "_b"],
+				       {([_a, "_getf", "_distAvg"]
+					  call fnc_tell) >
+					([_b, "_getf", "_distAvg"]
+					  call fnc_tell)}
+				      ] call fnc_lambda] call fnc_sorted;
+			_newPop = _newPop +
+				  ([_available, 0, _tgtLength - _newLength]
+				    call fnc_subseq);
+                };
+	};
+	for "_i" from 0 to ((count _population) - 1) do {
+		_p = _population select _i;
+		if (({_x == _p} count _newPop) == 0) then {
+		        [_p, "hide"] call fnc_tell;
+                        deleteVehicle _p;
 		};
 	};
+	[_self, "_setf", "population", _newPop] call fnc_tell;
 } ENDMETHOD;
-/////////////////////////////////* UNTESTED! */////////////////////////////////
