@@ -14,6 +14,9 @@
    perturb n radius              :: Perturb population by n-dimensional radius
    add_objective objective_fn    :: Push objective function to each individual
    evaluate_objectives           :: Matrix of all individuals' objective evals
+   de_candidates                 :: Create second population via Diff. Evol.
+   non_dominated_sort            :: Bin population by NSGA domination ranks <
+   MODE_step                     :: Multi-Objective Differential Evolution step
 
       This class represents a generic optimization algorithm implementation.  A
   population of individuals is kept over which various evolutionary algorithms
@@ -216,7 +219,7 @@ DEFMETHOD("Optimizer", "evaluate_objectives") ["_self"] DO {
 } ENDMETHOD;
 
 
-DEFMETHOD("Optimizer", "MODE_step") ["_self"] DO {
+DEFMETHOD("Optimizer", "de_candidates") ["_self"] DO {
 	/* Create a second population by differential evolution */
 	private ["_population", "_population2", "_others"];
 	_population = [_self, "_getf", "population"] call fnc_tell;
@@ -245,8 +248,8 @@ DEFMETHOD("Optimizer", "MODE_step") ["_self"] DO {
 } ENDMETHOD;
 
 
-DEFMETHOD("Optimizer", "NSGA_bins") ["_self"] DO {
-	/* NSGA fast non-dominated sort */
+DEFMETHOD("Optimizer", "non_dominated_sort") ["_self"] DO {
+	/* NSGA fast non-dominated sort algorithm */
 	private ["_bins", "_population", "_domByN", "_y", "_dominated",
 	         "_binIndex", "_nextBin"];
 	_bins = [[]];
@@ -311,3 +314,32 @@ DEFMETHOD("Optimizer", "NSGA_bins") ["_self"] DO {
 	};
 	_bins
 } ENDMETHOD;
+
+
+/////////////////////////////////* UNTESTED! */////////////////////////////////
+DEFMETHOD("Optimizer", "MODE_step") ["_self"] DO {
+	/* Evolve population by multi-objective differential evolution */
+	private ["_bins", "_newPop", "_tgtLength", "_newLen", "_available"];
+	[_self, "_setf", "population",
+	 ([_self, "_getf", "population"] call fnc_tell) +
+	 ([_self, "de_candidates"] call fnc_tell)] call fnc_tell;
+	_bins = [_self, "non_dominated_sort"] call fnc_tell;
+	_newPop = [];
+	_tgtLength = (count _population) / 2.0;
+	for "_i" from 0 to ((count _bins) - 1) do {
+			_newLen = count _newPop;
+			if ((_newLen + (count (_bins select _i))) <=
+			    _tgtLength) then {
+				_newPop = _newPop + (_bins select _i);
+			else {
+				_available = _bins select _i;
+				// <TODO: SORT AVAILABLE (CROWDING?)>
+				_newPop = _newPop +
+					  ([_available, 0,
+					    _tgtLength -
+					    _newLen] call fnc_subseq);
+			};
+		};
+	};
+} ENDMETHOD;
+/////////////////////////////////* UNTESTED! */////////////////////////////////
