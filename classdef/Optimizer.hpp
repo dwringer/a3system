@@ -328,11 +328,10 @@ DEFMETHOD("Optimizer", "MODE_step") ["_self"] DO {
 	_tgtLength = (count _population) / 2.0;
 	for "_i" from 0 to ((count _bins) - 1) do {
 		_newLength = count _newPop;
-		if ((_newLength + (count (_bins select _i))) <=
-		    _tgtLength) then {
-			_newPop = _newPop + (_bins select _i);
+		_available = _bins select _i;
+		if ((_newLength + (count _available)) <= _tgtLength) then {
+			_newPop = _newPop + _available;
 		} else {
-			_available = _bins select _i;
 			{
 				[_x, "_setf", "_distAvg",
 				 [[["_a", "_b"], {_a + _b}] call fnc_lambda,
