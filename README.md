@@ -353,3 +353,7 @@ And in init.sqf:
 ```html
         #include <include\weapon_shop.hpp>
 ```
+
+# license
+This software is released under The MIT License.  See the file
+LICENSE.txt for license details.
