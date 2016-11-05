@@ -59,7 +59,11 @@ DEFMETHOD("ObjectRoot", "_setf") ["_self", "_var_name", "_value"] DO {
 		};
         };
 	_self setVariable ["__locals__", _locals];
-	_self setVariable [_var_name, _value]
+	if (not isNil "_value") then {
+		_self setVariable [_var_name, _value];
+	} else {
+		_self setVariable [_var_name, nil];
+	};
 } ENDMETHOD;
 
 

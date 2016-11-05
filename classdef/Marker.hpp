@@ -50,8 +50,12 @@ DEFCLASS("Marker") ["_self", "_position", "_shape", "_type", "_size"] DO {
 	MarkerIndex = MarkerIndex + 1;
 	[_self, "_setf", "position", _position] call fnc_tell;
 	[_self, "_setf", "shape", _shape] call fnc_tell;
-	[_self, "_setf", "type", _type] call fnc_tell;
-        [_self, "_setf", "size", _size] call fnc_tell;
+	if (not isNil "_type") then {
+		[_self, "_setf", "type", _type] call fnc_tell;
+	};
+	if (not isNil "_size") then {
+		[_self, "_setf", "size", _size] call fnc_tell;
+	};
         _self
 } ENDCLASS;
 
