@@ -316,39 +316,43 @@ DEFMETHOD("Optimizer", "non_dominated_sort") ["_self"] DO {
 } ENDMETHOD;
 
 
-DEFMETHOD("Optimizer", "MODE_step") ["_self"] DO {
-	/* UNTESTED:Evolve by Multi-Objective Differential Evolution */
+DEFMETHOD("Optimizer", "sorted_average_distances") ["_self", "_subpop"] DO {
+	/* UNTESTED:For given subpop, assign-to-each avg distance to others */
+	{[_x, "_setf", "_distAvg",
+	  [[["_a", "_b"], {_a + _b}] call fnc_lambda,
+	   [[["_c", "_d", "_len"], {(_c distance _d) / _len}] call fnc_lambda,
+	    _subpop, [_x, count _subpop]] call fnc_mapwith] call fnc_reduce
+	 ] call fnc_tell;
+	} forEach _subpop;
+	_subpop = [_subpop,
+		   [["_a", "_b"], {([_a, "_getf", "_distAvg"] call fnc_tell) >
+				   ([_b, "_getf", "_distAvg"] call fnc_tell)}
+		   ] call fnc_lambda] call fnc_sorted;
+	_subpop	
+} ENDMETHOD;
+
+
+DEFMETHOD("Optimizer", "moea_step") ["_self",
+                                     "_candidate_generation_method",
+                                     "_bin_creation_method",
+                                     "_bin_ordering_method"] DO {
+	/* UNTESTED:Add candidate solutions, rank then cull */
 	private ["_bins", "_population", "_newPop", "_tgtLength",
 	         "_newLength", "_available"];
 	_population = ([_self, "_getf", "population"] call fnc_tell) +
-	              ([_self, "de_candidates"] call fnc_tell);
+	              ([_self, _canadidate_generation_method] call fnc_tell);
 	[_self, "_setf", "population", _population] call fnc_tell;
-	_bins = [_self, "non_dominated_sort"] call fnc_tell;
+	_bins = [_self, _bin_creation_method] call fnc_tell;
 	_newPop = [];
-	_tgtLength = (count _population) / 2.0;
+	_tgtLength = (count _population) / 2;
 	for "_i" from 0 to ((count _bins) - 1) do {
 		_newLength = count _newPop;
 		_available = _bins select _i;
 		if ((_newLength + (count _available)) <= _tgtLength) then {
 			_newPop = _newPop + _available;
 		} else {
-			{
-				[_x, "_setf", "_distAvg",
-				 [[["_a", "_b"], {_a + _b}] call fnc_lambda,
-				  [[["_c", "_d", "_len"],
-				    {(_c distance _d) / _len}] call fnc_lambda,
-				   _available,
-				   [_x, count _available]
-				  ] call fnc_mapwith] call fnc_reduce
-				] call fnc_tell;
-			} forEach _available;
-			_available = [_available,
-				      [["_a", "_b"],
-				       {([_a, "_getf", "_distAvg"]
-					  call fnc_tell) >
-					([_b, "_getf", "_distAvg"]
-					  call fnc_tell)}
-				      ] call fnc_lambda] call fnc_sorted;
+			_available = [_self, _bin_ordering_method,
+				      _available] call fnc_tell;
 			_newPop = _newPop +
 				  ([_available, 0, _tgtLength - _newLength]
 				    call fnc_subseq);
@@ -362,4 +366,13 @@ DEFMETHOD("Optimizer", "MODE_step") ["_self"] DO {
 		};
 	};
 	[_self, "_setf", "population", _newPop] call fnc_tell;
+} ENDMETHOD;
+
+
+DEFMETHOD("Optimizer", "MODE_step") ["_self"] DO {
+	/* Multi-Objective Differential Evolution */
+	[_self, "moea_step",
+	 "de_candidates",
+	 "non_dominated_sort",
+	 "sorted_average_distances"] call fnc_tell;
 } ENDMETHOD;
