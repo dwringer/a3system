@@ -16,6 +16,12 @@
    evaluate_objectives           :: Matrix of all individuals' objective evals
    de_candidates                 :: Create second population via Diff. Evol.
    non_dominated_sort            :: Bin population by NSGA domination ranks <
+   sorted_average_distances      :: Sort subpop by avg distance to each other
+       subpop
+   moea_step                     :: Multi-objective evolutionary algorithm step
+       candidate_generation_method
+       bin_creation_method
+       bin_ordering_method       
    MODE_step                     :: Multi-Objective Differential Evolution step
 
       This class represents a generic optimization algorithm implementation.  A
@@ -317,7 +323,7 @@ DEFMETHOD("Optimizer", "non_dominated_sort") ["_self"] DO {
 
 
 DEFMETHOD("Optimizer", "sorted_average_distances") ["_self", "_subpop"] DO {
-	/* UNTESTED:For given subpop, assign-to-each avg distance to others */
+	/* For given subpop, assign to each the avg distance to others */
 	{[_x, "_setf", "_distAvg",
 	  [[["_a", "_b"], {_a + _b}] call fnc_lambda,
 	   [[["_c", "_d", "_len"], {(_c distance _d) / _len}] call fnc_lambda,
