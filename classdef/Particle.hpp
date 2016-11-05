@@ -104,5 +104,7 @@ DEFMETHOD("Particle", "differential_evolve") ["_self", "_other",
 	};
 	_candidate = ["Particle"] call fnc_new;
 	[_candidate, "set_position", _acc] call fnc_tell;
+	[_candidate, "_setf", "objectives",
+	 [_self, "_getf", "objectives"] call fnc_tell] call fnc_tell;
 	_candidate	
 } ENDMETHOD;

@@ -29,11 +29,11 @@
       [opti, "add_objective", 
        [["_x"], 
 	{_x distance ((units group player) select 0)}
-       ] call fnc_lambda] call fnc_tell
+       ] call fnc_lambda] call fnc_tell;
       [opti, "add_objective", 
        [["_x"], 
 	{_x distance ((units group player) select 1)}
-       ] call fnc_lambda] call fnc_tell
+       ] call fnc_lambda] call fnc_tell;
       [opti, "add_objective", 
        [["_x"], 
 	{_x distance ((units group player) select 2)}
@@ -336,17 +336,22 @@ DEFMETHOD("Optimizer", "moea_step") ["_self",
                                      "_candidate_generation_method",
                                      "_bin_creation_method",
                                      "_bin_ordering_method"] DO {
-	/* UNTESTED:Add candidate solutions, rank then cull */
+	/* Add candidate solutions, rank then cull to pop size */
 	private ["_bins", "_population", "_newPop", "_tgtLength",
 	         "_newLength", "_available"];
-	_population = ([_self, "_getf", "population"] call fnc_tell) +
-	              ([_self, _canadidate_generation_method] call fnc_tell);
+        _population = [_self, "_getf", "population"] call fnc_tell;
+        _tgtLength = count _population;
+	_population = _population +
+	              ([_self, _candidate_generation_method] call fnc_tell);
 	[_self, "_setf", "population", _population] call fnc_tell;
 	_bins = [_self, _bin_creation_method] call fnc_tell;
 	_newPop = [];
-	_tgtLength = (count _population) / 2;
-	for "_i" from 0 to ((count _bins) - 1) do {
+        for "_i" from 0 to ((count _bins) - 1) do {
+   	        scopeName "fillFromBins";
 		_newLength = count _newPop;
+		if ((_tgtLength - _newLength) == 0) then {
+			breakOut "fillFromBins";
+		};
 		_available = _bins select _i;
 		if ((_newLength + (count _available)) <= _tgtLength) then {
 			_newPop = _newPop + _available;
