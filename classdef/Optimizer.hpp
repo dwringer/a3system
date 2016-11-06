@@ -31,12 +31,13 @@
   can be applied.
 
   Example:
-      /* Optimizes positions for two objectives:
-           # of nearby units in civArray
-           # of partial lines-of-sight to units in player's group
-         Then, calls mkcivs\layAmbush.sqf on the dominant positions.
-         If no solutions dominate, nothing happens.
-       */
+      // Optimizes positions for two objectives:
+      //     # of nearby units in civArray
+      //     # of partial lines-of-sight to units in player's group
+      //
+      //   Then, calls mkcivs\layAmbush.sqf on the dominant positions.
+      //   If no solutions dominate, nothing happens.
+       
       opti = ["Optimizer", 10, "Particle"] call fnc_new; 
       [opti, "conform_units", units group player] call fnc_tell;  
       [opti, "radial_scatter_2d", 100, 120] call fnc_tell; 
