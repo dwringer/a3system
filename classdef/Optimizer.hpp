@@ -31,34 +31,39 @@
   can be applied.
 
   Example:
-      opti = ["Optimizer", 20, "Particle"] call fnc_new;  
+      opti = ["Optimizer", 10, "Particle"] call fnc_new; 
       [opti, "conform_units", units group player] call fnc_tell;  
-      [opti, "perturb", 2, 160] call fnc_tell; 
+      [opti, "radial_scatter_2d", 100, 120] call fnc_tell; 
       [opti, "add_objective", 
-	  [["_x"], { 
-	   private ["_v"];
-	   _v = (1 - ([_x, "VIEW", player] checkVisibility 
-                      [[(getPosASL _x) select 0, 
-                        (getPosASL _x) select 1, 
-                        ((getPosASL _x) select 2) + 1.6], 
-                       eyePos player])); 
-	   if ((_v > 0) && (_v < 1)) then {0} else {
-	    if (_v == 0) then {0.5} else {_v};
+	  [["_y"], { 
+	   private ["_sum, _v"];
+	   _sum = 0;
+	   {
+	   _v = (1 - ([_y, "VIEW", _x] checkVisibility      
+		[[(getPosASL _y) select 0, 
+		  (getPosASL _y) select 1, 
+		  ((getPosASL _y) select 2) + 1.6], 
+		 eyePos _x])); 
+	   if ((_v > 0) && (_v < 1)) then {_sum = _sum + 0} else {
+	    if (_v == 0) then {_sum = _sum + 0.5} 
+			 else {_sum = _sum + _v};
 	   };
-	  }] call fnc_lambda] call fnc_tell; 
-      [opti, "add_objective", 
-	  [["_x"], { 
-	    if ((_x distance player) > 100) then {0} else {1}
+	   } forEach (units group player);
+	   _sum
 	  }] call fnc_lambda] call fnc_tell; 
       opti spawn { 
-	  for "_i" from 0 to 7 do { 
+	  private ["_handle", "_bins"];
+	  for "_i" from 0 to 5 do { 
 	      _handle = [_this, "MODE_step"] call fnc_tells; 
 	      waitUntil {scriptDone _handle}; 
 	  }; 
+	  _bins = [_this, "non_dominated_sort"] call fnc_tell;
+	  {[[["_y"], 
+	    {[_y, "hide"] call fnc_tell}] call fnc_lambda,
+	    _x] call fnc_map
+	  } forEach ([_bins, 1, 0] call fnc_subseq);
+      //    [100, _bins select 0] execVM "mkcivs\layAmbush.sqf";
       }; 
-      bins = [opti, "non_dominated_sort"] call fnc_tell;
-      {[[["_y"], {[_y, "hide"] call fnc_tell}] call fnc_lambda,
-	_x] call fnc_map} forEach ([bins, 1, 0] call fnc_subseq)
 
 */
 
@@ -232,6 +237,24 @@ DEFMETHOD("Optimizer", "perturb") ["_self", "_n", "_radius"] DO {
 } ENDMETHOD;
 
 
+DEFMETHOD("Optimizer", "radial_scatter_2d") ["_self",
+                                             "_min_radius",
+                                             "_max_radius"] DO {
+        private ["_p", "_theta", "_radius", "_dx", "_dy"];
+        {
+		_p = [_x, "get_position"] call fnc_tell;
+		_theta = 360 * (random 1);
+		_radius = _min_radius +
+		          ((random 1) * (_max_radius - _min_radius));
+		_dx = _radius * (cos _theta);
+		_dy = _radius * (sin _theta);
+		_p set [0, (_p select 0) + _dx];
+		_p set [1, (_p select 1) + _dy];
+		[_x, "set_position", _p] call fnc_tell;
+        } forEach (_self getVariable "population");
+} ENDMETHOD;
+
+
 DEFMETHOD("Optimizer", "add_objective") ["_self", "_objective_fn"] DO {
 	/* Add objective function to each population member */
 	{
@@ -274,7 +297,7 @@ DEFMETHOD("Optimizer", "de_candidates") ["_self"] DO {
                                  _others select 0,
 		                 _others select 1,
 		                 _others select 2,
-                                 0.5, 0.5] call fnc_tell];
+                                 0.35, 0.8] call fnc_tell];
 	} forEach _population;
 	_population2
 } ENDMETHOD;
@@ -287,11 +310,11 @@ DEFMETHOD("Optimizer", "non_dominated_sort") ["_self"] DO {
 	_bins = [[]];
 	_population = [_self, "_getf", "population"] call fnc_tell;
 	{
+		_xScore = [_x, "evaluate_objectives"] call fnc_tell;
 		_domByN = 0;
 		_x setVariable ["_NSGA_dominates", []];
 		for "_i" from 0 to ((count _population) - 1) do {
 			_y = _population select _i;
-			_xScore = [_x, "evaluate_objectives"] call fnc_tell;
 			_yScore = [_y, "evaluate_objectives"] call fnc_tell;
 			if (([[["_a", "_b"], {_a * _b}] call fnc_lambda,
 		              [[["_c", "_d"],
