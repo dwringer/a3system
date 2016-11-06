@@ -31,24 +31,41 @@
   can be applied.
 
   Example:
+      /* Optimizes positions for two objectives:
+           # of nearby units in civArray
+           # of partial lines-of-sight to units in player's group
+         Then, calls mkcivs\layAmbush.sqf on the dominant positions.
+         If no solutions dominate, nothing happens.
+       */
       opti = ["Optimizer", 10, "Particle"] call fnc_new; 
       [opti, "conform_units", units group player] call fnc_tell;  
       [opti, "radial_scatter_2d", 100, 120] call fnc_tell; 
+      [opti, "add_objective",
+	  [["_x"], {
+	    private ["_ct"];
+	    _ct = count ([_x, civArray, 100] call fnc_neighbors);
+	    if (_ct > 0) then {3 / _ct} else {4}
+	  }] call fnc_lambda] call fnc_tell;
       [opti, "add_objective", 
 	  [["_y"], { 
-	   private ["_sum, _v"];
-	   _sum = 0;
-	   {
-	   _v = (1 - ([_y, "VIEW", _x] checkVisibility      
-		[[(getPosASL _y) select 0, 
-		  (getPosASL _y) select 1, 
-		  ((getPosASL _y) select 2) + 1.6], 
-		 eyePos _x])); 
-	   if ((_v > 0) && (_v < 1)) then {_sum = _sum + 0} else {
-	    if (_v == 0) then {_sum = _sum + 0.5} 
-			 else {_sum = _sum + _v};
-	   };
-	   } forEach (units group player);
+	    private ["_sum, _v"];
+	    _sum = 0;
+	    {
+	     _v = (1 - ([_y, "VIEW", vehicle _x] checkVisibility
+			[[(getPosASL _y) select 0, 
+			  (getPosASL _y) select 1, 
+			  ((getPosASL _y) select 2) + 1.6], 
+			 eyePos _x])); 
+	     if ((_v > 0) && (_v < 1)) then {
+		 _sum = _sum + 0
+	     } else {
+		 if (_v == 0) then {
+		     _sum = _sum + 0.5
+	     } else {
+		 _sum = _sum + _v
+	     };
+	    };
+	    } forEach (units group player);
 	   _sum
 	  }] call fnc_lambda] call fnc_tell; 
       opti spawn { 
@@ -62,7 +79,9 @@
 	    {[_y, "hide"] call fnc_tell}] call fnc_lambda,
 	    _x] call fnc_map
 	  } forEach ([_bins, 1, 0] call fnc_subseq);
-      //    [100, _bins select 0] execVM "mkcivs\layAmbush.sqf";
+	  if ((count _bins) > 1) then {
+              [100, _bins select 0] execVM "mkcivs\layAmbush.sqf";
+          };
       }; 
 
 */
