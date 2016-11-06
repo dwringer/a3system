@@ -31,27 +31,34 @@
   can be applied.
 
   Example:
-      opti = ["Optimizer", 15, "Particle"] call fnc_new; 
-      [opti, "conform_units", units group player] call fnc_tell; 
-      [opti, "perturb", 2, 5] call fnc_tell; 
-      [opti, "add_objective",  
-       [["_x"],  
-	{_x distance ((units group player) select 0)} 
-       ] call fnc_lambda] call fnc_tell; 
-      [opti, "add_objective",  
-       [["_x"],  
-	{_x distance ((units group player) select 1)} 
-       ] call fnc_lambda] call fnc_tell; 
-      [opti, "add_objective",  
-       [["_x"],  
-	{_x distance ((units group player) select 2)} 
-       ] call fnc_lambda] call fnc_tell; 
-      opti spawn {
-	  for "_i" from 0 to 7 do {
-	      _handle = [_this, "MODE_step"] call fnc_tells;
-	      waitUntil {scriptDone _handle};
-	  };
-      };
+      opti = ["Optimizer", 20, "Particle"] call fnc_new;  
+      [opti, "conform_units", units group player] call fnc_tell;  
+      [opti, "perturb", 2, 160] call fnc_tell; 
+      [opti, "add_objective", 
+	  [["_x"], { 
+	   private ["_v"];
+	   _v = (1 - ([_x, "VIEW", player] checkVisibility 
+                      [[(getPosASL _x) select 0, 
+                        (getPosASL _x) select 1, 
+                        ((getPosASL _x) select 2) + 1.6], 
+                       eyePos player])); 
+	   if ((_v > 0) && (_v < 1)) then {0} else {
+	    if (_v == 0) then {0.5} else {_v};
+	   };
+	  }] call fnc_lambda] call fnc_tell; 
+      [opti, "add_objective", 
+	  [["_x"], { 
+	    if ((_x distance player) > 100) then {0} else {1}
+	  }] call fnc_lambda] call fnc_tell; 
+      opti spawn { 
+	  for "_i" from 0 to 7 do { 
+	      _handle = [_this, "MODE_step"] call fnc_tells; 
+	      waitUntil {scriptDone _handle}; 
+	  }; 
+      }; 
+      bins = [opti, "non_dominated_sort"] call fnc_tell;
+      {[[["_y"], {[_y, "hide"] call fnc_tell}] call fnc_lambda,
+	_x] call fnc_map} forEach ([bins, 1, 0] call fnc_subseq)
 
 */
 
@@ -276,21 +283,21 @@ DEFMETHOD("Optimizer", "de_candidates") ["_self"] DO {
 DEFMETHOD("Optimizer", "non_dominated_sort") ["_self"] DO {
 	/* NSGA fast non-dominated sort algorithm */
 	private ["_bins", "_population", "_domByN", "_y", "_dominated",
-	         "_binIndex", "_nextBin"];
+	         "_binIndex", "_nextBin", "_xScore", "_yScore"];
 	_bins = [[]];
 	_population = [_self, "_getf", "population"] call fnc_tell;
 	{
 		_domByN = 0;
-		[_x, "_setf", "_NSGA_dominates", []] call fnc_tell;
+		_x setVariable ["_NSGA_dominates", []];
 		for "_i" from 0 to ((count _population) - 1) do {
 			_y = _population select _i;
+			_xScore = [_x, "evaluate_objectives"] call fnc_tell;
+			_yScore = [_y, "evaluate_objectives"] call fnc_tell;
 			if (([[["_a", "_b"], {_a * _b}] call fnc_lambda,
 		              [[["_c", "_d"],
-                                {if (_c < _d) then {1} else {0}}
+                                {if (_c <= _d) then {1} else {0}}
 			       ] call fnc_lambda,
-                               [_x, "evaluate_objectives"] call fnc_tell,
-			       [_y, "evaluate_objectives"] call fnc_tell
-			      ] call fnc_map
+                               _xScore, _yScore] call fnc_map
                              ] call fnc_reduce) == 1) then {
 				[_x, "_push_attr", "_NSGA_dominates",
 				 _y] call fnc_tell;
@@ -298,35 +305,31 @@ DEFMETHOD("Optimizer", "non_dominated_sort") ["_self"] DO {
 		                if (([[["_a", "_b"],
 			               {_a * _b}] call fnc_lambda,
 				      [[["_c", "_d"],
-					{if (_c < _d) then {1} else {0}}
+					{if (_c <= _d) then {1} else {0}}
 				       ] call fnc_lambda,
-				       [_y, "evaluate_objectives"]
-				        call fnc_tell,
-				       [_x, "evaluate_objectives"]
-				        call fnc_tell
-				      ] call fnc_map
+				       _yScore, _xScore] call fnc_map
 				     ] call fnc_reduce) == 1) then {
 				_domByN = _domByN + 1;
                                 };
                         };
 		};
-		[_x, "_setf", "_NSGA_domByN", _domByN] call fnc_tell;
+		_x setVariable ["_NSGA_domByN", _domByN];
 		if (_domByN == 0) then {
 			_bins set [0, (_bins select 0) + [_x]];
 		};
+	} forEach _population;
+	{
+		_x setVariable ["computedObjectives", nil];
 	} forEach _population;
 	_binIndex = 0;
         while {_binIndex < count _bins} do {
 	        _nextBin = [];
                 {
-			_dominated = [_x, "_getf",
-			              "_NSGA_dominates"] call fnc_tell;
+			_dominated = _x getVariable "_NSGA_dominates";
 			for "_i" from 0 to ((count _dominated) - 1) do {
 				_y = _dominated select _i;
-				_domByN = ([_y, "_getf",
-				            "_NSGA_domByN"] call fnc_tell) - 1;
-				[_y, "_setf",
-				 "_NSGA_domByN", _domByN] call fnc_tell;
+				_domByN = (_y getVariable "_NSGA_domByN") - 1;
+				_y setVariable ["_NSGA_domByN", _domByN];
 				if (_domByN == 0) then {
 					_nextBin = _nextBin + [_y];
 				};
@@ -350,8 +353,8 @@ DEFMETHOD("Optimizer", "sorted_average_distances") ["_self", "_subpop"] DO {
 	 ] call fnc_tell;
 	} forEach _subpop;
 	_subpop = [_subpop,
-		   [["_a", "_b"], {([_a, "_getf", "_distAvg"] call fnc_tell) >
-				   ([_b, "_getf", "_distAvg"] call fnc_tell)}
+		   [["_a", "_b"], {(_a getVariable "_distAvg") >
+				   (_b getVariable "_distAvg")}
 		   ] call fnc_lambda] call fnc_sorted;
 	_subpop	
 } ENDMETHOD;

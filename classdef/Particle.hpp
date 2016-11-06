@@ -25,10 +25,12 @@
 DEFCLASS("Particle") ["_self"] DO {
 	/* Initialize the particle */
 	SUPER_ARGS("Marker", _self)
-	        [position _self, "ELLIPSE", nil, [1, 1]]
+	        [position _self, "ELLIPSE", nil, [5, 5]]
 	ENDARGS;
 	[_self, "_setf", "extraDimensions", []] call fnc_tell;
 	[_self, "_setf", "objectives", []] call fnc_tell;
+	[_self, "set_color", "ColorOrange"] call fnc_tell;
+	[_self, "set_alpha", 0.95] call fnc_tell;
 	[_self, "show"] call fnc_tell;
 	_self
 } ENDCLASS;
@@ -74,12 +76,16 @@ DEFMETHOD("Particle", "add_objective") ["_self", "_objective_fn"] DO {
 
 DEFMETHOD("Particle", "evaluate_objectives") ["_self"] DO {
 	/* Evaluate this particle's list of objective functions */
-	private ["_acc"];
-	_acc = [];
-	{
-	        _acc = _acc + [[_self] call _x];
-	} forEach ([_self, "_getf", "objectives"] call fnc_tell);
-	_acc
+	private ["_computed"];
+	_computed = _self getVariable "computedObjectives";
+	if (isNil "_computed") then {
+		_computed = [];
+		{
+			_computed = _computed + [[_self] call _x];
+		} forEach (_self getVariable "objectives");
+		_self setVariable ["computedObjectives", _computed];
+	};
+	_computed
 } ENDMETHOD;
 
 
