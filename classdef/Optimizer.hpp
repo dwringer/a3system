@@ -21,6 +21,7 @@
        subpop
    moea_step                     :: Multi-objective evolutionary algorithm step
        candidate_generation_method
+       preevaluation_method
        bin_creation_method
        bin_ordering_method       
    MODE_step                     :: Multi-Objective Differential Evolution step
@@ -30,22 +31,27 @@
   can be applied.
 
   Example:
-      opti = ["Optimizer", 20, "Particle"] call fnc_new;
-      [opti, "conform_units", units group player] call fnc_tell;
-      [opti, "perturb", 2, 5] call fnc_tell;
-      [opti, "add_objective", 
-       [["_x"], 
-	{_x distance ((units group player) select 0)}
-       ] call fnc_lambda] call fnc_tell;
-      [opti, "add_objective", 
-       [["_x"], 
-	{_x distance ((units group player) select 1)}
-       ] call fnc_lambda] call fnc_tell;
-      [opti, "add_objective", 
-       [["_x"], 
-	{_x distance ((units group player) select 2)}
-       ] call fnc_lambda] call fnc_tell;
-      [opti, "MODE_step"] call fnc_tell;
+      opti = ["Optimizer", 15, "Particle"] call fnc_new; 
+      [opti, "conform_units", units group player] call fnc_tell; 
+      [opti, "perturb", 2, 5] call fnc_tell; 
+      [opti, "add_objective",  
+       [["_x"],  
+	{_x distance ((units group player) select 0)} 
+       ] call fnc_lambda] call fnc_tell; 
+      [opti, "add_objective",  
+       [["_x"],  
+	{_x distance ((units group player) select 1)} 
+       ] call fnc_lambda] call fnc_tell; 
+      [opti, "add_objective",  
+       [["_x"],  
+	{_x distance ((units group player) select 2)} 
+       ] call fnc_lambda] call fnc_tell; 
+      opti spawn {
+	  for "_i" from 0 to 7 do {
+	      _handle = [_this, "MODE_step"] call fnc_tells;
+	      waitUntil {scriptDone _handle};
+	  };
+      };
 
 */
 
