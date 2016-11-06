@@ -353,6 +353,7 @@ DEFMETHOD("Optimizer", "sorted_average_distances") ["_self", "_subpop"] DO {
 
 DEFMETHOD("Optimizer", "moea_step") ["_self",
                                      "_candidate_generation_method",
+                                     "_preevaluation_method",
                                      "_bin_creation_method",
                                      "_bin_ordering_method"] DO {
 	/* Add candidate solutions, rank then cull to pop size */
@@ -362,7 +363,10 @@ DEFMETHOD("Optimizer", "moea_step") ["_self",
         _tgtLength = count _population;
 	_population = _population +
 	              ([_self, _candidate_generation_method] call fnc_tell);
-	[_self, "_setf", "population", _population] call fnc_tell;
+        [_self, "_setf", "population", _population] call fnc_tell;
+        if (not isNil "_preevaluation_method") then {
+   	        [_self, _preevaluation_method] call fnc_tell;
+  	};
 	_bins = [_self, _bin_creation_method] call fnc_tell;
 	_newPop = [];
         for "_i" from 0 to ((count _bins) - 1) do {
@@ -397,6 +401,7 @@ DEFMETHOD("Optimizer", "MODE_step") ["_self"] DO {
 	/* Multi-Objective Differential Evolution */
 	[_self, "moea_step",
 	 "de_candidates",
+ 	 "fit_terrain",
 	 "non_dominated_sort",
 	 "sorted_average_distances"] call fnc_tell;
 } ENDMETHOD;
