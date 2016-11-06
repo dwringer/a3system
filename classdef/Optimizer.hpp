@@ -11,6 +11,7 @@
    report_position               :: Report all population positions and mean
    conform_positions positions   :: Distribute population across positions
    conform_units units           :: Distribute population across unit positions
+   fit_terrain                   :: Adjust population to terrain elevation
    perturb n radius              :: Perturb population by n-dimensional radius
    add_objective objective_fn    :: Push objective function to each individual
    evaluate_objectives           :: Matrix of all individuals' objective evals
@@ -28,7 +29,7 @@
   population of individuals is kept over which various evolutionary algorithms
   can be applied.
 
-  Example (WIP - not currently useful):
+  Example:
       opti = ["Optimizer", 20, "Particle"] call fnc_new;
       [opti, "conform_units", units group player] call fnc_tell;
       [opti, "perturb", 2, 5] call fnc_tell;
@@ -44,7 +45,7 @@
        [["_x"], 
 	{_x distance ((units group player) select 2)}
        ] call fnc_lambda] call fnc_tell;
-      bins = [opti, "non_dominated_sort"] call fnc_tell;
+      [opti, "MODE_step"] call fnc_tell;
 
 */
 
@@ -166,6 +167,18 @@ DEFMETHOD("Optimizer", "conform_units") ["_self", "_units"] DO {
 	[_self, "conform_positions",
          [[["_x"], {position _x}] call fnc_lambda, _units] call fnc_map
 	] call fnc_tell;
+} ENDMETHOD;
+
+
+DEFMETHOD("Optimizer", "fit_terrain") ["_self"] DO {
+	/* Adjust population to terrain elevation */
+	private ["_pos"];
+        {
+		_pos = position _x;
+		_pos set [2, (_pos select 2) -
+		             ((getPosATL _x) select 2)];
+		_x setPos _pos;
+	} forEach ([_self, "_getf", "population"] call fnc_tell);
 } ENDMETHOD;
 
 
