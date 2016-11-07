@@ -2,6 +2,10 @@
   Optimizer class
     :: Optimizer -> ObjectRoot
 
+  Global functions:
+   OPT_fnc_civilians_nearby
+   OPT_fnc_partial_LOS_to_player_group
+
   Methods:
    __init__ n particle_classname :: Initialize w/ population of n particles
    get_position                  :: Determine mean position vector of population
@@ -42,33 +46,9 @@
       [opti, "conform_units", units group player] call fnc_tell;  
       [opti, "radial_scatter_2d", 100, 120] call fnc_tell; 
       [opti, "add_objective",
-	  [["_x"], {
-	    private ["_ct"];
-	    _ct = count ([_x, civArray, 100] call fnc_neighbors);
-	    if (_ct > 0) then {3 / _ct} else {4}
-	  }] call fnc_lambda] call fnc_tell;
+       OPT_fnc_civilians_nearby] call fnc_tell;
       [opti, "add_objective", 
-	  [["_y"], { 
-	    private ["_sum, _v"];
-	    _sum = 0;
-	    {
-	     _v = (1 - ([_y, "VIEW", vehicle _x] checkVisibility
-			[[(getPosASL _y) select 0, 
-			  (getPosASL _y) select 1, 
-			  ((getPosASL _y) select 2) + 1.6], 
-			 eyePos _x])); 
-	     if ((_v > 0) && (_v < 1)) then {
-		 _sum = _sum + 0
-	     } else {
-		 if (_v == 0) then {
-		     _sum = _sum + 0.5
-	     } else {
-		 _sum = _sum + _v
-	     };
-	    };
-	    } forEach (units group player);
-	   _sum
-	  }] call fnc_lambda] call fnc_tell; 
+       OPT_fnc_partial_LOS_to_player_group] call fnc_tell; 
       opti spawn { 
 	  private ["_handle", "_bins"];
 	  for "_i" from 0 to 5 do { 
@@ -457,3 +437,37 @@ DEFMETHOD("Optimizer", "MODE_step") ["_self"] DO {
 	 "non_dominated_sort",
 	 "sorted_average_distances"] call fnc_tell;
 } ENDMETHOD;
+
+
+OPT_fnc_civilians_nearby = {
+	private ["_x", "_ct"];
+	_x = _this select 0;
+	_ct = count ([_x, civArray, 100] call fnc_neighbors);
+	if (_ct > 0) then {3 / _ct} else {4}
+};
+
+
+OPT_fnc_partial_LOS_to_player_group = {
+	private ["_y", "_sum", "_v"];
+	_y = _this select 0;
+	_sum = 0;
+	{
+		_v = (1 - ([_y, "VIEW", vehicle _x] checkVisibility
+		            [[(getPosASL _y) select 0, 
+                              (getPosASL _y) select 1, 
+		              ((getPosASL _y) select 2) + 1.6], 
+		             eyePos _x])); 
+		if ((_v > 0) && (_v < 1)) then {
+			_sum = _sum + 0
+		} else {
+			if (_v == 0) then {
+				_sum = _sum + 0.5
+			} else {
+				_sum = _sum + _v
+			};
+		};
+	} forEach (units group player);
+	_sum
+};
+
+
