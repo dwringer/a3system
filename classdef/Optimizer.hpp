@@ -17,11 +17,14 @@
    conform_units units           :: Distribute population across unit positions
    fit_terrain                   :: Adjust population to terrain elevation
    perturb n radius              :: Perturb population by n-dimensional radius
+   radial_scatter_2d             :: Scatter points between min/max radius in 2d
+       min_radius
+       max_radius
    add_objective objective_fn    :: Push objective function to each individual
    evaluate_objectives           :: Matrix of all individuals' objective evals
    de_candidates                 :: Create second population via Diff. Evol.
    non_dominated_sort            :: Bin population by NSGA domination ranks <
-   sorted_average_distances      :: Sort subpop by avg distance to each other
+   sorted_average_distances_3d   :: Sort subpop by avg 3d dist. to each other
        subpop
    moea_step                     :: Multi-objective evolutionary algorithm step
        candidate_generation_method
@@ -200,6 +203,11 @@ DEFMETHOD("Optimizer", "fit_terrain") ["_self"] DO {
 } ENDMETHOD;
 
 
+DEFMETHOD("Optimizer", "pass") ["_self"] DO {
+	/* Do nothing - used for preprocessing */
+} ENDMETHOD;
+
+
 DEFMETHOD("Optimizer", "perturb") ["_self", "_n", "_radius"] DO {
 	/* Randomly perturb each population member up to radius in n-dims */
 	private ["_population", "_position", "_constants", "_newPos",
@@ -367,7 +375,7 @@ DEFMETHOD("Optimizer", "non_dominated_sort") ["_self"] DO {
 } ENDMETHOD;
 
 
-DEFMETHOD("Optimizer", "sorted_average_distances") ["_self", "_subpop"] DO {
+DEFMETHOD("Optimizer", "sorted_average_distances_3d") ["_self", "_subpop"] DO {
 	/* For given subpop, assign to each the avg distance to others */
 	{[_x, "_setf", "_distAvg",
 	  [[["_a", "_b"], {_a + _b}] call fnc_lambda,
@@ -376,9 +384,10 @@ DEFMETHOD("Optimizer", "sorted_average_distances") ["_self", "_subpop"] DO {
 	 ] call fnc_tell;
 	} forEach _subpop;
 	_subpop = [_subpop,
-		   [["_a", "_b"], {(_a getVariable "_distAvg") >
-				   (_b getVariable "_distAvg")}
-		   ] call fnc_lambda] call fnc_sorted;
+		   [["_a", "_b"], {
+		           (_a getVariable "_distAvg") >
+			   (_b getVariable "_distAvg")
+		   }] call fnc_lambda] call fnc_sorted;
 	_subpop	
 } ENDMETHOD;
 
@@ -430,16 +439,17 @@ DEFMETHOD("Optimizer", "moea_step") ["_self",
 
 
 DEFMETHOD("Optimizer", "MODE_step") ["_self"] DO {
-	/* Multi-Objective Differential Evolution */
+	/* Modified Multi-Objective Differential Evolution */
 	[_self, "moea_step",
 	 "de_candidates",
  	 "fit_terrain",
 	 "non_dominated_sort",
-	 "sorted_average_distances"] call fnc_tell;
+	 "sorted_average_distances_3d"] call fnc_tell;
 } ENDMETHOD;
 
 
 OPT_fnc_civilians_nearby = {
+	/* Cost function for not being near civs in civArray */
 	private ["_x", "_ct"];
 	_x = _this select 0;
 	_ct = count ([_x, civArray, 100] call fnc_neighbors);
@@ -448,6 +458,7 @@ OPT_fnc_civilians_nearby = {
 
 
 OPT_fnc_partial_LOS_to_player_group = {
+	/* Cost function for not having [partial] LOS to player group */
 	private ["_y", "_sum", "_v"];
 	_y = _this select 0;
 	_sum = 0;
