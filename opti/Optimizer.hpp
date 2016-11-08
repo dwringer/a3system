@@ -2,28 +2,35 @@
   Optimizer class
     :: Optimizer -> ObjectRoot
 
-  Global functions:
-   OPT_fnc_civilians_nearby
-   OPT_fnc_partial_LOS_to_player_group
-
   Methods:
-   __init__ n particle_classname :: Initialize w/ population of n particles
+   __init__                      :: Initialize w/ population of n particles
+       n                  
+       particle_classname 
    get_position                  :: Determine mean position vector of population
    position_offsets              :: Get population position offsets from mean
-   set_position position         :: Move population center and reposition all
-   uniform_position position     :: Move all population to the same position
+   set_position                  :: Move population center and reposition all
+       position
+   uniform_position              :: Move all population to the same position
+       position
    report_position               :: Report all population positions and mean
-   conform_positions positions   :: Distribute population across positions
-   conform_units units           :: Distribute population across unit positions
+   conform_positions             :: Distribute population across positions
+       positions
+   conform_units                 :: Distribute population across unit positions
+       units
    do_nothing                    :: Pass without modifications
    fit_terrain                   :: Adjust population to terrain elevation
-   perturb n radius              :: Perturb population by n-dimensional radius
+   perturb                       :: Perturb population by n-dimensional radius
+       n
+       radius
    radial_scatter_2d             :: Scatter points between min/max radius in 2d
        min_radius
        max_radius
-   add_objective objective_fn    :: Push objective function to each individual
+   add_objective                 :: Push objective function to each individual
+       objective_fn
    evaluate_objectives           :: Matrix of all individuals' objective evals
    de_candidates                 :: Create second population via Diff. Evol.
+       weight
+       freqeuency
    non_dominated_sort            :: Bin pop. by NSGA-II domination ranks (asc.)
    sorted_average_distances_3d   :: Sort subpop by avg 3-d distance to others
        subpop
@@ -31,9 +38,13 @@
        subpop
    moea_step                     :: Multi-objective evolutionary algorithm step
        candidate_generation_method
-       preevaluation_method
-       bin_creation_method
-       bin_ordering_method       
+       candidate_generation_params
+       preevaluation_method       
+       preevaluation_params       
+       bin_creation_method        
+       bin_creation_params        
+       bin_ordering_method        
+       bin_ordering_params        
    MODE_step                     :: Multi-Objective Differential Evolution step
 
       This class represents a generic optimization algorithm implementation.  A
@@ -287,7 +298,7 @@ DEFMETHOD("Optimizer", "evaluate_objectives") ["_self"] DO {
 } ENDMETHOD;
 
 
-DEFMETHOD("Optimizer", "de_candidates") ["_self"] DO {
+DEFMETHOD("Optimizer", "de_candidates") ["_self", "_weight", "_frequency"] DO {
 	/* Create a second population by differential evolution */
 	private ["_population", "_population2", "_others"];
 	_population = [_self, "_getf", "population"] call fnc_tell;
@@ -310,7 +321,7 @@ DEFMETHOD("Optimizer", "de_candidates") ["_self"] DO {
                                  _others select 0,
 		                 _others select 1,
 		                 _others select 2,
-                                 0.35, 0.8] call fnc_tell];
+                                 _weight, _frequency] call fnc_tell];
 	} forEach _population;
 	_population2
 } ENDMETHOD;
@@ -420,21 +431,28 @@ DEFMETHOD("Optimizer", "sorted_average_distances") ["_self", "_subpop"] DO {
 
 DEFMETHOD("Optimizer", "moea_step") ["_self",
                                      "_candidate_generation_method",
+				     "_candidate_generation_params",
                                      "_preevaluation_method",
+				     "_preevaluation_params",
                                      "_bin_creation_method",
-                                     "_bin_ordering_method"] DO {
+				     "_bin_creation_params",
+                                     "_bin_ordering_method",
+				     "_bin_ordering_params"] DO {
 	/* Add candidate solutions, rank then cull to pop size */
 	private ["_bins", "_population", "_newPop", "_tgtLength",
 	         "_newLength", "_available"];
         _population = [_self, "_getf", "population"] call fnc_tell;
         _tgtLength = count _population;
 	_population = _population +
-	              ([_self, _candidate_generation_method] call fnc_tell);
+		      (([_self, _candidate_generation_method] +
+			_candidate_generation_params) call fnc_tell);
         [_self, "_setf", "population", _population] call fnc_tell;
         if (not isNil "_preevaluation_method") then {
-   	        [_self, _preevaluation_method] call fnc_tell;
+		([_self, _preevaluation_method] +
+		 _preevaluation_params) call fnc_tell;
   	};
-	_bins = [_self, _bin_creation_method] call fnc_tell;
+	_bins = ([_self, _bin_creation_method] +
+		 _bin_creation_params) call fnc_tell;
 	_newPop = [];
         for "_i" from 0 to ((count _bins) - 1) do {
    	        scopeName "fillFromBins";
@@ -446,8 +464,9 @@ DEFMETHOD("Optimizer", "moea_step") ["_self",
 		if ((_newLength + (count _available)) <= _tgtLength) then {
 			_newPop = _newPop + _available;
 		} else {
-			_available = [_self, _bin_ordering_method,
-				      _available] call fnc_tell;
+			_available = ([_self, _bin_ordering_method,
+				       _available] +
+				      _bin_ordering_params) call fnc_tell;
 			_newPop = _newPop +
 				  ([_available, 0, _tgtLength - _newLength]
 				    call fnc_subseq);
@@ -467,8 +486,8 @@ DEFMETHOD("Optimizer", "moea_step") ["_self",
 DEFMETHOD("Optimizer", "MODE_step") ["_self"] DO {
 	/* Modified Multi-Objective Differential Evolution */
 	[_self, "moea_step",
-	 "de_candidates",
- 	 "fit_terrain",
-	 "non_dominated_sort",
-	 "sorted_average_distances_3d"] call fnc_tell;
+	 "de_candidates", [0.35, 0.8],
+ 	 "fit_terrain", [],
+	 "non_dominated_sort", [],
+	 "sorted_average_distances_3d", []] call fnc_tell;
 } ENDMETHOD;

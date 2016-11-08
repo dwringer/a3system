@@ -24,8 +24,10 @@
 // Class system module - REQUIRED FOR HPP #INCLUDES: //
 ///////////////////////////////////////////////////////
 #include <include\classes.h>                         //
-#include <classdef\ObjectRoot.hpp>                   //
 ///////////////////////////////////////////////////////
+
+// ObjectRoot class:
+#include <classdef\ObjectRoot.hpp>
 
 // Simple Dictionary class:
 #include <classdef\Dictionary.hpp>
