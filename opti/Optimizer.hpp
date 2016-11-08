@@ -15,6 +15,7 @@
    report_position               :: Report all population positions and mean
    conform_positions positions   :: Distribute population across positions
    conform_units units           :: Distribute population across unit positions
+   do_nothing                    :: Pass without modifications
    fit_terrain                   :: Adjust population to terrain elevation
    perturb n radius              :: Perturb population by n-dimensional radius
    radial_scatter_2d             :: Scatter points between min/max radius in 2d
@@ -23,8 +24,10 @@
    add_objective objective_fn    :: Push objective function to each individual
    evaluate_objectives           :: Matrix of all individuals' objective evals
    de_candidates                 :: Create second population via Diff. Evol.
-   non_dominated_sort            :: Bin population by NSGA domination ranks <
-   sorted_average_distances_3d   :: Sort subpop by avg 3d dist. to each other
+   non_dominated_sort            :: Bin pop. by NSGA-II domination ranks (asc.)
+   sorted_average_distances_3d   :: Sort subpop by avg 3-d distance to others
+       subpop
+   sorted_average_distances      :: Sort subpop by avg N-d distance to others
        subpop
    moea_step                     :: Multi-objective evolutionary algorithm step
        candidate_generation_method
@@ -35,7 +38,9 @@
 
       This class represents a generic optimization algorithm implementation.  A
   population of individuals is kept over which various evolutionary algorithms
-  can be applied.
+  can be applied.  Candidate solutions are kept as separate object instances,
+  providing for full locality but severely limited performance on large 
+  population sizes.
 
   Example:
       // Optimizes positions for two objectives:
@@ -203,7 +208,7 @@ DEFMETHOD("Optimizer", "fit_terrain") ["_self"] DO {
 } ENDMETHOD;
 
 
-DEFMETHOD("Optimizer", "pass") ["_self"] DO {
+DEFMETHOD("Optimizer", "do_nothing") ["_self"] DO {
 	/* Do nothing - used for preprocessing */
 } ENDMETHOD;
 
@@ -312,7 +317,7 @@ DEFMETHOD("Optimizer", "de_candidates") ["_self"] DO {
 
 
 DEFMETHOD("Optimizer", "non_dominated_sort") ["_self"] DO {
-	/* NSGA fast non-dominated sort algorithm */
+	/* NSGA-II fast non-dominated sort algorithm */
 	private ["_bins", "_population", "_domByN", "_y", "_dominated",
 	         "_binIndex", "_nextBin", "_xScore", "_yScore"];
 	_bins = [[]];
@@ -390,18 +395,6 @@ DEFMETHOD("Optimizer", "sorted_average_distances_3d") ["_self", "_subpop"] DO {
 		   }] call fnc_lambda] call fnc_sorted;
 	_subpop	
 } ENDMETHOD;
-
-
-fnc_euclidean_distance = {
-	/* Unoptimized computation of euclidean distance between 2 vectors */
-	private ["_posX", "_posY"];
-	_posX = _this select 0;
-	_posY = _this select 1;
-	sqrt ([[["_a", "_b"], {_a + _b}] call fnc_lambda,
-	       [[["_c", "_d"], {(_d - _c) ^ 2}] call fnc_lambda,
-		_posX, _posY
-               ] call fnc_map] call fnc_reduce)
-};
 
 
 DEFMETHOD("Optimizer", "sorted_average_distances") ["_self", "_subpop"] DO {

@@ -40,12 +40,12 @@
 #include <mkcivs\classdef\Victim.hpp>
 #include <mkcivs\classdef\CivilianZone.hpp>
 
-// Particle Swarm Optimization module:
-#include <pso\distance_fns.h>
-#include <pso\objective_fns.h>
-#include <pso\Marker.hpp>
-#include <pso\Particle.hpp>
-#include <pso\Optimizer.hpp>
+// Optimization module:
+#include <opti\distance_fns.h>
+#include <opti\objective_fns.h>
+#include <opti\Marker.hpp>
+#include <opti\Particle.hpp>
+#include <opti\Optimizer.hpp>
 
 
 //////////////////////////////////////////////////
