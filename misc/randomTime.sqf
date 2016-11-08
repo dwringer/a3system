@@ -122,10 +122,11 @@ else {
 
 
 	_ts = "S";
-	if(isDay) then {_ts = "Midday, s";};
-	if(isNight) then {_ts = "Night, s";};
-	hint format ["%1omewhere in the Mediterranean\n%2 %3, %4", _ts, _d, _mn, _y];
+//	if(isDay) then {_ts = "Midday, s";};
+//	if(isNight) then {_ts = "Night, s";};
+	hint format ["%1 %2, %3", _d, _mn, _y];
 
+	// NEEDS DEBUGGED:
 	publicVariable "isDay";
 	publicVariable "isNight";
 };

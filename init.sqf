@@ -1,37 +1,68 @@
-#include <desrc\ga.h>
-#include <include\alist.h>
-#include <include\lambda.h>
-#include <include\randint.h>
-#include <include\vectools.h>
+// Old experimental optimizer functions - DEPRECATED:
+//#include <desrc\ga.h> 
+
+//////////////////////////////////////
+// Base support modules - REQUIRED: //
+//////////////////////////////////////
+#include <include\alist.h>          //
+#include <include\lambda.h>         //
+#include <include\randint.h>        //
+#include <include\vectools.h>       //
+//////////////////////////////////////
+
+// Editor-based Directed Graph module:
 #include <include\directed_graph.h>
+
+// Simple weapon shop dialog module:
 #include <include\weapon_shop.h>
+
+// Primitive RPG-style conversation module:
 #include <include\asinc.h>
 
-#include <include\classes.h>
-#include <classdef\ObjectRoot.hpp>
+
+///////////////////////////////////////////////////////
+// Class system module - REQUIRED FOR HPP #INCLUDES: //
+///////////////////////////////////////////////////////
+#include <include\classes.h>                         //
+#include <classdef\ObjectRoot.hpp>                   //
+///////////////////////////////////////////////////////
+
+// Simple Dictionary class:
 #include <classdef\Dictionary.hpp>
+
+// Unit Group class and Crew class for loading vehicles:
 #include <classdef\UnitGroup.hpp>
 #include <classdef\CrewUnitGroup.hpp>
 
+// MKCIVS module and support classes:
 #include <include\mkcivs.h>
 #include <mkcivs\classdef\WeaponCache.hpp>
 #include <mkcivs\classdef\Victim.hpp>
 #include <mkcivs\classdef\CivilianZone.hpp>
 
+// Particle Swarm Optimization module:
 #include <pso\distance_fns.h>
 #include <pso\objective_fns.h>
 #include <pso\Marker.hpp>
 #include <pso\Particle.hpp>
 #include <pso\Optimizer.hpp>
 
-ClassesInitialized = true;
 
-if (!isServer) exitWith {};
+//////////////////////////////////////////////////
+// Allow waiting editor objects to instantiate: //
+//////////////////////////////////////////////////
+ClassesInitialized = true;                      //
+//////////////////////////////////////////////////
 
+
+// [NOT MP DESIGNED OR TESTED!]
+//if (!isServer) exitWith {}; 
 
  
-/*
-execVM "misc\randomWeather.sqf";
-([[["sunrise", "sunset"] select floor random 2], []]
- select floor random 2) execVM "misc\randomTime.sqf";
-*/
+// Random weather - not fully functional:
+//execVM "misc\randomWeather.sqf";
+
+
+// Random time and date - sort of glitchy:
+//([[["sunrise", "sunset"] select floor random 2], []]
+// select floor random 2) execVM "misc\randomTime.sqf";
