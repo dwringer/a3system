@@ -392,6 +392,39 @@ DEFMETHOD("Optimizer", "sorted_average_distances_3d") ["_self", "_subpop"] DO {
 } ENDMETHOD;
 
 
+fnc_euclidean_distance = {
+	/* Unoptimized computation of euclidean distance between 2 vectors */
+	private ["_posX", "_posY"];
+	_posX = _this select 0;
+	_posY = _this select 1;
+	sqrt ([[["_a", "_b"], {_a + _b}] call fnc_lambda,
+	       [[["_c", "_d"], {(_d - _c) ^ 2}] call fnc_lambda,
+		_posX, _posY
+               ] call fnc_map] call fnc_reduce)
+};
+
+
+DEFMETHOD("Optimizer", "sorted_average_distances") ["_self", "_subpop"] DO {
+	/* For given subpop, assign to each the avg distance to others */
+	{[_x, "_setf", "_distAvg",
+	  [[["_a", "_b"], {_a + _b}] call fnc_lambda,
+	   [[["_c", "_d", "_len"], {
+		   ([[_c, "get_position"] call fnc_tell,
+		     [_d, "get_position"] call fnc_tell
+		    ] call fnc_euclidean_distance) / _len
+	    }] call fnc_lambda,
+	    _subpop, [_x, count _subpop]] call fnc_mapwith] call fnc_reduce
+	 ] call fnc_tell;
+	} forEach _subpop;
+	_subpop = [_subpop,
+		   [["_a", "_b"], {
+		           (_a getVariable "_distAvg") >
+			   (_b getVariable "_distAvg")
+		   }] call fnc_lambda] call fnc_sorted;
+	_subpop	
+} ENDMETHOD;
+
+
 DEFMETHOD("Optimizer", "moea_step") ["_self",
                                      "_candidate_generation_method",
                                      "_preevaluation_method",
