@@ -18,10 +18,11 @@
 #include <mkcivs\classdef\Victim.hpp>
 #include <mkcivs\classdef\CivilianZone.hpp>
 
+#include <pso\distance_fns.h>
+#include <pso\objective_fns.h>
 #include <pso\Marker.hpp>
 #include <pso\Particle.hpp>
 #include <pso\Optimizer.hpp>
-#include <pso\Objectives.h>
 
 ClassesInitialized = true;
 
