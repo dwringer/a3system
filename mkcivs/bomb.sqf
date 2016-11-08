@@ -8,7 +8,7 @@
 	Params:
 		_victim :: unit
 */	
-#include <include\props.hpp>
+#include <include\props.h>
 
 private ["_victim", "_velX", "_velY", "_vel", "_timerBomb", "_radBomb", "_rBomb", "_theta", "_compX", "_compY", "_bombPos", "_bombAltPosList", "_bombIntvls"];
 

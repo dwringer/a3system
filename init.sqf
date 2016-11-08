@@ -1,28 +1,36 @@
 #include <desrc\ga.h>
-#include <include\alist.hpp>
-#include <include\lambda.hpp>
-#include <include\randint.hpp>
-#include <include\vectools.hpp>
-#include <include\directed_graph.hpp>
-#include <include\mkcivs.hpp>
-#include <include\weapon_shop.hpp>
-#include <include\asinc.hpp>
+#include <include\alist.h>
+#include <include\lambda.h>
+#include <include\randint.h>
+#include <include\vectools.h>
+#include <include\directed_graph.h>
+#include <include\weapon_shop.h>
+#include <include\asinc.h>
 
-#include <include\classes.hpp>
+#include <include\classes.h>
 #include <classdef\ObjectRoot.hpp>
 #include <classdef\Dictionary.hpp>
 #include <classdef\UnitGroup.hpp>
 #include <classdef\CrewUnitGroup.hpp>
-#include <classdef\mkcivsWeaponCache.hpp>
-#include <classdef\mkcivsVictim.hpp>
-#include <classdef\mkcivsCivilianZone.hpp>
+
+#include <include\mkcivs.h>
+#include <mkcivs\classdef\WeaponCache.hpp>
+#include <mkcivs\classdef\Victim.hpp>
+#include <mkcivs\classdef\CivilianZone.hpp>
+
+#include <pso\Marker.hpp>
+#include <pso\Particle.hpp>
+#include <pso\Optimizer.hpp>
+#include <pso\Objectives.h>
+
 ClassesInitialized = true;
 
 if (!isServer) exitWith {};
 
 
  
-
+/*
 execVM "misc\randomWeather.sqf";
 ([[["sunrise", "sunset"] select floor random 2], []]
  select floor random 2) execVM "misc\randomTime.sqf";
+*/

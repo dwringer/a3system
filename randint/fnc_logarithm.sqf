@@ -10,7 +10,7 @@ private [                 //
          "_e",            // float                                 ///    ///
          "_result"        // float [OUT]                          ///      ///
 ];  /////////////////////////////////////// <dwringer@gmail.com> ///        ///
-#include <include\constants.hpp>
+#include <include\constants.h>
 _e = E;
 _argc = count _this;
 switch (_argc) do {

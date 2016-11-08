@@ -17,12 +17,12 @@ if you let me know.  Thanks, and good luck!
 - fnc_alist_get/fnc_alist_set - Use array of value pairs as a dictionary.
 Folder structure:
 ```html
-        include\alist.hpp
+        include\alist.h
         alist\*.*
 ```
 Config init.sqf:
 ```html
-#include <include\alist.hpp>
+#include <include\alist.h>
 ```
 
 # asinc
@@ -34,19 +34,19 @@ console-style RPG's).  To use, ensure these files are in the mission path:
         Description.ext
         init.sqf
         mission.sqm
-        include\asinc.hpp
-        include\asinc_defines.hpp
-        include\asinc_dialogs.hpp
+        include\asinc.h
+        include\asinc_defines.h
+        include\asinc_dialogs.h
         asinc\*.*
 ```
 Put the following at the top of Description.ext:
 ```html
-        #include <include\asinc_defines.hpp>
-        #include <include\asinc_dialogs.hpp>
+        #include <include\asinc_defines.h>
+        #include <include\asinc_dialogs.h>
 ```
 And the following at the head of init.sqf:
 ```html
-        #include <include\asinc.hpp>
+        #include <include\asinc.h>
 ```
 Now edit asinc\initDialogs.sqf following the example to fill in dialog
 state variables and enable the dialog system on individual units.  Currently
@@ -65,10 +65,10 @@ Dependencies:
 ```html
         init.sqf
         mission.sqm
-        include\alist.hpp
-        include\classes.hpp
-        include\lambda.hpp
-        include\vectools.hpp  // Used for examples
+        include\alist.h
+        include\classes.h
+        include\lambda.h
+        include\vectools.h  // Used for examples
         alist\*.*
         classes\*.*
         classdef\*.*  // Example classes
@@ -78,11 +78,11 @@ Dependencies:
 
 Init.sqf configuration:
 ```html
-        #include <include\alist.hpp>
-        #include <include\lambda.hpp>
-        #include <include\vectools.hpp>
-        #include <include\classes.hpp>
-        #include <classdef\Dictionary.hpp>
+        #include <include\alist.h>
+        #include <include\lambda.h>
+        #include <include\vectools.h>
+        #include <include\classes.h>
+        #include <classdef\Dictionary.h>
         #include <classdef\... >
           [... this is where classdefs should be imported ...]
         ClassesInitialized = true;  // Allow starting units to initialize
@@ -123,13 +123,13 @@ named "TestDictionary" in the editor):
         // Get an alist of all key, value pairs stored using this interface:
         _kvps = [TestDictionary, "items"] call fnc_tell;
 ```
-In include\classes.hpp there is a series of macros to facilitate the
-construction of class definition files as found in classdef\ in Dictionary.hpp
+In include\classes.h there is a series of macros to facilitate the
+construction of class definition files as found in classdef\ in Dictionary.h
 and some others.  These macros are not required at all, but provide a slightly
 cleaner syntax for making a file with several class or method definitions.  Do
 not think this means classes must be formed in this way - it is possible to
 declare and instantiate classes from scratch all while the simulation is
-running.  See classdef\testWorldEntity.hpp for a trivial class that shows how
+running.  See classdef\testWorldEntity.h for a trivial class that shows how
 to initialize everything without the use of preprocessor macros (the syntax
 is not much different and I almost didn't include macros in the first place).
 
@@ -158,15 +158,15 @@ NOTE: This module requires the randint module.  Your path should be as follows:
 ```html
         init.sqf
         mission.sqm
-        include\randint.hpp
-        include\directed_graph.hpp
+        include\randint.h
+        include\directed_graph.h
         randint\*.*
         directed_graph\*.*
 ```
 The following two lines should be in init.sqf:
 ```html
-        #include <include\randint.hpp>
-        #include <include\directed_graph.hpp>
+        #include <include\randint.h>
+        #include <include\directed_graph.h>
 ```
 
 # lambda
@@ -187,12 +187,12 @@ Files needed:
 ```html
         init.sqf
         mission.sqm
-        include\lambda.hpp
+        include\lambda.h
         lambda\*.*
 ```
 Headers required in init.sqf:
 ```html
-        #include <include\lambda.hpp>
+        #include <include\lambda.h>
 ```
 Setting up an anonymous function of three variables to compute the volume of
 a cube:
@@ -216,10 +216,10 @@ modules):
 ```html
         init.sqf
         mission.sqm
-        include\lambda.hpp
-        include\mkcivs.hpp
-        include\randint.hpp
-        include\vectools.hpp
+        include\lambda.h
+        include\mkcivs.h
+        include\randint.h
+        include\vectools.h
         lambda\*.*
         mkcivs\*.*
         randint\*.*
@@ -228,10 +228,10 @@ modules):
 
 Then, place the following at the top of your misson's init.sqf file:
 ```html
-        #include <include\lambda.hpp>
-        #include <include\randint.hpp>
-        #include <include\vectools.hpp>
-        #include <include\mkcivs.hpp>
+        #include <include\lambda.h>
+        #include <include\randint.h>
+        #include <include\vectools.h>
+        #include <include\mkcivs.h>
 ```
 
 To create an ambient civilian zone, place a named Game Logic at the center and
@@ -287,12 +287,12 @@ function.
 Folder setup:
 ```html
 mission.sqm
-include\randint.hpp
+include\randint.h
 randint\*.*
 ```
 Init.sqf setup:
 ```html
-#include <randint.hpp>
+#include <randint.h>
 ```
 
 # vectools
@@ -317,15 +317,15 @@ File setup:
 ```html
         init.sqf
         mission.sqm
-        include\lambda.hpp
-        include\vectools.hpp
+        include\lambda.h
+        include\vectools.h
         lambda\*.*
         vectools\*.*
 ```
 Setup of init.sqf:
 ```html
-        #include <include\lambda.hpp>
-        #include <include\vectools.hpp>
+        #include <include\lambda.h>
+        #include <include\vectools.h>
 ```
 
 # weapon_shop
@@ -339,19 +339,19 @@ To use, the following files are required:
 ```html
         Description.ext
         init.sqf
-        include\weapon_shop_defines.hpp
-        include\weapon_shop_dialogs.hpp
-        include\weapon_shop.hpp
+        include\weapon_shop_defines.h
+        include\weapon_shop_dialogs.h
+        include\weapon_shop.h
         weapon_shop\*.*
 ```
 In Description.ext:
 ```html
-        #include <include\weapon_shop_defines.hpp>
-        #include <include\weapon_shop_dialogs.hpp>
+        #include <include\weapon_shop_defines.h>
+        #include <include\weapon_shop_dialogs.h>
 ```
 And in init.sqf:
 ```html
-        #include <include\weapon_shop.hpp>
+        #include <include\weapon_shop.h>
 ```
 
 # license

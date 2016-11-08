@@ -15,7 +15,7 @@
 	Return:
 		true
 */
-#include <include\props.hpp>
+#include <include\props.h>
 
 private ["_lo", "_hi", "_sz", "_p", "_r",
 	 "_civs", "_tst", "_center", "_acc",

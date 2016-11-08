@@ -1,7 +1,7 @@
-#include "include\weapon_shop_defines.hpp" 
-#include "include\weapon_shop_dialogs.hpp" 
-#include "include\asinc_defines.hpp"
-#include "include\asinc_dialogs.hpp"
+#include "include\weapon_shop_defines.h" 
+#include "include\weapon_shop_dialogs.h" 
+#include "include\asinc_defines.h"
+#include "include\asinc_dialogs.h"
 
 /*
 class CfgMusic
