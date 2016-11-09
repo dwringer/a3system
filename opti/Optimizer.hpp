@@ -126,15 +126,17 @@ DEFMETHOD("Optimizer", "get_position") ["_self"] DO {
 
 DEFMETHOD("Optimizer", "position_offsets") ["_self"] DO {
 	/* Return each population member's distance from group center */
-	private ["_position", "_population", "_offsets", "_p", "_offset"];
+	private ["_position", "_population", "_offsets", "_fn_getOffset",
+		 "_p", "_offset"];
 	_position = [_self, "get_position"] call fnc_tell;
 	_population = [_self, "_getf", "population"] call fnc_tell;
 	_offsets = [];
+	_fn_getOffset = [["_a", "_b"], {_a - _b}] call fnc_lambda;
 	for "_i" from 0 to ((count _population) - 1) do {
 		_p = _population select _i;
-		_offset = [[["_a", "_b"], {_a - _b}] call fnc_lambda,
-			  [_p, "get_position"] call fnc_tell,
-			  _position] call fnc_map;
+		_offset = [_fn_getOffset,
+			   [_p, "get_position"] call fnc_tell,
+			   _position] call fnc_map;
 		_offsets = _offsets + [_offset];
 	};
 	_offsets
@@ -227,8 +229,11 @@ DEFMETHOD("Optimizer", "do_nothing") ["_self"] DO {
 DEFMETHOD("Optimizer", "perturb") ["_self", "_n", "_radius"] DO {
 	/* Randomly perturb each population member up to radius in n-dims */
 	private ["_population", "_position", "_constants", "_newPos",
-		 "_posDelta"];
+		 "_fn_subtract", "_fn_square", "_fn_add", "_posDelta"];
 	_population = [_self, "_getf", "population"] call fnc_tell;
+	_fn_subtract = [["_a", "_b"], {_a - _b}] call fnc_lambda;
+	_fn_square = [["_x"], {_x * _x}] call fnc_lambda;
+	_fn_add = [["_a", "_b"], {_a + _b}] call fnc_lambda;
 	for "_i" from 0 to ((count _population) - 1) do {
 		_position = [_population select _i,
 		             "get_position"] call fnc_tell;
@@ -242,15 +247,11 @@ DEFMETHOD("Optimizer", "perturb") ["_self", "_n", "_radius"] DO {
                     		           _radius +
                                            random (2 * _radius)];
        			};
-			_posDelta = [[["_a", "_b"],
-				      {_a - _b}] call fnc_lambda,
+			_posDelta = [_fn_subtract,
 				     _newPos, _position] call fnc_map;
-			if ((sqrt ([[["_a", "_b"],
-		                     {_a + _b}] call fnc_lambda,
-                                    [[["_x"],
-                                      {_x * _x}] call fnc_lambda,
-                                     _posDelta] call fnc_map
-				    ] call fnc_reduce)) <=
+			if ((sqrt ([_fn_add,
+                                    [_fn_square, _posDelta] call fnc_map
+				   ] call fnc_reduce)) <=
 			    _radius) then {
 				breakOut "randomPlacement";
                         };
@@ -330,9 +331,14 @@ DEFMETHOD("Optimizer", "de_candidates") ["_self", "_weight", "_frequency"] DO {
 DEFMETHOD("Optimizer", "non_dominated_sort") ["_self"] DO {
 	/* NSGA-II fast non-dominated sort algorithm */
 	private ["_bins", "_population", "_domByN", "_y", "_dominated",
-	         "_binIndex", "_nextBin", "_xScore", "_yScore"];
+	         "_binIndex", "_nextBin", "_xScore", "_yScore",
+		 "_fn_multiply", "_fn_1_if_lte_else_0"];
 	_bins = [[]];
 	_population = [_self, "_getf", "population"] call fnc_tell;
+	_fn_multiply = [["_a", "_b"], {_a * _b}] call fnc_lambda;
+	_fn_1_if_lte_else_0 = [["_a", "_b"],
+			       {if (_a <= _b) then {1}
+                                              else {0}}] call fnc_lambda;
 	{
 		_xScore = [_x, "evaluate_objectives"] call fnc_tell;
 		_domByN = 0;
@@ -340,20 +346,15 @@ DEFMETHOD("Optimizer", "non_dominated_sort") ["_self"] DO {
 		for "_i" from 0 to ((count _population) - 1) do {
 			_y = _population select _i;
 			_yScore = [_y, "evaluate_objectives"] call fnc_tell;
-			if (([[["_a", "_b"], {_a * _b}] call fnc_lambda,
-		              [[["_c", "_d"],
-                                {if (_c <= _d) then {1} else {0}}
-			       ] call fnc_lambda,
+			if (([_fn_multiply,
+		              [_fn_1_if_lte_else_0,
                                _xScore, _yScore] call fnc_map
                              ] call fnc_reduce) == 1) then {
 				[_x, "_push_attr", "_NSGA_dominates",
 				 _y] call fnc_tell;
                         } else {
-		                if (([[["_a", "_b"],
-			               {_a * _b}] call fnc_lambda,
-				      [[["_c", "_d"],
-					{if (_c <= _d) then {1} else {0}}
-				       ] call fnc_lambda,
+		                if (([_fn_multiply,
+				      [_fn_1_if_lte_else_0,
 				       _yScore, _xScore] call fnc_map
 				     ] call fnc_reduce) == 1) then {
 				_domByN = _domByN + 1;
@@ -393,38 +394,43 @@ DEFMETHOD("Optimizer", "non_dominated_sort") ["_self"] DO {
 
 DEFMETHOD("Optimizer", "sorted_average_distances_3d") ["_self", "_subpop"] DO {
 	/* For given subpop, assign to each the avg distance to others */
-	{[_x, "_setf", "_distAvg",
-	  [[["_a", "_b"], {_a + _b}] call fnc_lambda,
-	   [[["_c", "_d", "_len"], {(_c distance _d) / _len}] call fnc_lambda,
-	    _subpop, [_x, count _subpop]] call fnc_mapwith] call fnc_reduce
-	 ] call fnc_tell;
+	private ["_fn_add", "_fn_dist_over_len", "_fn_distAvg_gt"];
+	_fn_add = [["_a", "_b"], {_a + _b}] call fnc_lambda;
+	_fn_dist_over_len = [["_a", "_b", "_len"],
+			     {(_a distance _b) / _len}] call fnc_lambda;
+	_fn_distAvg_gt = [["_a", "_b"], {
+			      (_a getVariable "_distAvg") >
+			      (_b getVariable "_distAvg")
+	         	 }] call fnc_lambda;
+	{_x setVariable ["_distAvg",
+	  [_fn_add,
+	   [_fn_dist_over_len,
+	    _subpop, [_x, count _subpop]] call fnc_mapwith] call fnc_reduce];
 	} forEach _subpop;
-	_subpop = [_subpop,
-		   [["_a", "_b"], {
-		           (_a getVariable "_distAvg") >
-			   (_b getVariable "_distAvg")
-		   }] call fnc_lambda] call fnc_sorted;
+	_subpop = [_subpop, _fn_distAvg_gt] call fnc_sorted;
 	_subpop	
 } ENDMETHOD;
 
 
 DEFMETHOD("Optimizer", "sorted_average_distances") ["_self", "_subpop"] DO {
 	/* For given subpop, assign to each the avg distance to others */
-	{[_x, "_setf", "_distAvg",
-	  [[["_a", "_b"], {_a + _b}] call fnc_lambda,
-	   [[["_c", "_d", "_len"], {
-		   ([[_c, "get_position"] call fnc_tell,
-		     [_d, "get_position"] call fnc_tell
-		    ] call fnc_euclidean_distance) / _len
-	    }] call fnc_lambda,
-	    _subpop, [_x, count _subpop]] call fnc_mapwith] call fnc_reduce
-	 ] call fnc_tell;
+	private ["_fn_add", "_fn_dist_over_len", "_fn_distAvg_gt"];
+	_fn_add = [["_a", "_b"], {_a + _b}] call fnc_lambda;
+	_fn_dist_over_len = [["_a", "_b", "_len"], {
+			         ([[_a, "get_position"] call fnc_tell,
+                                   [_b, "get_position"] call fnc_tell
+          		          ] call fnc_euclidean_distance) / _len
+		            }] call fnc_lambda;
+	_fn_distAvg_gt = [["_a", "_b"], {
+			      (_a getVariable "_distAvg") >
+			      (_b getVariable "_distAvg")
+	         	 }] call fnc_lambda;
+	{_x setVariable ["_distAvg",
+	  [_fn_add,
+	   [_fn_dist_over_len,
+ 	    _subpop, [_x, count _subpop]] call fnc_mapwith] call fnc_reduce];
 	} forEach _subpop;
-	_subpop = [_subpop,
-		   [["_a", "_b"], {
-		           (_a getVariable "_distAvg") >
-			   (_b getVariable "_distAvg")
-		   }] call fnc_lambda] call fnc_sorted;
+	_subpop = [_subpop, _fn_distAvg_gt] call fnc_sorted;
 	_subpop	
 } ENDMETHOD;
 
