@@ -13,7 +13,7 @@
   Arguments: [leader,
 	      cache]
 */
-#include <include\props.hpp>
+#include <include\props.h>
 
 private ["_grpLdr", "_wpnCache", "_grpThis", 
 	 "_mgznMen", "_wpnMen", "_mgznLdr", "_wpnLdr",
