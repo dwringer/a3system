@@ -71,7 +71,7 @@
       opti spawn { 
 	  private ["_handle", "_bins"];
 	  for "_i" from 0 to 5 do { 
-	      _handle = [_this, "MODE_step"] call fnc_tells; 
+	      _handle = [opti, "MODE_step"] call fnc_tells; 
 	      waitUntil {scriptDone _handle}; 
 	  }; 
 	  _bins = [opti, "non_dominated_sort"] call fnc_tell;
