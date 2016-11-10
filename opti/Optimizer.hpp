@@ -74,7 +74,7 @@
 	      _handle = [_this, "MODE_step"] call fnc_tells; 
 	      waitUntil {scriptDone _handle}; 
 	  }; 
-	  _bins = [_this, "non_dominated_sort"] call fnc_tell;
+	  _bins = [opti, "non_dominated_sort"] call fnc_tell;
 	  {[[["_y"], 
 	    {[_y, "hide"] call fnc_tell}] call fnc_lambda,
 	    _x] call fnc_map
