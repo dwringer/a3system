@@ -64,21 +64,32 @@
       opti = ["Optimizer", 10, "Particle"] call fnc_new; 
       [opti, "conform_units", units group player] call fnc_tell;  
       [opti, "radial_scatter_2d", 100, 120] call fnc_tell; 
+
       [opti, "add_objective",
        OPT_fnc_civilians_nearby] call fnc_tell;
       [opti, "add_objective", 
        OPT_fnc_partial_LOS_to_player_group] call fnc_tell; 
+      [opti, "add_objective",
+       [["_x"], {
+               1 / (100 min (_x distance player));
+       }] call fnc_lambda] call fnc_tell;
+
       opti spawn { 
 	  private ["_handle", "_bins"];
+
 	  for "_i" from 0 to 5 do { 
 	      _handle = [opti, "MODE_step"] call fnc_tells; 
 	      waitUntil {scriptDone _handle}; 
 	  }; 
+
+          // When using _this here, the wrong data results. Why?
 	  _bins = [opti, "non_dominated_sort"] call fnc_tell;
+
 	  {[[["_y"], 
 	    {[_y, "hide"] call fnc_tell}] call fnc_lambda,
 	    _x] call fnc_map
 	  } forEach ([_bins, 1, 0] call fnc_subseq);
+
 	  if ((count _bins) > 1) then {
               [100, _bins select 0] execVM "mkcivs\layAmbush.sqf";
           };
