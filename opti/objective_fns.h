@@ -1,33 +1,20 @@
-component_fnc_units_nearby = {
+component_fnc_units_nearby = [["_x", "_units", "_dist", "_min", "_max"], {
 	/* Parametric cost for not having a certain number of units nearby */
-	private ["_x", "_units", "_dist", "_min", "_max", "_count"];
-	_x = _this select 0;
-	_units = _this select 1;
-	_dist = _this select 2;
-	_min = _this select 3;
-	_max = _this select 4;
+	private ["_count"];
 	_count = count ([_x, _units, _dist] call fnc_neighbors);
-	((_count - _min) / (_max - _min))
-};
-
-
-OPT_fnc_civilians_nearby = [["_x"], {
-	/* Cost function for not being near civs in civArray */
-	1 - ([_x, civArray, 100, 1, 5] call component_fnc_units_nearby);
+	(1 min (0 max ((_count - _min) / (_max - _min))))
 }] call fnc_lambda;
 
 
-component_fnc_partial_LOS_to_array_members = {
+component_fnc_partial_LOS_to_array_members = [["_y",
+					       "_array",
+					       "_eye_height",
+					       "_full_LOS_bias",
+					       "_no_LOS_weight",
+					       "_min"
+					       "_max"], {
 	/* Parametric cost for not having occluded LOS to array members */
-	private ["_y", "_array", "_eye_height", "_full_LOS_bias",
-	         "_no_LOS_weight", "_min", "_max", "_sum", "_v"];
-	_y = _this select 0;
-	_array = _this select 1;
-	_eye_height = _this select 2;
-	_full_LOS_bias = _this select 3;
-	_no_LOS_weight = _this select 4;
-	_min = _this select 5;
-	_max = _this select 6;
+	private ["_sum", "_v"];
 	_sum = 0;
 	{
 		_v = (1 - ([vehicle _y, "VIEW", vehicle _x] checkVisibility
@@ -46,11 +33,62 @@ component_fnc_partial_LOS_to_array_members = {
 		};
 	} forEach _array;
 	(((_sum / (count _array)) - _min) / (_max - _min))
-};
+}] call fnc_lambda;
+
+
+component_fnc_building_positions_nearby = [["_x", "_dist", "_min", "_max"], {
+	/* Parametric cost for not having building positions nearby */
+	private ["_houses", "_positions"];
+	_houses = nearObjects [_x, ["house"], _dist];
+	_positions = [];
+	for "_i" from 0 to ((count _houses) - 1) do {
+		_positions = _positions + ((_houses select _i) buildingPos -1);
+	};
+	(1 min (0 max (((count _positions) - _min)) / (_max - _min)))
+}] call fnc_lambda;
+
+
+component_fnc_distance_from_position = [["_x", "_pos", "_min", "_max"], {
+	/* Parametric cost for being close to a position */
+	(1 min
+	 (0 max
+	  (([_pos, _x] call fnc_euclidean_distance) - _min) /
+	  (_max - _min)))
+}] call fnc_lambda;
+
+
+OPT_fnc_building_positions_nearby = [["_x"], {
+	/* Cost function for not having building positions nearby */
+		1 -
+		([_x, 15, 2, 10] call component_fnc_building_positions_nearby);
+}] call fnc_lambda;
+
+
+OPT_fnc_civilians_nearby = [["_x"], {
+	/* Cost function for not being near civs in civArray */
+	1 - ([_x, civArray, 100, 1, 5] call component_fnc_units_nearby);
+}] call fnc_lambda;
 
 
 OPT_fnc_partial_LOS_to_player_group = [["_x"], {
 	/* Cost function for not having occluded LOS to player group */
 	[_x, units group player,
 	 1.6, 0, 0.5, 0, 1] call component_fnc_partial_LOS_to_array_members;
+}] call fnc_lambda;
+
+
+OPT_fnc_partial_LOS_to_targets = [["_x"], {
+        /* Cost function for not having occluded LOS to designated targets */
+	private ["_targets"];
+	_targets = _x getVariable ["targets", []];
+	[_x, _targets,
+	 1.6, 0, 0.5, 0, 1] call component_fnc_partial_LOS_to_array_members;
+}] call fnc_lambda;
+
+
+OPT_fnc_distance_from_player = [["_x"], {
+	/* Cost function for being close to a position */
+	1 -
+	([_x, position player, 50, 300]
+	  call component_fnc_distance_from_position);
 }] call fnc_lambda;
