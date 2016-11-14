@@ -48,6 +48,51 @@ component_fnc_building_positions_nearby = [["_x", "_dist", "_min", "_max"], {
 }] call fnc_lambda;
 
 
+fnc_find_intersections = [["_x", "_dist"], {
+	private ["_segments", "_intersections", "_segment"];
+	_segments = _x nearRoads _dist;
+	_intersections = [];
+	for "_i" from 0 to ((count _segments) - 1) do {
+		_segment = _segments select _i;
+		if ((count roadsConnectedTo _segment) > 2) then {
+			_intersections = _intersections + [_segment];
+		};
+	};
+	_intersections
+}] call fnc_lambda;
+
+
+fnc_trace_road = [["_start", "_candidates"], {
+	private ["_trace", "_next", "_connected", "_foundOne", "_selection",
+                 "_newConnections"];
+	_trace = [];
+	_next = _start;
+	_connected = roadsConnectedTo _next;
+	while {True} do {
+		scopeName "TracingPath";
+		_foundOne = false;
+		for "_i" from 0 to ((count _connected) - 1) do {
+			scopeName "CheckingUniqueness";
+			_selection = _connected select _i;
+			_newConnections = roadsConnectedTo _selection;
+			if ((not (_selection in _trace)) and
+                            (not (count (_newConnections) > 2)) and
+			    (_selection in _candidates)) then {
+				_trace = _trace + [_selection];
+				_next = _selection;
+   			        _connected = _newConnections;
+				_foundOne = true;
+				breakOut "CheckingUniqueness";
+			};
+		};
+		if (not _foundOne) then {
+			breakOut "TracingPath";
+		};
+	};
+	_trace
+}] call fnc_lambda;
+
+
 component_fnc_distance_from_position = [["_x", "_pos", "_min", "_max"], {
 	/* Parametric cost for being close to a position */
 	(1 min
@@ -59,8 +104,7 @@ component_fnc_distance_from_position = [["_x", "_pos", "_min", "_max"], {
 
 OPT_fnc_building_positions_nearby = [["_x"], {
 	/* Cost function for not having building positions nearby */
-		1 -
-		([_x, 15, 2, 10] call component_fnc_building_positions_nearby);
+	1 - ([_x, 15, 2, 10] call component_fnc_building_positions_nearby);
 }] call fnc_lambda;
 
 
