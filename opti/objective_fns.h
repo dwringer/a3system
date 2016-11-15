@@ -48,8 +48,18 @@ component_fnc_building_positions_nearby = [["_x", "_dist", "_min", "_max"], {
 }] call fnc_lambda;
 
 
+component_fnc_distance_from_position = [["_x", "_pos", "_min", "_max"], {
+	/* Parametric cost for being close to a position */
+	(1 min
+	 (0 max
+	  (([_pos, _x] call fnc_euclidean_distance) - _min) /
+	  (_max - _min)))
+}] call fnc_lambda;
+
+
 ///////////////////////////////// TEST ////////////////////////////////////////
 fnc_find_intersections = [["_x", "_dist"], {
+	/* Find all intersections within a certain radius of an entity */
 	private ["_segments", "_intersections", "_segment"];
 	_segments = _x nearRoads _dist;
 	_intersections = [];
@@ -66,6 +76,7 @@ fnc_find_intersections = [["_x", "_dist"], {
 
 ///////////////////////////////// TEST ////////////////////////////////////////
 fnc_trace_road = [["_start", "_candidates"], {
+	/* Given a start & some road segments, trace a singly connected path */
 	private ["_trace", "_next", "_connected", "_foundOne", "_selection",
                  "_newConnections"];
 	_trace = [];
@@ -97,13 +108,29 @@ fnc_trace_road = [["_start", "_candidates"], {
 ///////////////////////////////// TEST ////////////////////////////////////////
 
 
-component_fnc_distance_from_position = [["_x", "_pos", "_min", "_max"], {
-	/* Parametric cost for being close to a position */
-	(1 min
-	 (0 max
-	  (([_pos, _x] call fnc_euclidean_distance) - _min) /
-	  (_max - _min)))
+///////////////////////////////// TEST ////////////////////////////////////////
+fnc_find_roads = [["_x", "_dist"], {
+	/* Attempt to find all distinct road paths from or through a radius */
+	private ["_stems", "_roads", "_segments", "_road"];
+	_stems = [];
+	_roads = [];
+	{
+		_stems = _stems + (roadsConnectedTo _x);
+	} forEach ([_x, _dist] call fnc_find_intersections);
+	_segments = _x nearRoads _dist;
+	{
+		_road = [_x, _segments] call fnc_trace_road;
+		_roads = _roads + [_road];
+		_segments = _segments - _road;
+	} forEach _stems;
+	while {(count _segments) > 0} do {
+		_road = [_x, _segments] call fnc_trace_road;
+		_roads = _roads + [_road];
+	        _segments = _segments - _road;
+	};
+	_roads
 }] call fnc_lambda;
+///////////////////////////////// TEST ////////////////////////////////////////
 
 
 OPT_fnc_building_positions_nearby = [["_x"], {
