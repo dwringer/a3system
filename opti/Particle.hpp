@@ -29,6 +29,8 @@ DEFCLASS("Particle") ["_self"] DO {
 	ENDARGS;
 	[_self, "_setf", "extraDimensions", []] call fnc_tell;
 	[_self, "_setf", "objectives", []] call fnc_tell;
+	[_self, "set_color", "ColorOrange"] call fnc_tell;
+	[_self, "set_alpha", 0.95] call fnc_tell;
 	[_self, "show"] call fnc_tell;
 	_self
 } ENDCLASS;
@@ -91,7 +93,8 @@ DEFMETHOD("Particle", "differential_evolve") ["_self", "_other",
                                               "_adjunct", "_moderator",
                                               "_weight", "_frequency"] DO {
 	/* Differential evolve given three other particles and params */
-        private ["_posX", "_posA", "_posB", "_posC", "_acc", "_candidate"];
+        private ["_posX", "_posA", "_posB", "_posC", "_acc", "_candidate",
+		 "_value"];
 	_posX = [_self, "get_position"] call fnc_tell;
         _posA = [_other, "get_position"] call fnc_tell;
 	_posB = [_adjunct, "get_position"] call fnc_tell;
@@ -107,11 +110,8 @@ DEFMETHOD("Particle", "differential_evolve") ["_self", "_other",
 		};
 	};
 	_candidate = ["Particle"] call fnc_new;
-	{
-		[_candidate, "_setf", _x select 0, _x select 1] call fnc_tell;
-	} foreach ([_self, "_items"] call fnc_tell);
 	[_candidate, "set_position", _acc] call fnc_tell;
-	//	[_candidate, "_setf", "objectives",
-	//	 [_self, "_getf", "objectives"] call fnc_tell] call fnc_tell;
+	[_candidate, "_setf", "objectives",
+	 [_self, "_getf", "objectives"] call fnc_tell] call fnc_tell;
 	_candidate	
 } ENDMETHOD;

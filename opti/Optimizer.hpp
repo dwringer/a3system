@@ -104,8 +104,6 @@ DEFCLASS("Optimizer") ["_self", "_n", "_particle_classname"] DO {
 	private ["_p", "_position"];
 	for "_i" from 1 to _n do {
 		_p = [_particle_classname] call fnc_new;
-		[_p, "set_color", "ColorOrange"] call fnc_tell;
-		[_p, "set_alpha", 0.95] call fnc_tell;
 		if (isNil "_position") then {
 			_position = [_p, "get_position"] call fnc_tell;
 		};

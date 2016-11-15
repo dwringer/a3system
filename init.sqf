@@ -66,5 +66,5 @@ ClassesInitialized = true;                      //
 
 
 // Random time and date - sort of glitchy:
-//([[["sunrise", "sunset"] select floor random 2], []]
-// select floor random 2) execVM "misc\randomTime.sqf";
+([[["sunrise", "sunset"] select floor random 2], []]
+ select floor random 2) execVM "misc\randomTime.sqf";

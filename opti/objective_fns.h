@@ -11,7 +11,7 @@ component_fnc_partial_LOS_to_array_members = [["_y",
 					       "_eye_height",
 					       "_full_LOS_bias",
 					       "_no_LOS_weight",
-					       "_min"
+					       "_min",
 					       "_max"], {
 	/* Parametric cost for not having occluded LOS to array members */
 	private ["_sum", "_v"];
@@ -39,7 +39,7 @@ component_fnc_partial_LOS_to_array_members = [["_y",
 component_fnc_building_positions_nearby = [["_x", "_dist", "_min", "_max"], {
 	/* Parametric cost for not having building positions nearby */
 	private ["_houses", "_positions"];
-	_houses = nearObjects [_x, ["house"], _dist];
+	_houses = _x nearObjects ["house", _dist];
 	_positions = [];
 	for "_i" from 0 to ((count _houses) - 1) do {
 		_positions = _positions + ((_houses select _i) buildingPos -1);
@@ -104,7 +104,7 @@ component_fnc_distance_from_position = [["_x", "_pos", "_min", "_max"], {
 
 OPT_fnc_building_positions_nearby = [["_x"], {
 	/* Cost function for not having building positions nearby */
-	1 - ([_x, 15, 2, 10] call component_fnc_building_positions_nearby);
+	1 - ([_x, 35, 2, 10] call component_fnc_building_positions_nearby);
 }] call fnc_lambda;
 
 
@@ -133,6 +133,6 @@ OPT_fnc_partial_LOS_to_targets = [["_x"], {
 OPT_fnc_distance_from_player = [["_x"], {
 	/* Cost function for being close to a position */
 	1 -
-	([_x, position player, 50, 300]
+	([position _x, position player, 50, 300]
 	  call component_fnc_distance_from_position);
 }] call fnc_lambda;
