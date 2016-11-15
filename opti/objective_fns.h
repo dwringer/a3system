@@ -48,6 +48,7 @@ component_fnc_building_positions_nearby = [["_x", "_dist", "_min", "_max"], {
 }] call fnc_lambda;
 
 
+///////////////////////////////// TEST ////////////////////////////////////////
 fnc_find_intersections = [["_x", "_dist"], {
 	private ["_segments", "_intersections", "_segment"];
 	_segments = _x nearRoads _dist;
@@ -60,8 +61,10 @@ fnc_find_intersections = [["_x", "_dist"], {
 	};
 	_intersections
 }] call fnc_lambda;
+///////////////////////////////// TEST ////////////////////////////////////////
 
 
+///////////////////////////////// TEST ////////////////////////////////////////
 fnc_trace_road = [["_start", "_candidates"], {
 	private ["_trace", "_next", "_connected", "_foundOne", "_selection",
                  "_newConnections"];
@@ -91,6 +94,7 @@ fnc_trace_road = [["_start", "_candidates"], {
 	};
 	_trace
 }] call fnc_lambda;
+///////////////////////////////// TEST ////////////////////////////////////////
 
 
 component_fnc_distance_from_position = [["_x", "_pos", "_min", "_max"], {
@@ -121,6 +125,7 @@ OPT_fnc_partial_LOS_to_player_group = [["_x"], {
 }] call fnc_lambda;
 
 
+///////////////////////////////// TEST ////////////////////////////////////////
 OPT_fnc_partial_LOS_to_targets = [["_x"], {
         /* Cost function for not having occluded LOS to designated targets */
 	private ["_targets"];
@@ -128,6 +133,7 @@ OPT_fnc_partial_LOS_to_targets = [["_x"], {
 	[_x, _targets,
 	 1.6, 0, 0.5, 0, 1] call component_fnc_partial_LOS_to_array_members;
 }] call fnc_lambda;
+///////////////////////////////// TEST ////////////////////////////////////////
 
 
 OPT_fnc_distance_from_player = [["_x"], {

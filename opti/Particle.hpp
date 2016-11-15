@@ -47,6 +47,23 @@ ALIAS("Particle", "set_marker_text", "Marker", "set_text");
 ALIAS("Particle", "set_marker_type", "Marker", "set_type");
 
 
+////////////////////////////////// TEST ///////////////////////////////////////
+DEFMETHOD("Particle", "items") ["_self"] DO {
+	/* Return a list of copiable key, value pairs */
+        private ["_keys", "_acc"];
+	_keys = [_self, "_locals"] call fnc_tell;
+	_keys = _keys - ["marker",
+			 "_NSGA_dominates",
+			 "_NSGA_domByN",
+			 "computedObjectives"];
+	_acc = [[["_k", "_d"],  
+                {[_d, "_getf", _k] call fnc_tell}] call fnc_lambda,
+	        _keys, [_self]] call fnc_mapwith;
+	[_keys, _acc] call fnc_zip
+} ENDMETHOD;
+////////////////////////////////// TEST ///////////////////////////////////////
+
+
 DEFMETHOD("Particle", "set_position") ["_self", "_position"] DO {
 	/* Set particle's position vector up to position length */
 	private ["_currentExtras", "_newExtras"];
@@ -94,7 +111,7 @@ DEFMETHOD("Particle", "differential_evolve") ["_self", "_other",
                                               "_weight", "_frequency"] DO {
 	/* Differential evolve given three other particles and params */
         private ["_posX", "_posA", "_posB", "_posC", "_acc", "_candidate",
-		 "_value"];
+		 "_key", "_value"];
 	_posX = [_self, "get_position"] call fnc_tell;
         _posA = [_other, "get_position"] call fnc_tell;
 	_posB = [_adjunct, "get_position"] call fnc_tell;
@@ -110,8 +127,18 @@ DEFMETHOD("Particle", "differential_evolve") ["_self", "_other",
 		};
 	};
 	_candidate = ["Particle"] call fnc_new;
+
+	{  /////////////////////////// TEST ///////////////////////////////////
+		_key = _x select 0;
+		_value = _x select 1;
+		if (not isNil "_value") then {
+			[_candidate, "_setf", _key, _value] call fnc_tell;
+		};
+	} forEach ([_self, "items"] call fnc_tell);
+	////////////////////////////// TEST ///////////////////////////////////
+	
 	[_candidate, "set_position", _acc] call fnc_tell;
-	[_candidate, "_setf", "objectives",
-	 [_self, "_getf", "objectives"] call fnc_tell] call fnc_tell;
+	//	[_candidate, "_setf", "objectives",
+	// [_self, "_getf", "objectives"] call fnc_tell] call fnc_tell;
 	_candidate	
 } ENDMETHOD;
