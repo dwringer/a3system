@@ -57,7 +57,6 @@ component_fnc_distance_from_position = [["_x", "_pos", "_min", "_max"], {
 }] call fnc_lambda;
 
 
-///////////////////////////////// TEST ////////////////////////////////////////
 fnc_find_intersections = [["_x", "_dist"], {
 	/* Find all intersections within a certain radius of an entity */
 	private ["_segments", "_intersections", "_segment"];
@@ -70,6 +69,36 @@ fnc_find_intersections = [["_x", "_dist"], {
 		};
 	};
 	_intersections
+}] call fnc_lambda;
+
+
+///////////////////////////////// TEST ////////////////////////////////////////
+fnc_trace_road2 = [["_start", "_candidates"], {
+	/* Given a start & some road segments, trace a singly connected path */
+	private ["_trace", "_next", "_connected", "_found", "_newConnections"];
+	_trace = [_start];
+	_connected = roadsConnectedTo _start;
+	while {True} do {
+		scopeName "TracingPath";
+		_found = false;
+		for "_i" from 0 to ((count _connected) - 1) do {
+			scopeName "CheckingUniqueness";
+			_next = _connected select _i;
+			_newConnections = roadsConnectedTo _next;
+			if ((not (_next in _trace)) and
+                            (not (count (_newConnections) > 2)) and
+			    (_next in _candidates)) then {
+				_trace = _trace + [_next];
+   			        _connected = _newConnections;
+				_found = true;
+				breakOut "CheckingUniqueness";
+			};
+		};
+		if (not _found) then {
+			breakOut "TracingPath";
+		};
+	};
+	_trace
 }] call fnc_lambda;
 ///////////////////////////////// TEST ////////////////////////////////////////
 
@@ -123,6 +152,8 @@ fnc_find_roads = [["_x", "_dist"], {
 		if ((count _road) > 0) then {
 			_roads = _roads + [_road];
 			_segments = _segments - _road;
+		} else {
+			_segments = _segments - [_x];
 		};
 	} forEach _stems;
 	while {(count _segments) > 0} do {
@@ -130,6 +161,8 @@ fnc_find_roads = [["_x", "_dist"], {
 		if ((count _road) > 0) then {
 			_roads = _roads + [_road];
 			_segments = _segments - _road;
+		} else {
+			_segments = _segments - [_x];
 		};
 	};
 	_roads
