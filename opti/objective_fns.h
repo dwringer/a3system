@@ -120,28 +120,46 @@ fnc_find_roads = [["_x", "_dist"], {
 	_segments = _x nearRoads _dist;
 	{
 		_road = [_x, _segments] call fnc_trace_road;
-		_roads = _roads + [_road];
-		_segments = _segments - _road;
+		if ((count _road) > 0) then {
+			_roads = _roads + [_road];
+			_segments = _segments - _road;
+		};
 	} forEach _stems;
 	while {(count _segments) > 0} do {
 		_road = [_x, _segments] call fnc_trace_road;
-		_roads = _roads + [_road];
-	        _segments = _segments - _road;
+		if ((count _road) > 0) then {
+			_roads = _roads + [_road];
+			_segments = _segments - _road;
+		};
 	};
 	_roads
 }] call fnc_lambda;
 ///////////////////////////////// TEST ////////////////////////////////////////
 
 
+component_fnc_roads_nearby = [["_x", "_dist", "_min", "_max"], {
+	/* Parametric cost for not having a certain number of units nearby */
+	private ["_count"];
+	_count = count ([_x, _dist] call fnc_find_roads);
+	(1 min (0 max ((_count - _min) / (_max - _min))))
+}] call fnc_lambda;
+
+
+OPT_fnc_roads_nearby = [["_x"], {
+	/* Cost function for having roads nearby */
+	[_x, 5, 0, 10] call component_fnc_roads_nearby
+}] call fnc_lambda;
+
+
 OPT_fnc_building_positions_nearby = [["_x"], {
 	/* Cost function for not having building positions nearby */
-	1 - ([_x, 35, 2, 10] call component_fnc_building_positions_nearby);
+	(1 - ([_x, 35, 2, 10] call component_fnc_building_positions_nearby));
 }] call fnc_lambda;
 
 
 OPT_fnc_civilians_nearby = [["_x"], {
 	/* Cost function for not being near civs in civArray */
-	1 - ([_x, civArray, 100, 1, 5] call component_fnc_units_nearby);
+	(1 - ([_x, civArray, 150, 1, 5] call component_fnc_units_nearby));
 }] call fnc_lambda;
 
 
