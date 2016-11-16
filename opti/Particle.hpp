@@ -53,6 +53,7 @@ DEFMETHOD("Particle", "items") ["_self"] DO {
         private ["_keys", "_acc"];
 	_keys = [_self, "_locals"] call fnc_tell;
 	_keys = _keys - ["marker",
+			 "name",
 			 "_NSGA_dominates",
 			 "_NSGA_domByN",
 			 "computedObjectives"];
