@@ -6,7 +6,7 @@ component_fnc_units_nearby = [["_x", "_units", "_dist", "_min", "_max"], {
 }] call fnc_lambda;
 
 
-component_fnc_partial_LOS_to_array_members = [["_y",
+component_fnc_partial_LOS_to_array_members = [["_p",
 					       "_array",
 					       "_eye_height",
 					       "_full_LOS_bias",
@@ -17,10 +17,10 @@ component_fnc_partial_LOS_to_array_members = [["_y",
 	private ["_sum", "_v"];
 	_sum = 0;
 	{
-		_v = (1 - ([vehicle _y, "VIEW", vehicle _x] checkVisibility
-		            [[(getPosASL _y) select 0, 
-                              (getPosASL _y) select 1, 
-		              ((getPosASL _y) select 2) + _eye_height], 
+		_v = (1 - ([vehicle _p, "VIEW", vehicle _x] checkVisibility
+		            [[(getPosASL _p) select 0, 
+                              (getPosASL _p) select 1, 
+		              ((getPosASL _p) select 2) + _eye_height], 
 		             eyePos _x])); 
 		if ((_v >= 0.025) && (_v < 1)) then {
 			_sum = _sum + 0;
@@ -73,10 +73,11 @@ fnc_find_intersections = [["_x", "_dist"], {
 
 
 ///////////////////////////////// TEST ////////////////////////////////////////
-fnc_trace_road2 = [["_start", "_candidates"], {
+fnc_trace_road = [["_start", "_candidates"], {
 	/* Given a start & some road segments, trace a singly connected path */
 	private ["_trace", "_next", "_connected", "_found", "_newConnections"];
-	_trace = [_start];
+	_trace = [];
+	_next = _start;
 	_connected = roadsConnectedTo _start;
 	while {True} do {
 		scopeName "TracingPath";
@@ -104,49 +105,22 @@ fnc_trace_road2 = [["_start", "_candidates"], {
 
 
 ///////////////////////////////// TEST ////////////////////////////////////////
-fnc_trace_road = [["_start", "_candidates"], {
-	/* Given a start & some road segments, trace a singly connected path */
-	private ["_trace", "_next", "_connected", "_foundOne", "_selection",
-                 "_newConnections"];
-	_trace = [];
-	_next = _start;
-	_connected = roadsConnectedTo _next;
-	while {True} do {
-		scopeName "TracingPath";
-		_foundOne = false;
-		for "_i" from 0 to ((count _connected) - 1) do {
-			scopeName "CheckingUniqueness";
-			_selection = _connected select _i;
-			_newConnections = roadsConnectedTo _selection;
-			if ((not (_selection in _trace)) and
-                            (not (count (_newConnections) > 2)) and
-			    (_selection in _candidates)) then {
-				_trace = _trace + [_selection];
-				_next = _selection;
-   			        _connected = _newConnections;
-				_foundOne = true;
-				breakOut "CheckingUniqueness";
-			};
-		};
-		if (not _foundOne) then {
-			breakOut "TracingPath";
-		};
-	};
-	_trace
-}] call fnc_lambda;
-///////////////////////////////// TEST ////////////////////////////////////////
-
-
-///////////////////////////////// TEST ////////////////////////////////////////
-fnc_find_roads = [["_x", "_dist"], {
-	/* Attempt to find all distinct road paths from or through a radius */
-	private ["_stems", "_roads", "_segments", "_road"];
+fnc_find_roads = [["_p", "_dist"], {
+	/* Attempt to find all distinct road paths within a certain radius */
+	private ["_stems", "_roads", "_segments", "_road", "_connections",
+	         "_last", "_next", "_edge"];
 	_stems = [];
 	_roads = [];
+
+	// Collect stems from intersections
 	{
 		_stems = _stems + (roadsConnectedTo _x);
-	} forEach ([_x, _dist] call fnc_find_intersections);
-	_segments = _x nearRoads _dist;
+	} forEach ([_p, _dist] call fnc_find_intersections);
+
+	// Prepare list of available segments
+	_segments = _p nearRoads _dist;
+
+	// Collect roads begun from stems and make segments unavailable:
 	{
 		_road = [_x, _segments] call fnc_trace_road;
 		if ((count _road) > 0) then {
@@ -156,15 +130,51 @@ fnc_find_roads = [["_x", "_dist"], {
 			_segments = _segments - [_x];
 		};
 	} forEach _stems;
-	while {(count _segments) > 0} do {
-		_road = [_x, _segments] call fnc_trace_road;
+
+	// While unassigned segments remain:
+        while {(count _segments) > 0} do {
+	        // Set first segment as edge
+	        _edge = _segments select 0;
+	        _next = _edge;
+                while {_next in _segments} do {
+                        scopeName "JumpToEdge";
+                        // Remember last loc to check progress
+                 	_last = _edge;  
+	                // Advance edge position toward boundary
+                        _edge = _next;
+                   	// Get next round of possible advancements
+	                _connections = roadsConnectedTo _edge;
+                        if ((count _connections) > 0) then {
+		                // Find next connected pos
+		                {
+					scopeName "MoveAlong";
+					if (_x != _last) then {
+						// If progress, proceed.
+						_next = _x;
+						breakOut "MoveAlong";
+				        };
+			        } forEach _connections;
+				if (_next == (_segments select 0)) then {
+					// We have looped, so we are done.
+					breakOut "JumpToEdge";
+				};
+		        } else {
+				// Nowhere to go; we are done.
+				breakOut "JumpToEdge";
+			};
+                };
+		
+		// Trace road from edge segment, add it, and remove segments
+		_road = [_edge, _segments] call fnc_trace_road;
 		if ((count _road) > 0) then {
 			_roads = _roads + [_road];
 			_segments = _segments - _road;
 		} else {
-			_segments = _segments - [_x];
+			_segments = _segments - [_edge];
 		};
 	};
+
+	// Return resultant list of roads
 	_roads
 }] call fnc_lambda;
 ///////////////////////////////// TEST ////////////////////////////////////////
