@@ -108,7 +108,7 @@ fnc_trace_road = [["_start", "_candidates"], {
 fnc_find_roads = [["_p", "_dist"], {
 	/* Attempt to find all distinct road paths within a certain radius */
 	private ["_stems", "_roads", "_segments", "_road", "_connections",
-	         "_last", "_next", "_edge"];
+	         "_last", "_next", "_edge", "_c"];
 	_stems = [];
 	_roads = [];
 
@@ -146,14 +146,16 @@ fnc_find_roads = [["_p", "_dist"], {
 	                _connections = roadsConnectedTo _edge;
                         if ((count _connections) > 0) then {
 		                // Find next connected pos
-		                {
+				for "_i" from 0 to
+					      ((count _connections) - 1) do {
 					scopeName "MoveAlong";
-					if (_x != _last) then {
+					_c = _connections select _i;
+					if (_c != _last) then {
 						// If progress, proceed.
-						_next = _x;
+						_next = _c;
 						breakOut "MoveAlong";
 				        };
-			        } forEach _connections;
+				};
 				if (_next == (_segments select 0)) then {
 					// We have looped, so we are done.
 					breakOut "JumpToEdge";
@@ -190,19 +192,19 @@ component_fnc_roads_nearby = [["_x", "_dist", "_min", "_max"], {
 
 OPT_fnc_roads_nearby = [["_x"], {
 	/* Cost function for having roads nearby */
-	[_x, 5, 0, 10] call component_fnc_roads_nearby
+	[_x, 10, 0, 10] call component_fnc_roads_nearby
 }] call fnc_lambda;
 
 
 OPT_fnc_building_positions_nearby = [["_x"], {
 	/* Cost function for not having building positions nearby */
-	(1 - ([_x, 35, 2, 10] call component_fnc_building_positions_nearby));
+	(1 - ([_x, 35, 0, 10] call component_fnc_building_positions_nearby));
 }] call fnc_lambda;
 
 
 OPT_fnc_civilians_nearby = [["_x"], {
 	/* Cost function for not being near civs in civArray */
-	(1 - ([_x, civArray, 150, 1, 5] call component_fnc_units_nearby));
+	(1 - ([_x, civArray, 100, 0, 5] call component_fnc_units_nearby));
 }] call fnc_lambda;
 
 
