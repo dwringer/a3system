@@ -72,7 +72,6 @@ fnc_find_intersections = [["_x", "_dist"], {
 }] call fnc_lambda;
 
 
-///////////////////////////////// TEST ////////////////////////////////////////
 fnc_trace_road = [["_start", "_candidates"], {
 	/* Given a start & some road segments, trace a singly connected path */
 	private ["_trace", "_next", "_connected", "_found", "_newConnections"];
@@ -101,10 +100,8 @@ fnc_trace_road = [["_start", "_candidates"], {
 	};
 	_trace
 }] call fnc_lambda;
-///////////////////////////////// TEST ////////////////////////////////////////
 
 
-///////////////////////////////// TEST ////////////////////////////////////////
 fnc_find_roads = [["_p", "_dist"], {
 	/* Attempt to find all distinct road paths within a certain radius */
 	private ["_stems", "_roads", "_segments", "_road", "_connections",
@@ -179,7 +176,6 @@ fnc_find_roads = [["_p", "_dist"], {
 	// Return resultant list of roads
 	_roads
 }] call fnc_lambda;
-///////////////////////////////// TEST ////////////////////////////////////////
 
 
 component_fnc_roads_nearby = [["_x", "_dist", "_min", "_max"], {
@@ -215,7 +211,6 @@ OPT_fnc_partial_LOS_to_player_group = [["_x"], {
 }] call fnc_lambda;
 
 
-///////////////////////////////// TEST ////////////////////////////////////////
 OPT_fnc_partial_LOS_to_targets = [["_x"], {
         /* Cost function for not having occluded LOS to designated targets */
 	private ["_targets"];
@@ -223,7 +218,6 @@ OPT_fnc_partial_LOS_to_targets = [["_x"], {
 	[_x, _targets,
 	 1.6, 0, 0.5, 0, 1] call component_fnc_partial_LOS_to_array_members;
 }] call fnc_lambda;
-///////////////////////////////// TEST ////////////////////////////////////////
 
 
 OPT_fnc_distance_from_player = [["_x"], {
@@ -231,4 +225,69 @@ OPT_fnc_distance_from_player = [["_x"], {
 	1 -
 	([position _x, position player, 50, 300]
 	  call component_fnc_distance_from_position);
+}] call fnc_lambda;
+
+
+OPT_fnc_distance_from_targets = [["_x"], {
+	/* Cost function for being close to designated targets */
+	private ["_targets", "_positions", "_position", "_alen", "_component"];
+	_targets = _x getVariable ["targets", []];
+	_positions = [[["_t"], {position _t}] call fnc_lambda,
+		      _targets] call fnc_map;
+	_position = [];
+	_alen = count _targets;
+	for "_i" from 0 to 2 do {
+		_component = 0;
+		for "_j" from 0 to (_alen - 1) do {
+			_component = _component +
+			        (((_positions select _j) select _i) / _alen);
+		};
+		_position = _position + [_component];
+	};
+	1 - ([position _x, _position, 50, 300]
+	     call component_fnc_distance_from_position);
+}] call fnc_lambda;
+
+
+fnc_intersection_ambush = [["_killzone_logic", "_radius"], {
+    private ["_opti", "_targets"];
+    _opti = ["Optimizer", 15, "Particle"] call fnc_new;  
+    [_opti, "conform_units",
+     [_killzone_logic, _radius] call fnc_find_intersections]
+     call fnc_tell;   
+    [_opti, "radial_scatter_2d", 50, 80] call fnc_tell;
+    _targets = [killzone, 60] call fnc_find_intersections;
+    {
+        [_x, "_setf", "targets", _targets] call fnc_tell
+    } forEach (_opti getVariable "population");  
+    [_opti, "add_objective",
+     OPT_fnc_roads_nearby] call fnc_tell;
+    [_opti, "add_objective", 
+     OPT_fnc_distance_from_targets] call fnc_tell; 
+    [_opti, "add_objective",  
+     OPT_fnc_partial_LOS_to_player_group] call fnc_tell;  
+    [_opti, "add_objective", 
+     OPT_fnc_civilians_nearby] call fnc_tell; 
+    _opti spawn {
+        private ["_optimizer", "_handle", "_bins"]; 
+	_optimizer = _this;
+	for "_i" from 0 to 5 do {  
+	      _handle = [_optimizer, "MODE_step"] call fnc_tells;  
+	      waitUntil {scriptDone _handle};  
+	};  
+
+	_bins = [_optimizer, "non_dominated_sort"] call fnc_tell; 
+
+	{[[["_y"],  
+	    {[_y, "hide"] call fnc_tell}] call fnc_lambda, 
+	    _x] call fnc_map 
+	} forEach ([_bins, 1, 0] call fnc_subseq); 
+	hint str _bins;
+	if ((count _bins) > 1) then { 
+		     [100, _bins select 0] execVM "mkcivs\layAmbush.sqf"; 
+  	} else {
+	   {[_x, "hide"] call fnc_tell;
+	    deleteVehicle _x} forEach (_bins select 0);
+        }; 
+    };  
 }] call fnc_lambda;
