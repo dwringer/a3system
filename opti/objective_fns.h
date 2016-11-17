@@ -36,6 +36,36 @@ component_fnc_partial_LOS_to_array_members = [["_p",
 }] call fnc_lambda;
 
 
+component_fnc_partial_LOS_to_positions = [["_p",
+				           "_array",
+                                           "_eye_height",
+				           "_full_LOS_bias",
+				           "_no_LOS_weight",
+				           "_min",
+				           "_max"], {
+	/* Parametric cost for not having occluded LOS to positions */
+	private ["_sum", "_v"];
+	_sum = 0;
+	{
+		_v = (1 - ([_p, "VIEW"] checkVisibility
+		            [[(getPosASL _p) select 0, 
+                              (getPosASL _p) select 1, 
+		              ((getPosASL _p) select 2) + _eye_height], 
+		             _x])); 
+		if ((_v >= 0.025) && (_v < 1)) then {
+			_sum = _sum + 0;
+		} else {
+			if (_v < 0.025) then {
+				_sum = _sum + _full_LOS_bias + _no_LOS_weight;
+			} else {
+				_sum = _sum + (1 - _full_LOS_bias);
+			};
+		};
+	} forEach _array;
+	(((_sum / (count _array)) - _min) / (_max - _min))
+}] call fnc_lambda;
+
+
 component_fnc_building_positions_nearby = [["_x", "_dist", "_min", "_max"], {
 	/* Parametric cost for not having building positions nearby */
 	private ["_houses", "_positions"];
@@ -215,8 +245,8 @@ OPT_fnc_partial_LOS_to_targets = [["_x"], {
         /* Cost function for not having occluded LOS to designated targets */
 	private ["_targets"];
 	_targets = _x getVariable ["targets", []];
-	[_x, _targets,
-	 1.6, 0, 0.5, 0, 1] call component_fnc_partial_LOS_to_array_members;
+	[_x, [[["_t"], {position _t}] call fnc_lambda, _targets] call fnc_map,
+	 1.6, 0, 0.5, 0, 1] call component_fnc_partial_LOS_to_positions;
 }] call fnc_lambda;
 
 
@@ -249,45 +279,49 @@ OPT_fnc_distance_from_targets = [["_x"], {
 }] call fnc_lambda;
 
 
-fnc_intersection_ambush = [["_killzone_logic", "_radius"], {
+fnc_intersection_ambush = [["_killzone_logic",
+                            "_kill_radius",
+                            "_pull_radius",
+                            "_pop_size",
+                            "_generations"], {
+    /* Evolve positions around area intersections to form killzone; ambush */
     private ["_opti", "_targets"];
-    _opti = ["Optimizer", 15, "Particle"] call fnc_new;  
-    [_opti, "conform_units",
-     [_killzone_logic, _radius] call fnc_find_intersections]
-     call fnc_tell;   
-    [_opti, "radial_scatter_2d", 50, 80] call fnc_tell;
-    _targets = [killzone, 60] call fnc_find_intersections;
+    _opti = ["Optimizer", _pop_size, "Particle"] call fnc_new;
+    _targets = [_killzone_logic, _kill_radius] call fnc_find_intersections;
+    [_opti, "conform_units", _targets] call fnc_tell;
+    [_opti, "radial_scatter_2d",
+     _kill_radius / 1.6, _kill_radius * 1.6] call fnc_tell;
     {
         [_x, "_setf", "targets", _targets] call fnc_tell
-    } forEach (_opti getVariable "population");  
+    } forEach (_opti getVariable "population");
     [_opti, "add_objective",
      OPT_fnc_roads_nearby] call fnc_tell;
-    [_opti, "add_objective", 
-     OPT_fnc_distance_from_targets] call fnc_tell; 
-    [_opti, "add_objective",  
-     OPT_fnc_partial_LOS_to_player_group] call fnc_tell;  
-    [_opti, "add_objective", 
-     OPT_fnc_civilians_nearby] call fnc_tell; 
-    _opti spawn {
-        private ["_optimizer", "_handle", "_bins"]; 
-	_optimizer = _this;
-	for "_i" from 0 to 5 do {  
-	      _handle = [_optimizer, "MODE_step"] call fnc_tells;  
-	      waitUntil {scriptDone _handle};  
-	};  
-
+    [_opti, "add_objective",
+     OPT_fnc_distance_from_targets] call fnc_tell;
+    [_opti, "add_objective",
+     OPT_fnc_partial_LOS_to_targets] call fnc_tell;
+    [_opti, "add_objective",
+     OPT_fnc_civilians_nearby] call fnc_tell;
+    [_opti, _pull_radius] spawn {
+        private ["_optimizer", "_handle", "_bins", "_radius"];
+        _optimizer = _this select 0;
+        _radius = _this select 1;
+	for "_i" from 0 to (_generations - 1) do {
+	      _handle = [_optimizer, "MODE_step"] call fnc_tells;
+	      waitUntil {scriptDone _handle};
+	};
 	_bins = [_optimizer, "non_dominated_sort"] call fnc_tell; 
-
-	{[[["_y"],  
-	    {[_y, "hide"] call fnc_tell}] call fnc_lambda, 
-	    _x] call fnc_map 
-	} forEach ([_bins, 1, 0] call fnc_subseq); 
+	{[[["_y"],
+	   {[_y, "hide"] call fnc_tell;
+	    deleteVehicle _y}] call fnc_lambda,
+	    _x] call fnc_map
+	} forEach ([_bins, 1, 0] call fnc_subseq);
 	hint str _bins;
-	if ((count _bins) > 1) then { 
-		     [100, _bins select 0] execVM "mkcivs\layAmbush.sqf"; 
+	if ((count _bins) > 1) then {
+	     [_radius, _bins select 0] execVM "mkcivs\layAmbush.sqf";
   	} else {
 	   {[_x, "hide"] call fnc_tell;
 	    deleteVehicle _x} forEach (_bins select 0);
-        }; 
-    };  
+        };
+    };
 }] call fnc_lambda;
