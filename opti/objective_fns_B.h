@@ -308,27 +308,25 @@ fnc_intersection_ambush = [["_killzone_logic",
      OPT_fnc_partial_LOS_to_targets] call fnc_tell;
     [_opti, "add_objective",
      OPT_fnc_civilians_nearby] call fnc_tell;
-    [_opti, _pull_radius, _generations] spawn {
-        private ["_optimizer", "_handle", "_bins", "_radius"];
-        _optimizer = _this select 0;
-        _radius = _this select 1;
-	_gens = _this select 2;
+    [_opti, _pull_radius, _generations] spawn
+     ([["_optimizer", "_radius", "_gens"], {
+        private ["_handle"];
 	for "_i" from 0 to (_gens - 1) do {
 	      _handle = [_optimizer, "MODE_step"] call fnc_tells;
 	      waitUntil {scriptDone _handle};
 	};
 	_bins = [_optimizer, "non_dominated_sort"] call fnc_tell; 
-	{[[["_y"],
-	   {[_y, "hide"] call fnc_tell;
-	    deleteVehicle _y}] call fnc_lambda,
-	    _x] call fnc_map
-	} forEach ([_bins, 1, 0] call fnc_subseq);
 	//	hint str _bins;
 	if ((count _bins) > 1) then {
-	     [_radius, _bins select 0] execVM "mkcivs\layAmbush.sqf";
+		{[[["_y"],
+		   {[_y, "hide"] call fnc_tell;
+		    deleteVehicle _y}] call fnc_lambda,
+		    _x] call fnc_map
+		} forEach ([_bins, 1, 0] call fnc_subseq);
+		[_radius, _bins select 0] execVM "mkcivs\layAmbush.sqf";
   	} else {
 	   {[_x, "hide"] call fnc_tell;
 	    deleteVehicle _x} forEach (_bins select 0);
         };
-    };
+     }] call fnc_lambda);
 }] call fnc_lambda;

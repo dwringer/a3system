@@ -245,11 +245,7 @@ OPT_fnc_partial_LOS_to_targets = [["_x"], {
         /* Cost function for not having occluded LOS to designated targets */
 	private ["_targets"];
 	_targets = _x getVariable ["targets", []];
-	[_x, [[["_t"], {
-		private ["_pos"];
-		_pos = position _t;
-		[_pos select 0, _pos select 1, (_pos select 2) + 1.5]
- 	      }] call fnc_lambda, _targets] call fnc_map,
+	[_x, [[["_t"], {position _t}] call fnc_lambda, _targets] call fnc_map,
 	 1.6, 0, 0.5, 0, 1] call component_fnc_partial_LOS_to_positions;
 }] call fnc_lambda;
 
@@ -301,19 +297,16 @@ fnc_intersection_ambush = [["_killzone_logic",
     [_opti, "add_objective",
      OPT_fnc_roads_nearby] call fnc_tell;
     [_opti, "add_objective",
-     OPT_fnc_building_positions_nearby] call fnc_tell;
-    [_opti, "add_objective",
      OPT_fnc_distance_from_targets] call fnc_tell;
     [_opti, "add_objective",
      OPT_fnc_partial_LOS_to_targets] call fnc_tell;
     [_opti, "add_objective",
      OPT_fnc_civilians_nearby] call fnc_tell;
-    [_opti, _pull_radius, _generations] spawn {
+    [_opti, _pull_radius] spawn {
         private ["_optimizer", "_handle", "_bins", "_radius"];
         _optimizer = _this select 0;
         _radius = _this select 1;
-	_gens = _this select 2;
-	for "_i" from 0 to (_gens - 1) do {
+	for "_i" from 0 to (_generations - 1) do {
 	      _handle = [_optimizer, "MODE_step"] call fnc_tells;
 	      waitUntil {scriptDone _handle};
 	};
@@ -323,7 +316,7 @@ fnc_intersection_ambush = [["_killzone_logic",
 	    deleteVehicle _y}] call fnc_lambda,
 	    _x] call fnc_map
 	} forEach ([_bins, 1, 0] call fnc_subseq);
-	//	hint str _bins;
+	hint str _bins;
 	if ((count _bins) > 1) then {
 	     [_radius, _bins select 0] execVM "mkcivs\layAmbush.sqf";
   	} else {
