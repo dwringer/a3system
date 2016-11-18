@@ -138,15 +138,12 @@ fnc_find_roads = [["_p", "_dist"], {
 	         "_last", "_next", "_edge", "_c"];
 	_stems = [];
 	_roads = [];
-
-	// Collect stems from intersections
+	// Collect stems from intersections:
 	{
 		_stems = _stems + (roadsConnectedTo _x);
 	} forEach ([_p, _dist] call fnc_find_intersections);
-
-	// Prepare list of available segments
+	// Prepare list of available segments:
 	_segments = _p nearRoads _dist;
-
 	// Collect roads begun from stems and make segments unavailable:
 	{
 		_road = [_x, _segments] call fnc_trace_road;
@@ -157,43 +154,41 @@ fnc_find_roads = [["_p", "_dist"], {
 			_segments = _segments - [_x];
 		};
 	} forEach _stems;
-
 	// While unassigned segments remain:
         while {(count _segments) > 0} do {
-	        // Set first segment as edge
+	        // Set first segment as edge:
 	        _edge = _segments select 0;
 	        _next = _edge;
                 while {_next in _segments} do {
                         scopeName "JumpToEdge";
-                        // Remember last loc to check progress
+                        // Remember last loc to check progress:
                  	_last = _edge;  
-	                // Advance edge position toward boundary
+	                // Advance edge position toward boundary:
                         _edge = _next;
-                   	// Get next round of possible advancements
+                   	// Get next round of possible advancements:
 	                _connections = roadsConnectedTo _edge;
                         if ((count _connections) > 0) then {
-		                // Find next connected pos
+		                // Find next connected position:
 				for "_i" from 0 to
 					      ((count _connections) - 1) do {
 					scopeName "MoveAlong";
 					_c = _connections select _i;
 					if (_c != _last) then {
-						// If progress, proceed.
+						// If progress, proceed:
 						_next = _c;
 						breakOut "MoveAlong";
 				        };
 				};
 				if (_next == (_segments select 0)) then {
-					// We have looped, so we are done.
+					// We have looped, so we are done:
 					breakOut "JumpToEdge";
 				};
 		        } else {
-				// Nowhere to go; we are done.
+				// Nowhere to go; we are done:
 				breakOut "JumpToEdge";
 			};
                 };
-		
-		// Trace road from edge segment, add it, and remove segments
+		// Trace road from edge segment, add it, and remove segments:
 		_road = [_edge, _segments] call fnc_trace_road;
 		if ((count _road) > 0) then {
 			_roads = _roads + [_road];
@@ -202,8 +197,7 @@ fnc_find_roads = [["_p", "_dist"], {
 			_segments = _segments - [_edge];
 		};
 	};
-
-	// Return resultant list of roads
+	// Return resultant list of roads:
 	_roads
 }] call fnc_lambda;
 
@@ -288,45 +282,86 @@ fnc_intersection_ambush = [["_killzone_logic",
                             "_pull_radius",
                             "_pop_size",
                             "_generations"], {
-    /* Evolve positions around area intersections to form killzone; ambush */
-    private ["_opti", "_targets"];
-    _opti = ["Optimizer", _pop_size, "Particle"] call fnc_new;
-    _targets = [_killzone_logic, _kill_radius] call fnc_find_intersections;
-    [_opti, "conform_units", _targets] call fnc_tell;
-    [_opti, "radial_scatter_2d",
-     _kill_radius / 1.6, _kill_radius * 1.6] call fnc_tell;
-    {
-        [_x, "_setf", "targets", _targets] call fnc_tell
-    } forEach (_opti getVariable "population");
-    [_opti, "add_objective",
-     OPT_fnc_roads_nearby] call fnc_tell;
-    [_opti, "add_objective",
-     OPT_fnc_building_positions_nearby] call fnc_tell;
-    [_opti, "add_objective",
-     OPT_fnc_distance_from_targets] call fnc_tell;
-    [_opti, "add_objective",
-     OPT_fnc_partial_LOS_to_targets] call fnc_tell;
-    [_opti, "add_objective",
-     OPT_fnc_civilians_nearby] call fnc_tell;
-    [_opti, _pull_radius, _generations] spawn
-     ([["_optimizer", "_radius", "_gens"], {
-        private ["_handle"];
-	for "_i" from 0 to (_gens - 1) do {
-	      _handle = [_optimizer, "MODE_step"] call fnc_tells;
-	      waitUntil {scriptDone _handle};
-	};
-	_bins = [_optimizer, "non_dominated_sort"] call fnc_tell; 
-	//	hint str _bins;
-	if ((count _bins) > 1) then {
-		{[[["_y"],
-		   {[_y, "hide"] call fnc_tell;
-		    deleteVehicle _y}] call fnc_lambda,
-		    _x] call fnc_map
-		} forEach ([_bins, 1, 0] call fnc_subseq);
-		[_radius, _bins select 0] execVM "mkcivs\layAmbush.sqf";
-  	} else {
-	   {[_x, "hide"] call fnc_tell;
-	    deleteVehicle _x} forEach (_bins select 0);
-        };
-     }] call fnc_lambda);
+	/* Evolve positions around intersections to form killzone; ambush */
+	private ["_opti", "_targets"];
+	_opti = ["Optimizer", _pop_size, "Particle"] call fnc_new;
+	_targets = [_killzone_logic, _kill_radius] call fnc_find_intersections;
+	[_opti, "conform_units", _targets] call fnc_tell;
+	[_opti, "radial_scatter_2d",
+	 _kill_radius / 1.25, _kill_radius * 1.25] call fnc_tell;
+	{
+		[_x, "_setf", "targets", _targets] call fnc_tell
+	} forEach (_opti getVariable "population");
+	[_opti, "add_objective",
+	 OPT_fnc_roads_nearby] call fnc_tell;
+	[_opti, "add_objective",
+	 OPT_fnc_building_positions_nearby] call fnc_tell;
+	[_opti, "add_objective",
+	 OPT_fnc_distance_from_targets] call fnc_tell;
+	[_opti, "add_objective",
+	 OPT_fnc_partial_LOS_to_targets] call fnc_tell;
+	[_opti, "add_objective",
+	 OPT_fnc_civilians_nearby] call fnc_tell;
+	[_opti, _pull_radius, _generations] spawn
+	 ([["_optimizer", "_radius", "_gens"], {
+	        private ["_bins", "_handle"];
+		for "_i" from 0 to (_gens - 1) do {
+			_handle = [_optimizer, "MODE_step"] call fnc_tells;
+			waitUntil {scriptDone _handle};
+		};
+		_bins = [_optimizer, "non_dominated_sort"] call fnc_tell; 
+		if ((count _bins) > 1) then {
+			{
+				[[["_y"], {
+					[_y, "hide"] call fnc_tell;
+					deleteVehicle _y
+				 }] call fnc_lambda,
+				 _x] call fnc_map
+			} forEach ([_bins, 1, 0] call fnc_subseq);
+			[_radius,
+			 _bins select 0] execVM "mkcivs\layAmbush.sqf";
+		} else {
+			{
+				[_x, "hide"] call fnc_tell;
+				deleteVehicle _x
+			} forEach (_bins select 0);
+		};
+	 }] call fnc_lambda);
 }] call fnc_lambda;
+
+
+fnc_find_positions = [["_logic", "_radius", "_targets", "_objectives", "_n"], {
+	private ["_opti", "_thread"];
+	_opti = ["Optimizer", _n, "Particle"] call fnc_new;
+	[_opti, "conform_units", _targets] call fnc_tell;
+	[_opti, "radial_scatter_2d",
+	 _radius / 1.25, _radius * 1.25] call fnc_tell;
+	{
+		[_x, "_setf", "targets", _targets] call fnc_tell;
+	} forEach (_opti getVariable "population");
+	{
+		[_opti, "add_objective", _x] call fnc_tell;
+	} forEach _objectives;
+	_thread = [_opti, _n] spawn ([["_optimizer", "_gens"], {
+		private ["_bins", "_handle"];
+		for "_i" from 0 to (_gens - 1) do {
+			_handle = [_optimizer, "MODE_step"] call fnc_tells;
+		        waitUntil {scriptDone _handle};
+		};
+		_bins = [];
+		while {(count _bins) <= 1} do {
+		        _bins = [_optimizer,
+		                 "non_dominated_sort"] call fnc_tell;
+		 };
+		 _optimizer setVariable ["result", _bins select 0];
+		 {
+			[[["_y"], {
+				[_y, "hide"] call fnc_tell;
+				deleteVehicle _y
+			 }] call fnc_lambda,
+			 _x] call fnc_map
+		 } forEach ([_bins, 1, 0] call fnc_subseq);
+	}] call fnc_lambda);
+        waitUntil {scriptDone _thread};
+	_opti getVariable "result";
+}] call fnc_vlambda;
