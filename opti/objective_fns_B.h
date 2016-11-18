@@ -36,6 +36,22 @@ component_fnc_partial_LOS_to_array_members = [["_p",
 }] call fnc_lambda;
 
 
+////////////////////////////////// UNTESTED ///////////////////////////////////
+component_fnc_partial_LOS_to_array_members_B = [["_p",
+					         "_array",
+					         "_eye_height",
+					         "_full_LOS_bias",
+					         "_no_LOS_weight",
+					         "_min",
+					         "_max"], {
+	/* Parametric cost for not having occluded LOS to array members */
+	[_p, [[["_x"], {position _x}] call fnc_lambda, _array] call fnc_map,
+	 _eye_height, _full_LOS_bias, _no_LOS_weight, _min, _max]
+	 call component_fnc_partial_LOS_to_positions;
+}] call fnc_lambda;
+////////////////////////////////// UNTESTED ///////////////////////////////////
+
+
 component_fnc_partial_LOS_to_positions = [["_p",
 				           "_array",
                                            "_eye_height",
@@ -202,7 +218,7 @@ fnc_find_roads = [["_p", "_dist"], {
 }] call fnc_lambda;
 
 
-component_fnc_roads_nearby = [["_x", "_dist", "_min", "_max"], {
+component_fnc_distance_from_roads = [["_x", "_dist", "_min", "_max"], {
 	/* Parametric cost for not having a certain number of units nearby */
 	private ["_count"];
 	_count = count ([_x, _dist] call fnc_find_roads);
@@ -210,9 +226,9 @@ component_fnc_roads_nearby = [["_x", "_dist", "_min", "_max"], {
 }] call fnc_lambda;
 
 
-OPT_fnc_roads_nearby = [["_x"], {
+OPT_fnc_distance_from_roads = [["_x"], {
 	/* Cost function for having roads nearby */
-	[_x, 10, 0, 10] call component_fnc_roads_nearby
+	[_x, 10, 0, 10] call component_fnc_distance_from_roads
 }] call fnc_lambda;
 
 
@@ -277,11 +293,12 @@ OPT_fnc_distance_from_targets = [["_x"], {
 }] call fnc_lambda;
 
 
-fnc_intersection_ambush = [["_killzone_logic",
-                            "_kill_radius",
-                            "_pull_radius",
-                            "_pop_size",
-                            "_generations"], {
+////////////////////////////////// UNTESTED ///////////////////////////////////
+fnc_intersection_ambush = [["_killzone_logic",  /* Zone center logic */
+                            "_kill_radius",     /* Zone size */
+                            "_pull_radius",     /* Muster distance */
+                            "_pop_size",        /* Particle count */
+                            "_generations"], {  /* Number of GA steps */
 	/* Evolve positions around intersections to form killzone; ambush */
 	private ["_opti", "_targets"];
 	_opti = ["Optimizer", _pop_size, "Particle"] call fnc_new;
@@ -293,7 +310,7 @@ fnc_intersection_ambush = [["_killzone_logic",
 		[_x, "_setf", "targets", _targets] call fnc_tell
 	} forEach (_opti getVariable "population");
 	[_opti, "add_objective",
-	 OPT_fnc_roads_nearby] call fnc_tell;
+	 OPT_fnc_distance_from_roads] call fnc_tell;
 	[_opti, "add_objective",
 	 OPT_fnc_building_positions_nearby] call fnc_tell;
 	[_opti, "add_objective",
@@ -328,40 +345,95 @@ fnc_intersection_ambush = [["_killzone_logic",
 		};
 	 }] call fnc_lambda);
 }] call fnc_lambda;
+////////////////////////////////// UNTESTED ///////////////////////////////////
 
 
-fnc_find_positions = [["_logic", "_radius", "_targets", "_objectives", "_n"], {
-	private ["_opti", "_thread"];
-	_opti = ["Optimizer", _n, "Particle"] call fnc_new;
-	[_opti, "conform_units", _targets] call fnc_tell;
-	[_opti, "radial_scatter_2d",
+////////////////////////////////// UNTESTED ///////////////////////////////////
+fnc_find_positions = [["_radius",          /* Initial search radius */
+                       "_init_array",      /* Initial position set */
+		       "_assignments",     /* Local bindings for particles */
+		       "_objectives",      /* Objective [cost] functions */
+                       "_pop_size",        /* Particle count */
+		       "_generations"], {  /* Number of GA steps */
+	/* Evolve positions from initial array */
+        private ["_optimizer", "_thread", "_result", "_assignment",
+ 	         "_assignments", "_key", "_value"];
+        _optimizer = ["Optimizer", _pop_size, "Particle"] call fnc_new;
+	[_optimizer, "conform_positions", _init_array] call fnc_tell;
+	[_optimizer, "radial_scatter_2d",
 	 _radius / 1.25, _radius * 1.25] call fnc_tell;
 	{
-		[_x, "_setf", "targets", _targets] call fnc_tell;
-	} forEach (_opti getVariable "population");
+		for "_i" from 0 to ((count _assignments) - 1) do {
+			_assignment = _assignments select _i;
+			_key = _assignment select 0;
+			_value = _assignment select 1;
+			[_x, "_setf", _key, _value] call fnc_tell;
+		};
+        } forEach (_optimizer getVariable "population");
 	{
-		[_opti, "add_objective", _x] call fnc_tell;
+		[_optimizer, "add_objective", _x] call fnc_tell;
 	} forEach _objectives;
-	_thread = [_opti, _n] spawn ([["_optimizer", "_gens"], {
-		private ["_bins", "_handle"];
+	_thread = [_optimizer, _generations] spawn ([["_opti", "_gens"], {
+		private ["_bins", "_handle", "_retries"];
 		for "_i" from 0 to (_gens - 1) do {
-			_handle = [_optimizer, "MODE_step"] call fnc_tells;
+			_handle = [_opti, "MODE_step"] call fnc_tells;
 		        waitUntil {scriptDone _handle};
 		};
 		_bins = [];
-		while {(count _bins) <= 1} do {
-		        _bins = [_optimizer,
-		                 "non_dominated_sort"] call fnc_tell;
-		 };
-		 _optimizer setVariable ["result", _bins select 0];
-		 {
-			[[["_y"], {
-				[_y, "hide"] call fnc_tell;
-				deleteVehicle _y
-			 }] call fnc_lambda,
-			 _x] call fnc_map
-		 } forEach ([_bins, 1, 0] call fnc_subseq);
+		_retries = 0;
+		while {((count _bins) <= 1) and
+	               (_retries < _gens)} do {
+			_handle = [_opti, "MODE_step"] call fnc_tells;
+		        waitUntil {scriptDone _handle};
+		        _bins = [_opti,
+              		         "non_dominated_sort"] call fnc_tell;
+			_retries = _retries + 1;
+		};
+	        if ((count _bins) > 1) then {
+			[_opti, "_setf",
+			 "result", _bins select 0] call fnc_tell;
+			{
+				[[["_y"], {
+					[_y, "hide"] call fnc_tell;
+					deleteVehicle _y;
+				 }] call fnc_lambda,
+				 _x] call fnc_map;
+			} forEach ([_bins, 1, 0] call fnc_subseq);
+		} else {
+			[_opti, "_setf", "result", []] call fnc_tell;
+			{
+				[_x, "hide"] call fnc_tell;
+				deleteVehicle _x;
+			} forEach (_bins select 0);
+                };
 	}] call fnc_lambda);
         waitUntil {scriptDone _thread};
-	_opti getVariable "result";
-}] call fnc_vlambda;
+	_result = _optimizer getVariable "result";
+	deleteVehicle _optimizer;
+	_result
+}] call fnc_lambda;
+////////////////////////////////// UNTESTED ///////////////////////////////////
+
+
+////////////////////////////////// UNTESTED ///////////////////////////////////
+fnc_intersection_ambush_B = [["_logic",           /* Zone center logic */
+			      "_zone_radius",     /* Zone size */
+			      "_pull_radius",     /* Muster distance */
+			      "_pop_size",        /* Particle count */
+                              "_generations"], {  /* Number of GA steps */
+	/* Evolve and execute ambush around area road intersections */
+	private ["_targets"];
+	_targets = [_logic, _zone_radius] call fnc_intersections;
+        [_pull_radius,
+	 [_zone_radius,
+  	  [[["_x"], {position _x}] call fnc_lambda, _targets] call fnc_map,
+          [["targets", _targets]],
+          [OPT_fnc_distance_from_roads,
+	   OPT_fnc_building_positions_nearby,
+	   OPT_fnc_distance_from_targets,
+	   OPT_fnc_partial_LOS_to_targets,
+	   OPT_fnc_civilians_nearby],
+          _generations,
+          _pop_size] call fnc_find_positions] execVM "mkcivs\layAmbush.sqf";
+}] call fnc_lambda;
+////////////////////////////////// UNTESTED ///////////////////////////////////
