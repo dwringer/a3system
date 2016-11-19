@@ -6,13 +6,13 @@ component_fnc_units_nearby = [["_x", "_units", "_dist", "_min", "_max"], {
 }] call fnc_lambda;
 
 
-component_fnc_partial_LOS_to_array_members = [["_p",
-					       "_array",
-					       "_eye_height",
-					       "_full_LOS_bias",
-					       "_no_LOS_weight",
-					       "_min",
-					       "_max"], {
+component_fnc_partial_LOS_to_unit_array = [["_p",
+				            "_array",
+					    "_eye_height",
+					    "_full_LOS_bias",
+					    "_no_LOS_weight",
+					    "_min",
+					    "_max"], {
 	/* Parametric cost for not having occluded LOS to array members */
 	private ["_sum", "_v"];
 	_sum = 0;
@@ -33,6 +33,20 @@ component_fnc_partial_LOS_to_array_members = [["_p",
 		};
 	} forEach _array;
 	(((_sum / (count _array)) - _min) / (_max - _min))
+}] call fnc_lambda;
+
+
+component_fnc_partial_LOS_to_object_array = [["_p",
+  			                      "_array",
+					      "_eye_height",
+					      "_full_LOS_bias",
+					      "_no_LOS_weight",
+					      "_min",
+					      "_max"], {
+	/* Parametric cost for not having occluded LOS to array members */
+	[_p, [[["_x"], {position _x}] call fnc_lambda, _array] call fnc_map,
+	 _eye_height, _full_LOS_bias, _no_LOS_weight, _min, _max]
+	 call component_fnc_partial_LOS_to_positions;
 }] call fnc_lambda;
 
 
@@ -138,15 +152,12 @@ fnc_find_roads = [["_p", "_dist"], {
 	         "_last", "_next", "_edge", "_c"];
 	_stems = [];
 	_roads = [];
-
-	// Collect stems from intersections
+	// Collect stems from intersections:
 	{
 		_stems = _stems + (roadsConnectedTo _x);
 	} forEach ([_p, _dist] call fnc_find_intersections);
-
-	// Prepare list of available segments
+	// Prepare list of available segments:
 	_segments = _p nearRoads _dist;
-
 	// Collect roads begun from stems and make segments unavailable:
 	{
 		_road = [_x, _segments] call fnc_trace_road;
@@ -157,43 +168,41 @@ fnc_find_roads = [["_p", "_dist"], {
 			_segments = _segments - [_x];
 		};
 	} forEach _stems;
-
 	// While unassigned segments remain:
         while {(count _segments) > 0} do {
-	        // Set first segment as edge
+	        // Set first segment as edge:
 	        _edge = _segments select 0;
 	        _next = _edge;
                 while {_next in _segments} do {
                         scopeName "JumpToEdge";
-                        // Remember last loc to check progress
+                        // Remember last loc to check progress:
                  	_last = _edge;  
-	                // Advance edge position toward boundary
+	                // Advance edge position toward boundary:
                         _edge = _next;
-                   	// Get next round of possible advancements
+                   	// Get next round of possible advancements:
 	                _connections = roadsConnectedTo _edge;
                         if ((count _connections) > 0) then {
-		                // Find next connected pos
+		                // Find next connected position:
 				for "_i" from 0 to
 					      ((count _connections) - 1) do {
 					scopeName "MoveAlong";
 					_c = _connections select _i;
 					if (_c != _last) then {
-						// If progress, proceed.
+						// If progress, proceed:
 						_next = _c;
 						breakOut "MoveAlong";
 				        };
 				};
 				if (_next == (_segments select 0)) then {
-					// We have looped, so we are done.
+					// We have looped, so we are done:
 					breakOut "JumpToEdge";
 				};
 		        } else {
-				// Nowhere to go; we are done.
+				// Nowhere to go; we are done:
 				breakOut "JumpToEdge";
 			};
                 };
-		
-		// Trace road from edge segment, add it, and remove segments
+		// Trace road from edge segment, add it, and remove segments:
 		_road = [_edge, _segments] call fnc_trace_road;
 		if ((count _road) > 0) then {
 			_roads = _roads + [_road];
@@ -202,13 +211,12 @@ fnc_find_roads = [["_p", "_dist"], {
 			_segments = _segments - [_edge];
 		};
 	};
-
-	// Return resultant list of roads
+	// Return resultant list of roads:
 	_roads
 }] call fnc_lambda;
 
 
-component_fnc_roads_nearby = [["_x", "_dist", "_min", "_max"], {
+component_fnc_distance_from_roads = [["_x", "_dist", "_min", "_max"], {
 	/* Parametric cost for not having a certain number of units nearby */
 	private ["_count"];
 	_count = count ([_x, _dist] call fnc_find_roads);
@@ -216,9 +224,9 @@ component_fnc_roads_nearby = [["_x", "_dist", "_min", "_max"], {
 }] call fnc_lambda;
 
 
-OPT_fnc_roads_nearby = [["_x"], {
+OPT_fnc_distance_from_roads = [["_x"], {
 	/* Cost function for having roads nearby */
-	[_x, 10, 0, 10] call component_fnc_roads_nearby
+	[_x, 10, 0, 10] call component_fnc_distance_from_roads
 }] call fnc_lambda;
 
 
@@ -237,7 +245,7 @@ OPT_fnc_civilians_nearby = [["_x"], {
 OPT_fnc_partial_LOS_to_player_group = [["_x"], {
 	/* Cost function for not having occluded LOS to player group */
 	[_x, units group player,
-	 1.6, 0, 0.5, 0, 1] call component_fnc_partial_LOS_to_array_members;
+	 1.6, 0, 0.5, 0, 1] call component_fnc_partial_LOS_to_unit_array;
 }] call fnc_lambda;
 
 
@@ -283,52 +291,88 @@ OPT_fnc_distance_from_targets = [["_x"], {
 }] call fnc_lambda;
 
 
-fnc_intersection_ambush = [["_killzone_logic",
-                            "_kill_radius",
-                            "_pull_radius",
-                            "_pop_size",
-                            "_generations"], {
-    /* Evolve positions around area intersections to form killzone; ambush */
-    private ["_opti", "_targets"];
-    _opti = ["Optimizer", _pop_size, "Particle"] call fnc_new;
-    _targets = [_killzone_logic, _kill_radius] call fnc_find_intersections;
-    [_opti, "conform_units", _targets] call fnc_tell;
-    [_opti, "radial_scatter_2d",
-     _kill_radius / 1.6, _kill_radius * 1.6] call fnc_tell;
-    {
-        [_x, "_setf", "targets", _targets] call fnc_tell
-    } forEach (_opti getVariable "population");
-    [_opti, "add_objective",
-     OPT_fnc_roads_nearby] call fnc_tell;
-    [_opti, "add_objective",
-     OPT_fnc_building_positions_nearby] call fnc_tell;
-    [_opti, "add_objective",
-     OPT_fnc_distance_from_targets] call fnc_tell;
-    [_opti, "add_objective",
-     OPT_fnc_partial_LOS_to_targets] call fnc_tell;
-    [_opti, "add_objective",
-     OPT_fnc_civilians_nearby] call fnc_tell;
-    [_opti, _pull_radius, _generations] spawn {
-        private ["_optimizer", "_handle", "_bins", "_radius"];
-        _optimizer = _this select 0;
-        _radius = _this select 1;
-	_gens = _this select 2;
-	for "_i" from 0 to (_gens - 1) do {
-	      _handle = [_optimizer, "MODE_step"] call fnc_tells;
-	      waitUntil {scriptDone _handle};
-	};
-	_bins = [_optimizer, "non_dominated_sort"] call fnc_tell; 
-	{[[["_y"],
-	   {[_y, "hide"] call fnc_tell;
-	    deleteVehicle _y}] call fnc_lambda,
-	    _x] call fnc_map
-	} forEach ([_bins, 1, 0] call fnc_subseq);
-	//	hint str _bins;
-	if ((count _bins) > 1) then {
-	     [_radius, _bins select 0] execVM "mkcivs\layAmbush.sqf";
-  	} else {
-	   {[_x, "hide"] call fnc_tell;
-	    deleteVehicle _x} forEach (_bins select 0);
-        };
-    };
+fnc_find_positions = [["_radius",          /* Initial search radius */
+                       "_init_array",      /* Initial position set */
+		       "_assignments",     /* Local bindings for particles */
+		       "_objectives",      /* Objective [cost] functions */
+                       "_pop_size",        /* Particle count */
+		       "_generations"], {  /* Number of GA steps */
+	/* Evolve positions from initial array */
+        private ["_optimizer", "_thread", "_result", "_assignment",
+ 	         "_assignments", "_key", "_value"];
+        _optimizer = ["Optimizer", _pop_size, "Particle"] call fnc_new;
+	[_optimizer, "conform_positions", _init_array] call fnc_tell;
+	[_optimizer, "radial_scatter_2d",
+	 _radius / 1.25, _radius * 1.25] call fnc_tell;
+	{
+		for "_i" from 0 to ((count _assignments) - 1) do {
+			_assignment = _assignments select _i;
+			_key = _assignment select 0;
+			_value = _assignment select 1;
+			[_x, "_setf", _key, _value] call fnc_tell;
+		};
+        } forEach (_optimizer getVariable "population");
+	{
+		[_optimizer, "add_objective", _x] call fnc_tell;
+	} forEach _objectives;
+	_thread = [_optimizer, _generations] spawn ([["_opti", "_gens"], {
+		private ["_bins", "_handle", "_retries"];
+		for "_i" from 0 to (_gens - 1) do {
+			_handle = [_opti, "MODE_step"] call fnc_tells;
+		        waitUntil {scriptDone _handle};
+		};
+		_bins = [];
+		_retries = 0;
+		while {((count _bins) <= 1) and
+	               (_retries < _gens)} do {
+			_handle = [_opti, "MODE_step"] call fnc_tells;
+		        waitUntil {scriptDone _handle};
+		        _bins = [_opti,
+              		         "non_dominated_sort"] call fnc_tell;
+			_retries = _retries + 1;
+		};
+	        if ((count _bins) > 1) then {
+			[_opti, "_setf",
+			 "result", _bins select 0] call fnc_tell;
+			{
+				[[["_y"], {
+					[_y, "hide"] call fnc_tell;
+					deleteVehicle _y;
+				 }] call fnc_lambda,
+				 _x] call fnc_map;
+			} forEach ([_bins, 1, 0] call fnc_subseq);
+		} else {
+			[_opti, "_setf", "result", []] call fnc_tell;
+			{
+				[_x, "hide"] call fnc_tell;
+				deleteVehicle _x;
+			} forEach (_bins select 0);
+                };
+	}] call fnc_lambda);
+        waitUntil {scriptDone _thread};
+	_result = _optimizer getVariable "result";
+	deleteVehicle _optimizer;
+	_result
+}] call fnc_lambda;
+
+
+fnc_intersection_ambush = [["_logic",           /* Zone center logic */
+		            "_zone_radius",     /* Zone size */
+		            "_pull_radius",     /* Muster distance */
+		            "_pop_size",        /* Particle count */
+                            "_generations"], {  /* Number of GA steps */
+	/* Evolve and execute ambush around area road intersections */
+	private ["_targets"];
+	_targets = [_logic, _zone_radius] call fnc_find_intersections;
+        [_pull_radius,
+	 [_zone_radius,
+  	  [[["_x"], {position _x}] call fnc_lambda, _targets] call fnc_map,
+          [["targets", _targets]],
+          [OPT_fnc_distance_from_roads,
+	   OPT_fnc_building_positions_nearby,
+	   OPT_fnc_distance_from_targets,
+	   OPT_fnc_partial_LOS_to_targets,
+	   OPT_fnc_civilians_nearby],
+          _pop_size,
+          _generations] call fnc_find_positions] execVM "mkcivs\layAmbush.sqf";
 }] call fnc_lambda;
