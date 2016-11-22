@@ -1,63 +1,25 @@
-// Old experimental optimizer functions - DEPRECATED:
-//#include <desrc\ga.h> 
+// Core system (REQUIRED):
+#include <include\core.h>
 
-//////////////////////////////////////
-// Base support modules - REQUIRED: //
-//////////////////////////////////////
-#include <include\alist.h>          //
-#include <include\lambda.h>         //
-#include <include\randint.h>        //
-#include <include\vectools.h>       //
-//////////////////////////////////////
+// Misc modules:
+#include <misc\include\directed_graph.h>
+#include <misc\include\weapon_shop.h>
+#include <misc\include\asinc.h>
 
-// Editor-based Directed Graph module:
-#include <include\directed_graph.h>
-
-// Simple weapon shop dialog module:
-#include <include\weapon_shop.h>
-
-// Primitive RPG-style conversation module:
-#include <include\asinc.h>
-
-
-///////////////////////////////////////////////////////
-// Class system module - REQUIRED FOR HPP #INCLUDES: //
-///////////////////////////////////////////////////////
-#include <include\classes.h>                         //
-///////////////////////////////////////////////////////
-
-// ObjectRoot class:
+// ObjectRoot class (REQUIRED):
 #include <classdef\ObjectRoot.hpp>
 
-// Simple Dictionary class:
+// Assorted classes:
 #include <classdef\Dictionary.hpp>
-
-// Unit Group class and Crew class for loading vehicles:
 #include <classdef\UnitGroup.hpp>
 #include <classdef\CrewUnitGroup.hpp>
-
-// CargoVehicle:
 #include <classdef\CargoVehicle.hpp>
 
+// Optimizer module:
+#include <include\optimizer.h>
 
-/////////////////////////// Optimization library: /////////////////////////////
-#include <opti\distance_fns.h>
-#include <opti\road_fns.h>
-#include <opti\objective_fns.h>
-#include <opti\application_fns.h>
-#include <opti\Marker.hpp>
-#include <opti\Particle.hpp>
-#include <opti\Optimizer.hpp>
-///////////////////////////////////////////////////////////////////////////////
-
-
-///////////////////// MKCIVS module and support classes: //////////////////////
+// MKCIVS module:
 #include <include\mkcivs.h>
-#include <mkcivs\ambush_fns.h>
-#include <mkcivs\WeaponCache.hpp>
-#include <mkcivs\Victim.hpp>
-#include <mkcivs\CivilianZone.hpp>
-///////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////

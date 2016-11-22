@@ -2,6 +2,6 @@
 #define __ASINC_H__
 [] spawn {
 	waitUntil {time > 1};
-	execVM "asinc\dialogEngineStart.sqf";
+	execVM "misc\asinc\dialogEngineStart.sqf";
 };
 #endif
