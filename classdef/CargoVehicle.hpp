@@ -17,45 +17,66 @@
       method
     equip_civilian_attire    :: Switch a unit into civilian clothes
       unit
-    equip_scuba_gear         :: Switch a unit into SCUBA gear
+    equip_diving_gear         :: Switch a unit into diving gear
       unit
     outfit_group_civilian    :: Put whole group in civilian clothes
       group
-    outfit_group_scuba       :: Put whole group in SCUBA gear
+    outfit_group_diving       :: Put whole group in diving gear
       group
 
       This class outfits a vehicle with special actions to allow the player to
-  switch all group members into civilian clothes or scuba gear (then back into
+  switch all group members into civilian clothes or diving gear (then back into
   their regular loadouts).
 
   Example (in vehicle init):
       _nil = this spawn {
           waitUntil {not isNil "ClassesInitialized"};
-          [_this, "CargoVehicle", ["outfit_group_scuba"]] spawn fnc_instance;
+          [_this, "CargoVehicle", ["outfit_group_diving"]] spawn fnc_instance;
       };
    
 */
 
 #define ACTIONS [["outfit_group_civilian", "Switch to civilian attire"],  \
-                 ["outfit_group_scuba", "Switch to SCUBA gear"],  \
+                 ["outfit_group_diving", "Switch to diving gear"],  \
                  ["restore_group_equipment", "Switch back into equipment"]]
 
+#define CIVILIANS ["C_man_polo_1_F", "C_man_polo_2_F", "C_man_polo_3_F",  \
+                   "C_man_polo_4_F", "C_man_polo_5_F", "C_man_polo_6_F"]
 
 DEFCLASS("CargoVehicle") ["_self", "_special"] DO {
 	/* Initialize the vehicle w/list of action methods */
-	private ["_spec_method"];
 	SUPER("ObjectRoot", _self);
+	private ["_spec_method", "_group", "_diver", "_center", "_civilian",
+	         "_civilianAttire"];
+	
 	[_self, "_setf", "units", []] call fnc_tell;
 	[_self, "_setf", "loadouts", []] call fnc_tell;
-	if (isNil "_special") then {
-		_special = [];
-	};
 	[_self, "_setf", "special", _special] call fnc_tell;
 	{
 		[_self, "add_special_action", _x] call fnc_tell;
 	} forEach _special;
+	_group = createGroup (side player);
+	_diver = _group createUnit ["B_T_Diver_F", [0, 0, 0], [], 0, "NONE"];
+	removeAllWeapons _diver;
+	removeBackpack _diver;
+	[_self, "_setf", "diving_gear", getUnitLoadout _diver] call fnc_tell;
+	deleteVehicle _diver;
+	deleteGroup _group;
+	_group = createGroup civilian;
+	_civilianAttire = [];
+	if (isNil "_group") then {
+		_center = createCenter civilian;
+		_group = createGroup _center;
+	};
+	{
+		_civilian = _group createUnit [_x, [0, 0, 0], [], 0, "NONE"];
+		_civilianAttire = _civilianAttire + [getUnitLoadout _civilian];
+		deleteVehicle _civilian;
+	} forEach CIVILIANS;
+	[_self, "_setf", "civilian_group", _group] call fnc_tell;
+	[_self, "_setf", "civilian_attire", _civilianAttire] call fnc_tell;
 	_self
-} ENDCLASSV;
+} ENDCLASS;
 
 
 DEFMETHOD("CargoVehicle", "load_from_unit") ["_self", "_unit"] DO {
@@ -64,7 +85,11 @@ DEFMETHOD("CargoVehicle", "load_from_unit") ["_self", "_unit"] DO {
 	_gear = getUnitLoadout _unit;
 	[_self, "_push_attr", "units", _unit] call fnc_tell;
 	[_self, "_push_attr", "loadouts", _gear] call fnc_tell;
-	removeAllWeapons _unit;
+	removeAllWeapons _unit; 
+	removeAllAssignedItems _unit;
+	removeUniform _unit;
+	removeVest _unit;
+	removeBackpack _unit;
 } ENDMETHOD;
 
 
@@ -96,12 +121,16 @@ DEFMETHOD("CargoVehicle", "load_group_equipment") ["_self", "_group"] DO {
 
 DEFMETHOD("CargoVehicle", "restore_group_equipment") ["_self", "_group"] DO {
 	/* Restore loadout to all group members */
+	private ["_special"];
+	_special = _self getVariable "special";
 	{
 		[_self, "restore_unit_loadout", _x] call fnc_tell;
 	} forEach units _group;
 	{
 		[_self, "add_special_action", _x] call fnc_tell;
 	} forEach _special;
+	_self removeAction (_self getVariable "restore_group_equipment");
+	(units _group) joinSilent (_self getVariable "original_group");
 } ENDMETHOD;
 
 
@@ -121,13 +150,15 @@ DEFMETHOD("CargoVehicle", "add_special_action") ["_self", "_method"] DO {
 
 DEFMETHOD("CargoVehicle", "equip_civilian_attire") ["_self", "_unit"] DO {
 	/* Switch a unit into civilian clothes */
-	// .. outfit _unit with civilian attire ..
+	private ["_civilianAttire"];
+	_civilianAttire = _self getVariable "civilian_attire";
+	_unit setUnitLoadout (([_civilianAttire] call fnc_choose) select 0);
 } ENDMETHOD;
 
 
-DEFMETHOD("CargoVehicle", "equip_scuba_gear") ["_self", "_unit"] DO {
-	/* Switch a unit into SCUBA gear */
-	// .. outfit _unit with scuba gear ..
+DEFMETHOD("CargoVehicle", "equip_diving_gear") ["_self", "_unit"] DO {
+	/* Switch a unit into diving gear */
+	_unit setUnitLoadout (_self getVariable "diving_gear");
 } ENDMETHOD;
 
 
@@ -149,10 +180,12 @@ DEFMETHOD("CargoVehicle", "outfit_group") ["_self", "_group", "_method"] DO {
 DEFMETHOD("CargoVehicle", "outfit_group_civilian") ["_self", "_group"] DO {
 	/* Put whole group in civilian clothes */
 	[_self, "outfit_group", _group, "equip_civilian_attire"] call fnc_tell;
+	[_self, "_setf", "original_group", _group] call fnc_tell;
+	(units _group) joinSilent (_self getVariable "civilian_group");
 } ENDMETHOD;
 
 
-DEFMETHOD("CargoVehicle", "outfit_group_scuba") ["_self", "_group"] DO {
-	/* Put whole group in SCUBA gear */
-	[_self, "outfit_group", _group, "equip_scuba_gear"] call fnc_tell;
+DEFMETHOD("CargoVehicle", "outfit_group_diving") ["_self", "_group"] DO {
+	/* Put whole group in diving gear */
+	[_self, "outfit_group", _group, "equip_diving_gear"] call fnc_tell;
 } ENDMETHOD;

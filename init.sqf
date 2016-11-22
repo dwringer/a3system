@@ -36,6 +36,9 @@
 #include <classdef\UnitGroup.hpp>
 #include <classdef\CrewUnitGroup.hpp>
 
+// CargoVehicle:
+#include <classdef\CargoVehicle.hpp>
+
 // MKCIVS module and support classes:
 #include <include\mkcivs.h>
 #include <mkcivs\classdef\WeaponCache.hpp>
