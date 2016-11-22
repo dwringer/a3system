@@ -39,18 +39,25 @@
 // CargoVehicle:
 #include <classdef\CargoVehicle.hpp>
 
-// MKCIVS module and support classes:
-#include <include\mkcivs.h>
-#include <mkcivs\classdef\WeaponCache.hpp>
-#include <mkcivs\classdef\Victim.hpp>
-#include <mkcivs\classdef\CivilianZone.hpp>
 
-// Optimization module:
+/////////////////////////// Optimization library: /////////////////////////////
 #include <opti\distance_fns.h>
+#include <opti\road_fns.h>
 #include <opti\objective_fns.h>
+#include <opti\application_fns.h>
 #include <opti\Marker.hpp>
 #include <opti\Particle.hpp>
 #include <opti\Optimizer.hpp>
+///////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////// MKCIVS module and support classes: //////////////////////
+#include <include\mkcivs.h>
+#include <mkcivs\ambush_fns.h>
+#include <mkcivs\WeaponCache.hpp>
+#include <mkcivs\Victim.hpp>
+#include <mkcivs\CivilianZone.hpp>
+///////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////

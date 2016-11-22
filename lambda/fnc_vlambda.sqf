@@ -31,6 +31,8 @@ _func = compile format ["%1 %2 %3;", _guard, _context, _code];
 _func;  // RETURN /////////////////////////////////////////////////////////////
 
 /* EX:
-    _sum = [3, 4, 5] call ([["_x", "_y", "_z"], 
-                            {_x + _y + _z}] call fnc_lambda);
+    _sum = [3] call ([["_x", "_y", "_z"], { 
+           if (isNil "_z") then {_x}
+           else {_x + _y + _z}
+    }] call fnc_vlambda);
 */

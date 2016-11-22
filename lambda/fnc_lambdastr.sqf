@@ -1,6 +1,6 @@
-////////////////////////////// fnc_lambda ////////////////////////// 2016-10-21
-/*  Create and compile an anonymous function   */
-/////////////////////////////////////////////////
+//////////////////////////// fnc_lambdastr ///////////////////////// 2016-10-21
+/*  Create and compile an anonymous function from a string  */
+//////////////////////////////////////////////////////////////
 private [                //
          "_parameters",  // Array  [IN/0]                              //
          "_code",        // String [IN/1]                             //// 

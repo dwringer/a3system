@@ -1,3 +1,5 @@
+#ifndef __CLASSES_H__
+#define __CLASSES_H__
 fnc_class = compile preprocessfile "classes\fnc_class.sqf";
 fnc_instance = compile preprocessfile "classes\fnc_instance.sqf";
 fnc_new = compile preprocessfile "classes\fnc_new.sqf";
@@ -6,6 +8,7 @@ fnc_tell = compile preprocessfile "classes\fnc_tell.sqf";
 fnc_tells = compile preprocessfile "classes\fnc_tells.sqf";
 
 Classes = [];
+
 
 #define DEFCLASS(NAME)  [NAME, [
 #define DEFMETHOD(CLS, NAME)  [CLS, NAME, [
@@ -21,3 +24,4 @@ Classes = [];
 	[CLS, METH,  \
          [SUPMETH, [SUP, Classes] call fnc_alist_get] call fnc_alist_get  \
 	] call fnc_method
+#endif

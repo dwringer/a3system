@@ -1,3 +1,5 @@
+#ifndef __MKCIVS_H__
+#define __MKCIVS_H__
 /* Initialize ambient civilians: */
 civArray = [];
 civKilled = 0;
@@ -7,5 +9,4 @@ Index_civGroups = 0;
 
 fnc_mkcivs = compile preprocessfile "mkcivs\fnc_mkcivs.sqf";
 fnc_civLeaders = compile preprocessfile "mkcivs\fnc_civLeaders.sqf";
-fnc_neighbors = compile preprocessfile "mkcivs\fnc_neighbors.sqf";
-fnc_closest = compile preprocessfile "mkcivs\fnc_closest.sqf";
+#endif

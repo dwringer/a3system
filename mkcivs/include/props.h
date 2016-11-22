@@ -1,3 +1,5 @@
+#ifndef __MKCIVS_PROPS_H__
+#define __MKCIVS_PROPS_H__
 #define HE_BOMB_A "M_Zephyr"
 
 #define AP_BOMB_A "Sh_120mm_APFSDS"
@@ -20,12 +22,10 @@
 
 #define SMALL_ARMS  (ASSAULT_RIFLES + MACHINE_GUNS)
 
-#define CIVILIANS ["C_man_polo_2_F",  \
+#define CIVILIANS ["C_man_polo_1_F",  \
+		   "C_man_polo_2_F",  \
 		   "C_man_polo_3_F",  \
 		   "C_man_polo_4_F",  \
 		   "C_man_polo_5_F",  \
-		   "C_man_polo_6_F",  \
-		   "C_man_1_1_F",  \
-		   "C_man_1_2_F",  \
-		   "C_man_1_3_F"]
-		      
+		   "C_man_polo_6_F"]
+#endif
