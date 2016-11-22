@@ -43,44 +43,53 @@
 #define CIVILIANS ["C_man_polo_1_F", "C_man_polo_2_F", "C_man_polo_3_F",  \
                    "C_man_polo_4_F", "C_man_polo_5_F", "C_man_polo_6_F"]
 
+
 DEFCLASS("CargoVehicle") ["_self", "_special"] DO {
 	/* Initialize the vehicle w/list of action methods */
 	SUPER("ObjectRoot", _self);
 	private ["_spec_method", "_group", "_diver", "_center", "_civilian",
 	         "_civilianAttire"];
-	
 	[_self, "_setf", "units", []] call fnc_tell;
 	[_self, "_setf", "loadouts", []] call fnc_tell;
 	[_self, "_setf", "special", _special] call fnc_tell;
 	{
 		[_self, "add_special_action", _x] call fnc_tell;
 	} forEach _special;
-	_group = createGroup (side player);
-	_diver = _group createUnit ["B_T_Diver_F", [0, 0, 0], [], 0, "NONE"];
-	removeAllWeapons _diver;
-	removeBackpack _diver;
-	[_self, "_setf", "diving_gear", getUnitLoadout _diver] call fnc_tell;
-	deleteVehicle _diver;
-	deleteGroup _group;
-	_group = createGroup civilian;
-	_civilianAttire = [];
-	if (isNil "_group") then {
-		_center = createCenter civilian;
-		_group = createGroup _center;
+	if ("outfit_group_diving" in _special) then {
+		_group = createGroup (side player);
+		_diver = _group createUnit ["B_T_Diver_F", [0, 0, 0],
+					    [], 0, "NONE"];
+		removeAllWeapons _diver;
+		removeBackpack _diver;
+		[_self, "_setf", "diving_gear", getUnitLoadout _diver]
+ 		 call fnc_tell;
+		deleteVehicle _diver;
+		deleteGroup _group;
 	};
-	{
-		_civilian = _group createUnit [_x, [0, 0, 0], [], 0, "NONE"];
-		_civilianAttire = _civilianAttire + [getUnitLoadout _civilian];
-		deleteVehicle _civilian;
-	} forEach CIVILIANS;
-	[_self, "_setf", "civilian_group", _group] call fnc_tell;
-	[_self, "_setf", "civilian_attire", _civilianAttire] call fnc_tell;
+	if ("outfit_group_civilian" in _special) then {
+		_group = createGroup civilian;
+		_civilianAttire = [];
+		if (isNil "_group") then {
+			_center = createCenter civilian;
+			_group = createGroup _center;
+		};
+		{
+			_civilian = _group createUnit [_x, [0, 0, 0],
+						       [], 0, "NONE"];
+			_civilianAttire = _civilianAttire +
+				[getUnitLoadout _civilian];
+			deleteVehicle _civilian;
+		} forEach CIVILIANS;
+		[_self, "_setf", "civilian_group", _group] call fnc_tell;
+		[_self, "_setf", "civilian_attire", _civilianAttire]
+		 call fnc_tell;
+	};
 	_self
 } ENDCLASS;
 
 
 DEFMETHOD("CargoVehicle", "load_from_unit") ["_self", "_unit"] DO {
-	/* Store unit's loadout in object */
+	/* Store unit's loadout in object, then strip unit */
 	private ["_gear"];
 	_gear = getUnitLoadout _unit;
 	[_self, "_push_attr", "units", _unit] call fnc_tell;
@@ -121,14 +130,12 @@ DEFMETHOD("CargoVehicle", "load_group_equipment") ["_self", "_group"] DO {
 
 DEFMETHOD("CargoVehicle", "restore_group_equipment") ["_self", "_group"] DO {
 	/* Restore loadout to all group members */
-	private ["_special"];
-	_special = _self getVariable "special";
 	{
 		[_self, "restore_unit_loadout", _x] call fnc_tell;
 	} forEach units _group;
 	{
 		[_self, "add_special_action", _x] call fnc_tell;
-	} forEach _special;
+	} forEach (_self getVariable "special");
 	_self removeAction (_self getVariable "restore_group_equipment");
 	(units _group) joinSilent (_self getVariable "original_group");
 } ENDMETHOD;
@@ -136,15 +143,14 @@ DEFMETHOD("CargoVehicle", "restore_group_equipment") ["_self", "_group"] DO {
 
 DEFMETHOD("CargoVehicle", "add_special_action") ["_self", "_method"] DO {
 	/* Add an action method to the vehicle */
-	private ["_text", "_action"];
-	_text = [_method, ACTIONS] call fnc_alist_get;
-	_action = _self addAction [
-		_text,
-		[["_target", "_caller", "_id", "_args"], {
-			[_target, _args, group _caller] call fnc_tell
-		}] call fnc_lambda,
-		_method];
-	[_self, "_setf", _method, _action] call fnc_tell;
+	[_self, "_setf", _method,
+  	 _self addAction [
+                [_method, ACTIONS] call fnc_alist_get,
+                [["_target", "_caller", "_id", "_args"], {
+	  	        [_target, _args, group _caller] call fnc_tell
+	        }] call fnc_lambda,
+	        _method]
+	] call fnc_tell;
 } ENDMETHOD;
 
 
