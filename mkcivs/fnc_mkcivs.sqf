@@ -35,6 +35,9 @@ _r  = _this select 4;
 
 // Available civs:
 _civs = CIVILIANS;
+if (isClass (configFile >> "CfgPatches" >> "CUP")) then {
+	_civs = _civs + CUP_CIVILIANS;
+};
 
 // Assert side exists, get sideLogic grp handle
 _tst = createGroup civilian;
