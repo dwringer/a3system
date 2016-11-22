@@ -25,7 +25,7 @@ _this spawn {
       _vehicle = vehicle player;
       _action = _vehicle addAction [
 			format ["Talk to %1", _dLogic getVariable "dialogName"],
-	 	 	"asinc\openTalk.sqf", 
+	 	 	"misc\asinc\openTalk.sqf", 
 			[_this,_dLogic]
 		];
       waitUntil {

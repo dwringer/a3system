@@ -12,9 +12,9 @@ fnc_civLeaders = compile preprocessfile "mkcivs\fnc_civLeaders.sqf";
 #endif
 
 ///////////////////// MKCIVS module and support classes: //////////////////////
-#include <mkcivs\ambush_fns.h>
-#include <mkcivs\WeaponCache.hpp>
-#include <mkcivs\Victim.hpp>
-#include <mkcivs\CivilianZone.hpp>
+#include <..\mkcivs\ambush_fns.h>
+#include <..\mkcivs\WeaponCache.hpp>
+#include <..\mkcivs\Victim.hpp>
+#include <..\mkcivs\CivilianZone.hpp>
 ///////////////////////////////////////////////////////////////////////////////
 

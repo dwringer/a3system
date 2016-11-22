@@ -5,12 +5,12 @@
 #define ACT(STATE,NUM,DEST)  \
         setvariable [format ["dialogAct%1%2", STATE, NUM], [DEST, ""]]
 #define INIT(MAN, NAME, STATE)  \
-        _nil = MAN execVM "asinc\dialogEnable.sqf";  \
+        _nil = MAN execVM "misc\asinc\dialogEnable.sqf";  \
         MAN setVariable ["dialogState", STATE];  \
         MAN setVariable ["dialogStart", STATE];  \
         MAN setVariable ["dialogName", NAME]
 #define INIT_AS(AS, MAN)  \
-        _nil = [MAN, AS] execVM "asinc\dialogEnable.sqf"
+        _nil = [MAN, AS] execVM "misc\asinc\dialogEnable.sqf"
 #define STEADY_STATE(MAN, STATE)  \
         MAN ACT(STATE, 1, STATE);  \
         MAN ACT(STATE, 2, STATE);  \

@@ -5,19 +5,19 @@
 [] spawn {
   // Initialize dialog contents:
   waitUntil {alive player};
-  call compile preprocessfile "asinc\initDialogs.sqf";
+  call compile preprocessfile "misc\asinc\initDialogs.sqf";
 };
 
 [] spawn {
   // Conversation drivers:
-  fnc_talk = compile preprocessfile "asinc\talk.sqf";
-  fnc_text = compile preprocessfile "asinc\text.sqf";
+  fnc_talk = compile preprocessfile "misc\asinc\talk.sqf";
+  fnc_text = compile preprocessfile "misc\asinc\text.sqf";
   
   // Dialog retrieval helper:
-  fnc_getText = compile preprocessfile "asinc\getText.sqf";
+  fnc_getText = compile preprocessfile "misc\asinc\getText.sqf";
   
   // Interaction handler:
-  fnc_diagAct = compile preprocessfile "asinc\diagAct.sqf";
+  fnc_diagAct = compile preprocessfile "misc\asinc\diagAct.sqf";
   
 };
 
