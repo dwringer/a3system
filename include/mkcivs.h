@@ -16,5 +16,6 @@ fnc_civLeaders = compile preprocessfile "mkcivs\fnc_civLeaders.sqf";
 #include <..\mkcivs\WeaponCache.hpp>
 #include <..\mkcivs\Victim.hpp>
 #include <..\mkcivs\CivilianZone.hpp>
+#include <..\mkcivs\KillZone.hpp>
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -1,6 +1,6 @@
 #ifndef __MKCIVS_PROPS_H__
 #define __MKCIVS_PROPS_H__
-#define HE_BOMB_A "M_Zephyr"
+#define HE_BOMB_A "R_PG32V_F"
 
 #define AP_BOMB_A "Sh_120mm_APFSDS"
 
@@ -21,6 +21,8 @@
 #define MACHINE_GUNS ["LMG_Zafir_F"]
 
 #define SMALL_ARMS  (ASSAULT_RIFLES + MACHINE_GUNS)
+
+#define CUP_SMALL_ARMS (ASSAULT_RIFLES + MACHINE_GUNS + ["CUP_launch_RPG18"])
 
 #define CIVILIANS ["C_man_polo_1_F",  \
 		   "C_man_polo_2_F",  \

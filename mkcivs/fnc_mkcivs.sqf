@@ -35,7 +35,7 @@ _r  = _this select 4;
 
 // Available civs:
 _civs = CIVILIANS;
-if (isClass (configFile >> "CfgPatches" >> "CUP")) then {
+if (isClass (configFile >> "CfgPatches" >> "CUP_CAMisc")) then {
 	_civs = _civs + CUP_CIVILIANS;
 };
 

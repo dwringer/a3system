@@ -18,17 +18,22 @@
 private ["_grpLdr", "_wpnCache", "_grpThis", 
 	 "_mgznMen", "_wpnMen", "_mgznLdr", "_wpnLdr",
 	 "_grpNew", "_grpOPFOR", "_wptRegroup", "_wptArm",
-	 "_wptDummy"];
+	 "_wptDummy", "_arms"];
 
 _grpLdr = _this select 0;
 _wpnCache = _this select 1;
 _grpThis = group _grpLdr;
 
+_arms = SMALL_ARMS;
+if (isClass (configFile >> "CfgPatches" >> "CUP_CAMisc")) then {
+	_arms = CUP_SMALL_ARMS;
+};
+
 ///////////
 // WEAPONS:
-_wpnLdr = SMALL_ARMS;
+_wpnLdr = _arms;
 _wpnLdr = _wpnLdr select ([count _wpnLdr] call fnc_randint);
-_wpnMen = SMALL_ARMS;
+_wpnMen = _arms;
 _wpnMen = _wpnMen select ([count _wpnMen] call fnc_randint);
 //////////
 
@@ -84,8 +89,17 @@ _wptArm setWaypointStatements ["true", format [
     (units _grp) joinSilent _grpOPFOR;
     deleteGroup _grp;
 
-    {_dude = _x; {_dude addMagazine %1;} forEach [1,2,3,4];
-    _x addWeapon %2;} forEach ((units _grpOPFOR) - [leader _grpOPFOR]);
+    {
+        _dude = _x;
+        if (%2 == ""CUP_launch_RPG18"") then {
+            _dude addBackpack ""B_HuntingBackpack"";
+        };
+        {
+            _dude addMagazine %1;
+        } forEach [1,2,3,4];
+        _x addWeapon %2;
+    } forEach ((units _grpOPFOR) - [leader _grpOPFOR]);
+    (leader _grpOPFOR) addBackpack ""B_HuntingBackpack"";
     {(leader _grpOPFOR) addMagazine %3;} forEach [1,2,3,4];
     (leader _grpOPFOR) addWeapon %4; 
 
