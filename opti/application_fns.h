@@ -22,15 +22,17 @@ fnc_find_positions = [["_radius",          /* Initial search radius */
 	{
 		[_optimizer, "add_objective", _x] call fnc_tell;
 	} forEach _objectives;
-	_thread = [_optimizer, _generations] spawn ([["_opti", "_gens"], {
+	_thread = [_optimizer, _generations, floor (_pop_size / 5)]
+	           spawn ([["_opti", "_gens", "_sz"], {
 		private ["_bins", "_handle", "_retries"];
 		for "_i" from 0 to (_gens - 1) do {
 			_handle = [_opti, "MODE_step"] call fnc_tells;
 		        waitUntil {scriptDone _handle};
 		};
-		_bins = [];
+		_bins = [[]];
 		_retries = 0;
-		while {((count _bins) <= 1) and
+		while {(((count _bins) <= 1) or
+			((count (_bins select 0)) < _sz)) and
 	               (_retries < _gens)} do {
 			_handle = [_opti, "MODE_step"] call fnc_tells;
 		        waitUntil {scriptDone _handle};

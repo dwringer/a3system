@@ -10,6 +10,7 @@
 #include <classdef\ObjectRoot.hpp>
 
 // Assorted classes:
+#include <classdef\PostProcessing.hpp>
 #include <classdef\Dictionary.hpp>
 #include <classdef\UnitGroup.hpp>
 #include <classdef\CrewUnitGroup.hpp>

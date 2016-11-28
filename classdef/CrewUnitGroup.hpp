@@ -63,12 +63,86 @@ DEFMETHOD("CrewUnitGroup", "assign") ["_self", "_unit", "_role"] DO {
 } ENDMETHOD;
 
 
+DEFMETHOD("CrewUnitGroup", "auto_assign") ["_self", "_units"] DO {
+	/* Automatically assign roles to array of units + vehicle(s) */
+	private ["_vehicles", "_drivers", "_gunners", "_unit", "_vehicle",
+		 "_vehicleIndex"];
+	_vehicles = [];
+	_drivers = [];
+	_gunners = [];
+	for "_i" from 0 to ((count _units) - 1) do {
+		_unit = _units select _i;
+		if ((_unit emptyPositions "driver") > 0) then {
+			_vehicles = _vehicles + [_unit];
+		};
+	};
+	_units = _units - _vehicles;
+	for "_i" from 0 to ((count _vehicles) - 1) do {
+		if (_i < (count _units)) then {
+			_drivers = _drivers + [_units select _i];
+		};
+	};
+	_units = _units - _drivers;
+	_vehicleIndex = 0;
+	while {((count _units) > 0) and
+	       (_vehicleIndex < (count _vehicles))} do {
+		_vehicle = _vehicles select _vehicleIndex;
+		for "_i" from 0 to ((count (allTurrets _vehicle)) - 1) do {
+			if (_i <= (count _units)) then {
+				_gunners = _gunners + [_units select _i];
+			};
+		};
+		_units = _units - _gunners;
+		_vehicleIndex = _vehicleIndex + 1;
+	};
+	[[["_arr", "_role", "_cg"], {
+		if (((count _arr) > 0) and
+		    (not isNil "_arr")) then {
+			[[["_u", "_r", "_g"], {
+				if (not isNil "_u") then {
+						[_g, "assign", _u, _r]
+						 call fnc_tell;
+				};
+			 }] call fnc_lambda,
+			 _arr,
+			 [_role, _cg]] call fnc_mapwith;
+		};
+         }] call fnc_lambda,
+	 [_vehicles, _drivers, _gunners, _units],
+	 ["vehicle", "driver", "gunner", "cargo"],
+	 [_self]] call fnc_mapwith;
+} ENDMETHOD;
+
+
+thread_turret_monitor = [["_man", "_vehicle"], {
+	/* Watch stored list of gunners and man turret once all are dead */
+	waitUntil {([[["_a", "_b"], {_a * _b}] call fnc_lambda,
+ 		     [[["_x"], {
+			     if (alive _x) then {0} else {1}
+		      }] call fnc_lambda,
+		     _man getVariable "monitored"] call fnc_map
+		    ] call fnc_reduce) == 1
+	};
+	sleep 2 + (random 2);
+	if (not (_man in (crew _vehicle))) then {
+		_man doMove (position _vehicle);
+		waitUntil {(_man distance _vehicle) < 8};
+		sleep 2 + (random 2);
+	} else {
+		doGetOut _man;
+		waitUntil {not (_man in (crew _vehicle))};
+	};
+	_man assignAsGunner _vehicle;
+	_man moveInGunner _vehicle;
+}] call fnc_lambda;
+
+
 DEFMETHOD("CrewUnitGroup", "board_instant") ["_self"] DO {
 	/* Instantly embark */
 	private ["_vehicles", "_drivers", "_gunners", "_cargos", "_positions",
              	 "_vlen", "_vehicle", "_driver", "_gunner", "_cargo",
           	 "_turret", "_turretPositions", "_turrets", "_cargoSeats",
-	         "_assignmentIndex"];
+	         "_assignmentIndex", "_monitored", "_monitor"];
 	_vehicles = [_self, "_getf", "vehicles"] call fnc_tell;
 	_drivers = [_self, "_getf", "drivers"] call fnc_tell;
 	_gunners = [_self, "_getf", "gunners"] call fnc_tell;
@@ -119,14 +193,22 @@ DEFMETHOD("CrewUnitGroup", "board_instant") ["_self"] DO {
         };
 	for "_i" from 0 to (_vlen - 1) do {
 		if ((count _cargoSeats) > _i) then {
+			_vehicle = _vehicles select _i;
+			_monitored = [gunner _vehicle];
 			for "_j" from 0 to ((_cargoSeats select _i) - 1) do {
 				if ((count _gunners) > 0) then {
-					_vehicle = _vehicles select _i;
 					_cargo = _gunners select 0;
+					_cargo setVariable ["monitored",
+							    _monitored];
 					_cargo assignAsCargo _vehicle;
 					_cargo moveInCargo _vehicle;
 					_gunners = [_gunners, 1, 0] call
 					           fnc_subseq;
+					_monitored = _monitored + [_cargo];
+					_monitor = [_cargo, _vehicle] spawn
+						thread_turret_monitor;
+					_cargo setVariable ["monitor",
+							    _monitor];
 				};
 		        };
 		};

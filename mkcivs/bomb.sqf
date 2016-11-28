@@ -32,7 +32,7 @@ _bombAltPosList = nil;
 
 SMOKE_BOMB_A createVehicle [_bombPos select 0,
 			    _bombPos select 1,
-			    (_bombPos select 2) + 0.0125];
+			    (_bombPos select 2) + 0.00125];
 
 /*
 if ((count (_bombPos nearRoads 20)) == 0) then {
@@ -46,7 +46,7 @@ if ((count (_bombPos nearRoads 20)) == 0) then {
 */
 
 sleep (1.25 + (random 2.75));
-_bombIntvls = [0.125, 0.025];
+_bombIntvls = [0.125, 0.025, 0.025, 0.025, 0.025];
 {
 	sleep _x;
 	HE_BOMB_A createVehicle _bombPos;
