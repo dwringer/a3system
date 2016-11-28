@@ -96,12 +96,18 @@ DEFMETHOD("CrewUnitGroup", "auto_assign") ["_self", "_units"] DO {
 		_vehicleIndex = _vehicleIndex + 1;
 	};
 	[[["_arr", "_role", "_cg"], {
-		[[["_u", "_r", "_g"], {
-			[_g, "assign", _u, _r] call fnc_tell;
-		 }] call fnc_lambda,
-		 _arr,
-		 [_role, _cg]] call fnc_mapwith;
-	  }] call fnc_lambda,
+		if (((count _arr) > 0) and
+		    (not isNil "_arr")) then {
+			[[["_u", "_r", "_g"], {
+				if (not isNil "_u") then {
+						[_g, "assign", _u, _r]
+						 call fnc_tell;
+				};
+			 }] call fnc_lambda,
+			 _arr,
+			 [_role, _cg]] call fnc_mapwith;
+		};
+         }] call fnc_lambda,
 	 [_vehicles, _drivers, _gunners, _units],
 	 ["vehicle", "driver", "gunner", "cargo"],
 	 [_self]] call fnc_mapwith;
