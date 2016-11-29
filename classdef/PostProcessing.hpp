@@ -15,7 +15,7 @@
    list          :: List available mode names
 
       This class manages in-game post-processing to apply color corrections
-  based on several preset color profiles.  Currently available are:
+  based on several preset color profiles.  Currently available* are:
  
         o none
         o middle_east
@@ -23,6 +23,13 @@
         o nightstalkers
         o gray_tone
         o cold_tone
+
+    * These settings were taken from evromalarkey's helpful post at:
+      https://forums.bistudio.com/topic/169842-ascz-custom-post-process-effects/
+      Permission to redistribute the color values was neither asked nor 
+      granted, so if you have a license issue or other claim of interest on
+      these values just let me know and I can remove/replace them or provide
+      additional information as desired.
 
   Example:
    PostProcessing = ["PostProcessing", "none"] call fnc_new;
