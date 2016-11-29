@@ -65,3 +65,30 @@ DEFMETHOD("UnitGroup", "remove") ["_self", "_unit"] DO {
 	[_self, "_setf", "units", _units] call fnc_tell;
 	_units
 } ENDMETHOD;
+
+
+////////////////////////////////// UNTESTED ///////////////////////////////////
+DEFMETHOD("UnitGroup", "groups") ["_self"] DO {
+	/* Return all groups represented in this UnitGroup */
+	private ["_groups", "_group"];
+	_groups = [];
+	{
+		_group = group _x;
+		if (not (_group in _groups)) then {
+			_groups = _groups + [_group];
+		};
+	} foreach (self getVariable "units");
+	_groups
+} ENDMETHOD;
+////////////////////////////////// UNTESTED ///////////////////////////////////
+
+
+////////////////////////////////// UNTESTED ///////////////////////////////////
+DEFMETHOD("UnitGroup", "add_waypoint") ["_self",
+					"_waypoint"] DO {
+	/* Add a waypoint instance to every group in the UnitGroup */
+	{
+		[_waypoint, "add_to_group", _x] call fnc_tell;
+	} forEach ([_self, "groups"] call fnc_tell);
+} ENDMETHOD;
+////////////////////////////////// UNTESTED ///////////////////////////////////

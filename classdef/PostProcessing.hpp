@@ -1,4 +1,37 @@
-#define PP_MODES  [["none",  \
+/*
+  PostProcessing class
+    :: PostProcessing -> ObjectRoot
+
+  Methods:
+   __init__      :: Initialize Post Processing to the specified color mode
+   set           :: Set a specific color mode, with optional commit time
+     mode
+     [commit]
+   settings      :: Retrieve settings for a given mode
+     mode
+   apply         :: Apply given settings, with optional commit time
+     settings
+     [commit]
+   list          :: List available mode names
+
+      This class manages in-game post-processing to apply color corrections
+  based on several preset color profiles.  Currently available are:
+ 
+        o none
+        o middle_east
+        o real_is_brown_2
+        o nightstalkers
+        o gray_tone
+        o cold_tone
+
+  Example:
+   PostProcessing = ["PostProcessing", "none"] call fnc_new;
+   [PostProcessing, "set", "middle_east", 2] call fnc_tell;
+   // Fades to the middle_east color profile over a period of 2 seconds.
+
+*/
+
+#define PP_MODES  [["none",						\
                     [1, 1, 0,[ 0, 0, 0, 0],[ 1, 1, 1, 1],[ 0, 0, 0, 0]]],  \
                    ["middle_east",  \
 		    [0.9, 1, 0, [0.1, 0.1, 0.1, -0.1], [1, 1, 0.8, 0.528],  [1, 0.2, 0, 0]]],				\
@@ -14,6 +47,7 @@
 
 DEFCLASS("PostProcessing") ["_self", "_mode"] DO {
 	/* Post processing module initialization to named mode (or "random") */
+	SUPER("ObjectRoot", _self);
 	[_self, "set", _mode] call fnc_tell;
 	_self
 } ENDCLASS;
