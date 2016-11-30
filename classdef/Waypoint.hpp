@@ -43,11 +43,21 @@ DEFCLASS("Waypoint") (["_self"] + WAYPOINT_PARAMETERS) DO {
 } ENDCLASS;
 
 
-DEFMETHOD("Waypoint", "to_group") ["_self", "_group"] DO {
+DEFMETHOD("Waypoint", "to_group") ["_self", "_group", "_index"] DO {
 	/* Render a group waypoint from instance then return it */
-	private ["_waypoint", "_value", "_operation"];
-	_waypoint = _group addWaypoint [_self getVariable "_position",
-					_self getVariable "_placement_radius"];
+	private ["_waypoint", "_value", "_operation", "_parameters"];
+	_parameters = [_self getVariable "_position",
+		       _self getVariable "_placement_radius"];
+	if (not isNil "_index") then {
+		if (_index == 0) then {
+			_parameters = _parameters + [currentWaypoint _group];
+		} else {
+			if (_index > 0) then {
+				_parameters = _parameters + [_index];
+			};
+		};
+	};
+	_waypoint = _group addWaypoint _parameters;
 	{
 		_value = _self getVariable _x;
 		_operation = [_x, WAYPOINT_FUNCTIONS] call fnc_alist_get;
@@ -56,7 +66,6 @@ DEFMETHOD("Waypoint", "to_group") ["_self", "_group"] DO {
 					     _operation,
 					     _value];
 		};
-	} forEach (WAYPOINT_PARAMETERS - 
-		   ["_position", "_placement_radius"]);
+	} forEach (WAYPOINT_PARAMETERS - ["_position", "_placement_radius"]);
 	_waypoint
 } ENDMETHOD;

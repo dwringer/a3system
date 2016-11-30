@@ -81,12 +81,15 @@ DEFMETHOD("UnitGroup", "groups") ["_self"] DO {
 } ENDMETHOD;
 
 
-DEFMETHOD("UnitGroup", "add_waypoint") ["_self",
-					"_waypoint"] DO {
+DEFMETHOD("UnitGroup", "add_waypoint") ["_self", "_waypoint", "_index"] DO {
 	/* Add a waypoint instance to every group in the UnitGroup */
-	[[["_grp", "_wpt"], {
-		[_wpt, "to_group", _grp] call fnc_tell;
+	if (isNil "_index") then {
+		_index = -1;
+	};
+	[[["_grp", "_wpt", "_idx"], {
+		[_wpt, "to_group", _grp, _idx] call fnc_tell;
 	 }] call fnc_lambda,
 	 [_self, "groups"] call fnc_tell,
-	 [_waypoint]] call fnc_mapwith
+	 [_waypoint, _index]] call fnc_mapwith
 } ENDMETHOD;
+
