@@ -67,7 +67,6 @@ DEFMETHOD("UnitGroup", "remove") ["_self", "_unit"] DO {
 } ENDMETHOD;
 
 
-////////////////////////////////// UNTESTED ///////////////////////////////////
 DEFMETHOD("UnitGroup", "groups") ["_self"] DO {
 	/* Return all groups represented in this UnitGroup */
 	private ["_groups", "_group"];
@@ -77,18 +76,17 @@ DEFMETHOD("UnitGroup", "groups") ["_self"] DO {
 		if (not (_group in _groups)) then {
 			_groups = _groups + [_group];
 		};
-	} foreach (self getVariable "units");
+	} foreach (_self getVariable "units");
 	_groups
 } ENDMETHOD;
-////////////////////////////////// UNTESTED ///////////////////////////////////
 
 
-////////////////////////////////// UNTESTED ///////////////////////////////////
 DEFMETHOD("UnitGroup", "add_waypoint") ["_self",
 					"_waypoint"] DO {
 	/* Add a waypoint instance to every group in the UnitGroup */
-	{
-		[_waypoint, "add_to_group", _x] call fnc_tell;
-	} forEach ([_self, "groups"] call fnc_tell);
+	[[["_grp", "_wpt"], {
+		[_wpt, "to_group", _grp] call fnc_tell;
+	 }] call fnc_lambda,
+	 [_self, "groups"] call fnc_tell,
+	 [_waypoint]] call fnc_mapwith
 } ENDMETHOD;
-////////////////////////////////// UNTESTED ///////////////////////////////////

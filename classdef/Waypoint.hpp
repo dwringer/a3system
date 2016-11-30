@@ -1,8 +1,4 @@
-////////////////////////////////// UNTESTED ///////////////////////////////////
-////////////////////////////////// UNTESTED ///////////////////////////////////
-////////////////////////////////// UNTESTED ///////////////////////////////////
-#define WAYPOINT_PARAMETERS ["_self",  \
-			     "_behavior",		\
+#define WAYPOINT_PARAMETERS ["_behavior",		\
 			     "_combat_mode",		\
 			     "_completion_radius",	\
 			     "_description",		\
@@ -22,6 +18,7 @@
 			     "setWaypointCompletionRadius"],  \
 			    ["_description", "setWaypointDescription"],  \
 			    ["_formation", "setWaypointFormation"],  \
+			    ["_position", "setWaypointPosition"],  \
 			    ["_speed", "setWaypointSpeed"],  \
 			    ["_statements", "setWaypointStatements"],  \
 			    ["_timeout", "setWaypointTimeout"],  \
@@ -29,23 +26,24 @@
 			    ["_visible", "setWaypointVisible"]]
 
 
-DEFCLASS("Waypoint") WAYPOINT_PARAMETERS DO {
+DEFCLASS("Waypoint") (["_self"] + WAYPOINT_PARAMETERS) DO {
 	/* Create a waypoint with the appropriate parameters (or nil) */
+	private ["_value"];
 	SUPER("ObjectRoot", _self);
-	[_self, "_setf", "_parameters",
-	 [WAYPOINT_PARAMETERS, 1, 0] call fnc_subseq] call fnc_tell;
-	{
-		call compile format ["
-                        if (not isNil ""%1"") then {
-                                [_self, ""_setf"", ""%1"", %1] call fnc_tell;
-                        };
-                ", _x]
-	} forEach (_self getVariable "_parameters");
+	[_self, "_setf", "_parameters", _this] call fnc_tell;
+	for "_i" from 1 to ((count _this) - 1) do {
+		_value = _this select _i;
+		if (not isNil "_value") then {
+			[_self, "_setf", WAYPOINT_PARAMETERS select (_i - 1),
+			 _value]
+			 call fnc_tell;
+		};
+	};
 	_self
 } ENDCLASS;
 
 
-DEFMETHOD("Waypoint", "add_to_group") ["_self", "_group"] DO {
+DEFMETHOD("Waypoint", "to_group") ["_self", "_group"] DO {
 	/* Render a group waypoint from instance then return it */
 	private ["_waypoint", "_value", "_operation"];
 	_waypoint = _group addWaypoint [_self getVariable "_position",
@@ -58,10 +56,7 @@ DEFMETHOD("Waypoint", "add_to_group") ["_self", "_group"] DO {
 					     _operation,
 					     _value];
 		};
-	} forEach ((_self getVariable "_parameters") -
+	} forEach (WAYPOINT_PARAMETERS - 
 		   ["_position", "_placement_radius"]);
 	_waypoint
 } ENDMETHOD;
-////////////////////////////////// UNTESTED ///////////////////////////////////
-////////////////////////////////// UNTESTED ///////////////////////////////////
-////////////////////////////////// UNTESTED ///////////////////////////////////

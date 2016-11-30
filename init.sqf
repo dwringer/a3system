@@ -15,6 +15,7 @@
 #include <classdef\UnitGroup.hpp>
 #include <classdef\CrewUnitGroup.hpp>
 #include <classdef\CargoVehicle.hpp>
+#include <classdef\Waypoint.hpp>
 
 // Optimizer module:
 #include <include\optimizer.h>
