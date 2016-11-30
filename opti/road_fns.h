@@ -13,9 +13,11 @@ fnc_find_intersections = [["_x", "_dist"], {
 }] call fnc_lambda;
 
 
+/////////////////////////////////// UNTESTED //////////////////////////////////
 fnc_trace_road = [["_start", "_candidates"], {
-	/* Given a start & some road segments, trace a singly connected path */
-	private ["_trace", "_next", "_connected", "_found", "_newConnections"];
+	/* Given a start & opt. road segments, trace a singly connected path */
+	private ["_trace", "_next", "_connected", "_found", "_newConnections",
+		 "_continue"];
 	_trace = [];
 	_next = _start;
 	_connected = roadsConnectedTo _start;
@@ -27,12 +29,19 @@ fnc_trace_road = [["_start", "_candidates"], {
 			_next = _connected select _i;
 			_newConnections = roadsConnectedTo _next;
 			if ((not (_next in _trace)) and
-                            (not (count (_newConnections) > 2)) and
-			    (_next in _candidates)) then {
-				_trace = _trace + [_next];
-   			        _connected = _newConnections;
-				_found = true;
-				breakOut "CheckingUniqueness";
+                            (not (count (_newConnections) > 2))) then {
+				_continue = true;
+				if (not isNil "_candidates") then {
+					if (not (_next in _candidates)) then {
+						_continue = false;
+					};
+				};
+				if (_continue) then {
+					_trace = _trace + [_next];
+					_connected = _newConnections;
+					_found = true;
+					breakOut "CheckingUniqueness";
+				};
 			};
 		};
 		if (not _found) then {
@@ -41,6 +50,7 @@ fnc_trace_road = [["_start", "_candidates"], {
 	};
 	_trace
 }] call fnc_lambda;
+/////////////////////////////////// UNTESTED //////////////////////////////////
 
 
 fnc_find_roads = [["_p", "_dist"], {
