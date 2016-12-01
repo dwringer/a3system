@@ -15,32 +15,6 @@ fnc_units_nearby = [["_x", "_units", "_dist"], {
 }] call fnc_lambda;
 
 
-fnc_proximity_cost = [["_maximize",
-	               "_min",
-		       "_max",
-		       "_aname",
-		       "_dist"], {
-	/* {minimize|maximize} (as few as #) to (as many as #) 
-           members of [...] within #m */
-	private ["_pf", "_cf", "_prefix"];
-	_pf = [["_x"],
-	       format ["[_x, (_x getVariable ""%1""), %2] call fnc_units_nearby",
-		       _aname, _dist]]
- 	       call fnc_lambdastr;
-	if (_maximize) then {
-		_prefix = "1 - ";
-	} else {
-		_prefix = "";
-	};
-	_cf = [["_x"],
-	       format ["%1([_x] call %2)",
-		       _prefix,
-		       [_pf, _min, _max] call fnc_normalizer]]
-	       call fnc_lambdastr;
-	_cf
-}] call fnc_lambda;
-
-
 fnc_to_cost = [["_maximize",
 		"_min",
 		"_max",
@@ -66,21 +40,9 @@ fnc_to_cost = [["_maximize",
 }] call fnc_lambda;
 
 
-cost_fnc_1_to_5_targets_within_150m = [false, 1, 5, "targets", 150]
-                               	       call fnc_proximity_cost;
-
-
-cost_fnc_1_to_10_targets_within_10m = [false, 1, 10,
-				       "[_x, _x getVariable ""targets"", 10]",
-				       fnc_units_nearby] call fnc_to_cost;
-
-
-component_fnc_units_nearby = [["_x", "_units", "_dist", "_min", "_max"], {
-	/* Parametric cost for not having a certain number of units nearby */
-	private ["_count"];
-	_count = count ([_x, _units, _dist] call fnc_neighbors);
-	(1 min (0 max ((_count - _min) / (_max - _min))))
-}] call fnc_lambda;
+OPT_fnc_1_to_10_targets_within_10m = [false, 1, 10,
+  			              "[_x, _x getVariable ""targets"", 10]",
+				      fnc_units_nearby] call fnc_to_cost;
 
 
 component_fnc_partial_LOS_to_unit_array = [["_p",
@@ -198,10 +160,11 @@ OPT_fnc_building_positions_nearby = [["_x"], {
 }] call fnc_lambda;
 
 
-OPT_fnc_civilians_nearby = [["_x"], {
-	/* Cost function for not being near civs in civArray */
-	(1 - ([_x, civArray, 100, 0, 5] call component_fnc_units_nearby));
-}] call fnc_lambda;
+// Cost function for not being near civs in civArray:
+OPT_fnc_civilians_nearby = [false, 2, 5,
+			    "[_x, civArray, 100]",
+			    fnc_units_nearby]
+	                    call fnc_to_cost;
 
 
 OPT_fnc_partial_LOS_to_player_group = [["_x"], {
