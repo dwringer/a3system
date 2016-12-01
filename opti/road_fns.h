@@ -13,7 +13,6 @@ fnc_find_intersections = [["_x", "_dist"], {
 }] call fnc_lambda;
 
 
-/////////////////////////////////// UNTESTED //////////////////////////////////
 fnc_trace_road = [["_start", "_candidates"], {
 	/* Given a start & opt. road segments, trace a singly connected path */
 	private ["_trace", "_next", "_connected", "_found", "_newConnections",
@@ -50,7 +49,6 @@ fnc_trace_road = [["_start", "_candidates"], {
 	};
 	_trace
 }] call fnc_lambda;
-/////////////////////////////////// UNTESTED //////////////////////////////////
 
 
 fnc_find_roads = [["_p", "_dist"], {

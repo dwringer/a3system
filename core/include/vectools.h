@@ -9,4 +9,23 @@ fnc_homogenize = compile preprocessfile "core\vectools\fnc_homogenize.sqf";
 fnc_dehomogenize = compile preprocessfile "core\vectools\fnc_dehomogenize.sqf";
 fnc_neighbors = compile preprocessfile "core\vectools\fnc_neighbors.sqf";
 fnc_closest = compile preprocessfile "core\vectools\fnc_closest.sqf";
+
+/////////////////////////////////// UNTESTED //////////////////////////////////
+fnc_vector_mean = [["_vectors"], {
+	/* Find the mean vector of a list of vectors */
+	private ["_alen", "_component", "_mean"];
+	_mean = [];
+	_alen = count _vectors;
+	for "_i" from 0 to 2 do {
+		_component = 0;
+		for "_j" from 0 to (_alen - 1) do {
+			_component = _component +
+				(((_vectors select _j) select _i) / _alen);
+		};
+		_mean = _mean + [_component];
+	};
+	_mean
+}] call fnc_lambda;
+/////////////////////////////////// UNTESTED //////////////////////////////////
+
 #endif

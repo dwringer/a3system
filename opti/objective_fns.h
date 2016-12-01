@@ -1,4 +1,5 @@
 fnc_normalizer = [["_particle_function", "_min", "_max"], {
+	/* Create a normalized version of the given function of one Particle */
 	[["_p"], format ["
                 private [""_min"", ""_max""];
                 _min = %2;
@@ -10,27 +11,17 @@ fnc_normalizer = [["_particle_function", "_min", "_max"], {
 }] call fnc_lambda;
 
 
-fnc_units_nearby = [["_x", "_units", "_dist"], {
-	count ([_x, _units, _dist] call fnc_neighbors)
-}] call fnc_lambda;
-
-
-fnc_to_cost = [["_maximize",
-		"_min",
-		"_max",
-		"_x_parameter_string",
-		"_function"], {
-	/* {minimize|maximize} (as few as #) to (as many as #) 
-           members of [...] within #m */
+fnc_to_cost_function = [["_maximize",
+			 "_min",
+			 "_max",
+			 "_x_parameter_string",
+			 "_function"], {
+	/* Turn f("[_x_parameter_string]") to [min|max]imization f(_x) */
 	private ["_pf", "_cf", "_prefix"];
 	_pf = [["_x"],
 	               format ["%1 call %2", _x_parameter_string, _function]]
  	       call fnc_lambdastr;
-	if (_maximize) then {
-		_prefix = "1 - ";
-	} else {
-		_prefix = "";
-	};
+	if (_maximize) then {_prefix = "1 - "} else {_prefix = ""};
 	_cf = [["_x"],
 	       format ["%1([_x] call %2)",
 		       _prefix,
@@ -40,86 +31,47 @@ fnc_to_cost = [["_maximize",
 }] call fnc_lambda;
 
 
-OPT_fnc_1_to_10_targets_within_10m = [false, 1, 10,
-  			              "[_x, _x getVariable ""targets"", 10]",
-				      fnc_units_nearby] call fnc_to_cost;
+fnc_units_nearby = [["_x", "_units", "_dist"], {
+	/* Count members of _units within _dist of _x */
+	count ([_x, _units, _dist] call fnc_neighbors)
+}] call fnc_lambda;
 
 
-component_fnc_partial_LOS_to_unit_array = [["_p",
-				            "_array",
-					    "_eye_height",
-					    "_full_LOS_bias",
-					    "_no_LOS_weight",
-					    "_min",
-					    "_max"], {
-	/* Parametric cost for not having occluded LOS to array members */
-	private ["_sum", "_v"];
+fnc_partial_LOS_to_array = [["_p",
+			     "_array",
+			     "_eye_height",
+			     "_full_LOS_bias",
+			     "_no_LOS_weight",
+			     "_is_unit_array"], {
+	/* Ratio of occluded LOS to array of positions */
+	private ["_sum", "_visibilityParams", "_v", "_target"];
 	_sum = 0;
 	{
-		_v = (1 - ([vehicle _p, "VIEW", vehicle _x] checkVisibility
+		_visibilityParams = [vehicle _p, "VIEW"];
+		if (_is_unit_array) then {
+			_visibilityParams = _visibilityParams + [vehicle _x];
+			_target = eyePos _x;
+		} else {
+			_target = _x;
+		};			
+		_v = (1 - (_visibilityParams checkVisibility
 		            [[(getPosASL _p) select 0, 
                               (getPosASL _p) select 1, 
 		              ((getPosASL _p) select 2) + _eye_height], 
-		             eyePos _x])); 
-		if ((_v >= 0.025) && (_v < 1)) then {
-			_sum = _sum + 0;
+		             _target])); 
+		if (_v < 0.025) then {
+			_sum = _sum + _full_LOS_bias + _no_LOS_weight;
 		} else {
-			if (_v < 0.025) then {
-				_sum = _sum + _full_LOS_bias + _no_LOS_weight;
-			} else {
+			if (_v >= 1) then {
 				_sum = _sum + (1 - _full_LOS_bias);
 			};
 		};
 	} forEach _array;
-	(((_sum / (count _array)) - _min) / (_max - _min))
+	(_sum / (count _array))
 }] call fnc_lambda;
 
 
-component_fnc_partial_LOS_to_object_array = [["_p",
-  			                      "_array",
-					      "_eye_height",
-					      "_full_LOS_bias",
-					      "_no_LOS_weight",
-					      "_min",
-					      "_max"], {
-	/* Parametric cost for not having occluded LOS to array members */
-	[_p, [[["_x"], {position _x}] call fnc_lambda, _array] call fnc_map,
-	 _eye_height, _full_LOS_bias, _no_LOS_weight, _min, _max]
-	 call component_fnc_partial_LOS_to_positions;
-}] call fnc_lambda;
-
-
-component_fnc_partial_LOS_to_positions = [["_p",
-				           "_array",
-                                           "_eye_height",
-				           "_full_LOS_bias",
-				           "_no_LOS_weight",
-				           "_min",
-				           "_max"], {
-	/* Parametric cost for not having occluded LOS to positions */
-	private ["_sum", "_v"];
-	_sum = 0;
-	{
-		_v = (1 - ([_p, "VIEW"] checkVisibility
-		            [[(getPosASL _p) select 0, 
-                              (getPosASL _p) select 1, 
-		              ((getPosASL _p) select 2) + _eye_height], 
-		             _x])); 
-		if ((_v >= 0.025) && (_v < 1)) then {
-			_sum = _sum + 0;
-		} else {
-			if (_v < 0.025) then {
-				_sum = _sum + _full_LOS_bias + _no_LOS_weight;
-			} else {
-				_sum = _sum + (1 - _full_LOS_bias);
-			};
-		};
-	} forEach _array;
-	(((_sum / (count _array)) - _min) / (_max - _min))
-}] call fnc_lambda;
-
-
-component_fnc_building_positions_nearby = [["_x", "_dist", "_min", "_max"], {
+fnc_building_positions_nearby = [["_x", "_dist"], {
 	/* Parametric cost for not having building positions nearby */
 	private ["_houses", "_positions"];
 	_houses = _x nearObjects ["house", _dist];
@@ -127,90 +79,72 @@ component_fnc_building_positions_nearby = [["_x", "_dist", "_min", "_max"], {
 	for "_i" from 0 to ((count _houses) - 1) do {
 		_positions = _positions + ((_houses select _i) buildingPos -1);
 	};
-	(1 min (0 max (((count _positions) - _min)) / (_max - _min)))
+	count _positions
 }] call fnc_lambda;
 
 
-component_fnc_distance_from_position = [["_x", "_pos", "_min", "_max"], {
-	/* Parametric cost for being close to a position */
-	(1 min
-	 (0 max
-	  (([_pos, _x] call fnc_euclidean_distance) - _min) /
-	  (_max - _min)))
+fnc_roads_nearby = [["_x", "_dist"], {
+	/* Count roads near _x within _dist */
+	count ([_x, _dist] call fnc_find_roads)
 }] call fnc_lambda;
 
 
-component_fnc_distance_from_roads = [["_x", "_dist", "_min", "_max"], {
-	/* Parametric cost for not having a certain number of units nearby */
-	private ["_count"];
-	_count = count ([_x, _dist] call fnc_find_roads);
-	(1 min (0 max ((_count - _min) / (_max - _min))))
-}] call fnc_lambda;
+// Cost for having [0..10] roads within 10m:
+OPT_fnc_distance_from_roads = [false, 0, 10,
+			       "[_x, 10]",
+			       fnc_roads_nearby]
+	                       call fnc_to_cost_function;
 
 
-OPT_fnc_distance_from_roads = [["_x"], {
-	/* Cost function for having roads nearby */
-	[_x, 10, 0, 10] call component_fnc_distance_from_roads
-}] call fnc_lambda;
+// Cost for having [0..10] building positions within 35m:
+OPT_fnc_building_positions_nearby = [true, 0, 10,
+				     "[_x, 35]",
+				     fnc_building_positions_nearby]
+	                             call fnc_to_cost_function;
 
 
-OPT_fnc_building_positions_nearby = [["_x"], {
-	/* Cost function for not having building positions nearby */
-	(1 - ([_x, 35, 0, 10] call component_fnc_building_positions_nearby));
-}] call fnc_lambda;
-
-
-// Cost function for not being near civs in civArray:
+// Cost function for not being near [2..5] civs in civArray within 100m:
 OPT_fnc_civilians_nearby = [true, 2, 5,
 			    "[_x, civArray, 100]",
 			    fnc_units_nearby]
-	                    call fnc_to_cost;
+	                    call fnc_to_cost_function;
 
 
-OPT_fnc_partial_LOS_to_player_group = [["_x"], {
-	/* Cost function for not having occluded LOS to player group */
-	[_x, units group player,
-	 1.6, 0, 0.5, 0, 1] call component_fnc_partial_LOS_to_unit_array;
-}] call fnc_lambda;
+// Cost function for not having occluded LOS to player group:
+OPT_fnc_partial_LOS_to_player_group = [false, 0, 1,
+				       "[_x, units group player, 
+                                         1.6, 0, 0.5, true]",
+				       fnc_partial_LOS_to_array]
+                                       call fnc_to_cost_function;
 
 
-OPT_fnc_partial_LOS_to_targets = [["_x"], {
-        /* Cost function for not having occluded LOS to designated targets */
-	private ["_targets"];
-	_targets = _x getVariable ["targets", []];
-	[_x, [[["_t"], {
-		private ["_pos"];
-		_pos = position _t;
-		[_pos select 0, _pos select 1, (_pos select 2) + 1.5]
- 	      }] call fnc_lambda, _targets] call fnc_map,
-	 1.6, 0, 0.5, 0, 1] call component_fnc_partial_LOS_to_positions;
-}] call fnc_lambda;
+// Cost function for not having occluded LOS to designated targets:
+OPT_fnc_partial_LOS_to_targets = [false, 0, 1,
+				  "[_x,
+				    [[[""_t""], {
+                                             [(position _t) select 0,
+                                              (position _t) select 1,
+                                              1.5 + ((position _t) select 2)]
+                                     }] call fnc_lambda,
+				     _x getVariable ""targets""]
+				     call fnc_map,
+                                    1.6, 0, 0.5, false]",
+				  fnc_partial_LOS_to_array]
+                                  call fnc_to_cost_function;
 
 
-OPT_fnc_distance_from_player = [["_x"], {
-	/* Cost function for being close to a position */
-	1 -
-	([position _x, position player, 50, 300]
-	  call component_fnc_distance_from_position);
-}] call fnc_lambda;
+// Cost function for being close (w/in 50-300m) to player position:
+OPT_fnc_distance_from_player = [true, 50, 300,
+				"[position _x, position player]",
+				fnc_euclidean_distance]
+                                call fnc_to_cost_function;
 
 
-OPT_fnc_distance_from_targets = [["_x"], {
-	/* Cost function for being close to designated targets */
-	private ["_targets", "_positions", "_position", "_alen", "_component"];
-	_targets = _x getVariable ["targets", []];
-	_positions = [[["_t"], {position _t}] call fnc_lambda,
-		      _targets] call fnc_map;
-	_position = [];
-	_alen = count _targets;
-	for "_i" from 0 to 2 do {
-		_component = 0;
-		for "_j" from 0 to (_alen - 1) do {
-			_component = _component +
-			        (((_positions select _j) select _i) / _alen);
-		};
-		_position = _position + [_component];
-	};
-	1 - ([position _x, _position, 50, 300]
-	     call component_fnc_distance_from_position);
-}] call fnc_lambda;
+// Cost function for being close to designated targets:
+OPT_fnc_distance_from_targets = [true, 50, 300,
+				 "[position _x,
+                                   ([[[""_t""], {position _t}] call fnc_lambda,
+                                     _x getVariable ""targets""] 
+                                     call fnc_map) call fnc_vector_mean]",
+				 fnc_euclidean_distance]
+                                 call fnc_to_cost_function;
