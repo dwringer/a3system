@@ -14,7 +14,7 @@ fnc_find_intersections = [["_x", "_dist"], {
 
 
 fnc_trace_road = [["_start", "_candidates"], {
-	/* Given a start & opt. road segments, trace a singly connected path */
+	/* Trace a singly connected path given a start [& opt road segments] */
 	private ["_trace", "_next", "_connected", "_found", "_newConnections",
 		 "_continue"];
 	_trace = [];

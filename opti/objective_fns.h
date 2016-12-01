@@ -1,13 +1,20 @@
+////////////////////////////// OBJECTIVE_FNS.H ////////////////////////////////
+//  A set of cost/objective functions and utilities for creating new ones    //
+///////////////////////////////////////////////////////////////////////////////
+
+////////////////////////
+// UTILITY FUNCTIONS: //  For creating arbitrary normalized cost functions
+///////////////////////////////////////////////////////////////////////////////
+
 fnc_normalizer = [["_particle_function", "_min", "_max"], {
 	/* Create a normalized version of the given function of one Particle */
-	[["_p"], format ["
-                private [""_min"", ""_max""];
-                _min = %2;
-                _max = %3;
-	        (1 min (0 max 
-                 (((_max min (_min max ([_p] call %1))) - _min) / 
-                  (_max - _min))))
-	", _particle_function, _min, _max]] call fnc_lambdastr
+	[["_p"], format ['private ["_min", "_max"];
+                          _min = %2;
+                          _max = %3;
+                          (1 min (0 max 
+                           (((_max min (_min max ([_p] call %1))) - _min) / 
+                            (_max - _min))))',
+                         _particle_function, _min, _max]] call fnc_lambdastr
 }] call fnc_lambda;
 
 
@@ -30,6 +37,11 @@ fnc_to_cost_function = [["_maximize",
 	_cf
 }] call fnc_lambda;
 
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////
+// OBJECTIVE DATA FUNCTIONS: //  Parameterized functions for objective data
+///////////////////////////////////////////////////////////////////////////////
 
 fnc_units_nearby = [["_x", "_units", "_dist"], {
 	/* Count members of _units within _dist of _x */
@@ -88,63 +100,70 @@ fnc_roads_nearby = [["_x", "_dist"], {
 	count ([_x, _dist] call fnc_find_roads)
 }] call fnc_lambda;
 
+///////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////
+// NORMALIZED OBJECTIVE FUNCTIONS OF A SINGLE PARTICLE: //
+///////////////////////////////////////////////////////////////////////////////
 
 // Cost for having [0..10] roads within 10m:
 OPT_fnc_distance_from_roads = [false, 0, 10,
-			       "[_x, 10]",
+			       '[_x, 10]',
 			       fnc_roads_nearby]
 	                       call fnc_to_cost_function;
 
 
 // Cost for having [0..10] building positions within 35m:
 OPT_fnc_building_positions_nearby = [true, 0, 10,
-				     "[_x, 35]",
+				     '[_x, 35]',
 				     fnc_building_positions_nearby]
 	                             call fnc_to_cost_function;
 
 
 // Cost function for not being near [2..5] civs in civArray within 100m:
 OPT_fnc_civilians_nearby = [true, 2, 5,
-			    "[_x, civArray, 100]",
+			    '[_x, civArray, 100]',
 			    fnc_units_nearby]
 	                    call fnc_to_cost_function;
 
 
 // Cost function for not having occluded LOS to player group:
 OPT_fnc_partial_LOS_to_player_group = [false, 0, 1,
-				       "[_x, units group player, 
-                                         1.6, 0, 0.5, true]",
+				       '[_x, units group player, 
+                                         1.6, 0, 0.5, true]',
 				       fnc_partial_LOS_to_array]
                                        call fnc_to_cost_function;
 
 
 // Cost function for not having occluded LOS to designated targets:
 OPT_fnc_partial_LOS_to_targets = [false, 0, 1,
-				  "[_x,
-				    [[[""_t""], {
+				  '[_x,
+				    [[["_t"], {
                                              [(position _t) select 0,
                                               (position _t) select 1,
                                               1.5 + ((position _t) select 2)]
                                      }] call fnc_lambda,
-				     _x getVariable ""targets""]
+				     _x getVariable "targets"]
 				     call fnc_map,
-                                    1.6, 0, 0.5, false]",
+                                    1.6, 0, 0.5, false]',
 				  fnc_partial_LOS_to_array]
                                   call fnc_to_cost_function;
 
 
 // Cost function for being close (w/in 50-300m) to player position:
 OPT_fnc_distance_from_player = [true, 50, 300,
-				"[position _x, position player]",
+				'[position _x, position player]',
 				fnc_euclidean_distance]
                                 call fnc_to_cost_function;
 
 
 // Cost function for being close to designated targets:
 OPT_fnc_distance_from_targets = [true, 50, 300,
-				 "[position _x,
-                                   ([[[""_t""], {position _t}] call fnc_lambda,
-                                     _x getVariable ""targets""] 
-                                     call fnc_map) call fnc_vector_mean]",
+				 '[position _x,
+                                   ([[["_t"], {position _t}] call fnc_lambda,
+                                     _x getVariable "targets"] 
+                                     call fnc_map) call fnc_vector_mean]',
 				 fnc_euclidean_distance]
                                  call fnc_to_cost_function;
+
+///////////////////////////////////////////////////////////////////////////////
