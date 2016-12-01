@@ -161,7 +161,7 @@ OPT_fnc_building_positions_nearby = [["_x"], {
 
 
 // Cost function for not being near civs in civArray:
-OPT_fnc_civilians_nearby = [false, 2, 5,
+OPT_fnc_civilians_nearby = [true, 2, 5,
 			    "[_x, civArray, 100]",
 			    fnc_units_nearby]
 	                    call fnc_to_cost;
