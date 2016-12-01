@@ -1,4 +1,3 @@
-/////////////////////////////////// UNTESTED //////////////////////////////////
 fnc_normalizer = [["_particle_function", "_min", "_max"], {
 	[["_p"], format ["
                 private [""_min"", ""_max""];
@@ -9,7 +8,6 @@ fnc_normalizer = [["_particle_function", "_min", "_max"], {
                   (_max - _min))))
 	", _particle_function, _min, _max]] call fnc_lambdastr
 }] call fnc_lambda;
-////////////////////////////////// /UNTESTED //////////////////////////////////
 
 
 fnc_units_nearby = [["_x", "_units", "_dist"], {
@@ -17,34 +15,14 @@ fnc_units_nearby = [["_x", "_units", "_dist"], {
 }] call fnc_lambda;
 
 
-/////////////////////////////////// UNTESTED //////////////////////////////////
-p_fnc_targets_within_100m = [["_p"], {
-	[_p, _p getVariable "targets", 100] call fnc_units_nearby
-}] call fnc_lambda;
-////////////////////////////////// /UNTESTED //////////////////////////////////
-
-
-/////////////////////////////////// UNTESTED //////////////////////////////////
-cost_fnc_1_to_4_targets_within_100m = [["_p"], {
-	[_p] call ([p_fnc_targets_within_100m, 1, 4] call fnc_normalizer)
-}] call fnc_lambda;
-////////////////////////////////// /UNTESTED //////////////////////////////////
-
-
-/////////////////////////////////// UNTESTED //////////////////////////////////
-cost_fnc_1_to_5_targets_within_150m = [false, 1, 5, "targets", 150]
-                               	       call fnc_proximity_cost;
-////////////////////////////////// /UNTESTED //////////////////////////////////
-
-
-/////////////////////////////////// UNTESTED //////////////////////////////////
-//{minimize|maximize} (as few as #) to (as many as #) members of [...] within #m
 fnc_proximity_cost = [["_maximize",
 	               "_min",
 		       "_max",
 		       "_aname",
 		       "_dist"], {
-        private ["_pf", "_cf", "_prefix"];
+	/* {minimize|maximize} (as few as #) to (as many as #) 
+           members of [...] within #m */
+	private ["_pf", "_cf", "_prefix"];
 	_pf = [["_x"],
 	       format ["[_x, (_x getVariable ""%1""), %2] call fnc_units_nearby",
 		       _aname, _dist]]
@@ -61,7 +39,40 @@ fnc_proximity_cost = [["_maximize",
 	       call fnc_lambdastr;
 	_cf
 }] call fnc_lambda;
-////////////////////////////////// /UNTESTED //////////////////////////////////
+
+
+fnc_to_cost = [["_maximize",
+		"_min",
+		"_max",
+		"_x_parameter_string",
+		"_function"], {
+	/* {minimize|maximize} (as few as #) to (as many as #) 
+           members of [...] within #m */
+	private ["_pf", "_cf", "_prefix"];
+	_pf = [["_x"],
+	               format ["%1 call %2", _x_parameter_string, _function]]
+ 	       call fnc_lambdastr;
+	if (_maximize) then {
+		_prefix = "1 - ";
+	} else {
+		_prefix = "";
+	};
+	_cf = [["_x"],
+	       format ["%1([_x] call %2)",
+		       _prefix,
+		       [_pf, _min, _max] call fnc_normalizer]]
+	       call fnc_lambdastr;
+	_cf
+}] call fnc_lambda;
+
+
+cost_fnc_1_to_5_targets_within_150m = [false, 1, 5, "targets", 150]
+                               	       call fnc_proximity_cost;
+
+
+cost_fnc_1_to_10_targets_within_10m = [false, 1, 10,
+				       "[_x, _x getVariable ""targets"", 10]",
+				       fnc_units_nearby] call fnc_to_cost;
 
 
 component_fnc_units_nearby = [["_x", "_units", "_dist", "_min", "_max"], {
