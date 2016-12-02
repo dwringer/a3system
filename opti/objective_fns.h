@@ -106,7 +106,7 @@ fnc_roads_nearby = [["_x", "_dist"], {
 // NORMALIZED OBJECTIVE FUNCTIONS OF A SINGLE PARTICLE: //
 ///////////////////////////////////////////////////////////////////////////////
 
-// Cost for having [0..10] roads within 10m:
+// Cost for having [2..6] roads within 7.5m:
 OPT_fnc_distance_from_roads = [false, 2, 6,
 			       '[_x, 7.5]',
 			       fnc_roads_nearby]
@@ -120,7 +120,7 @@ OPT_fnc_building_positions_nearby = [true, 0, 10,
 	                             call fnc_to_cost_function;
 
 
-// Cost function for not being near [2..5] civs in civArray within 100m:
+// Cost function for not being near [3..8] civs in civArray within 100m:
 OPT_fnc_civilians_nearby = [true, 3, 8,
 			    '[_x, civArray, 100]',
 			    fnc_units_nearby]
