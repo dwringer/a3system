@@ -490,11 +490,17 @@ DEFMETHOD("Optimizer", "moea_step") ["_self",
 } ENDMETHOD;
 
 
-DEFMETHOD("Optimizer", "MODE_step") ["_self"] DO {
+DEFMETHOD("Optimizer", "MODE_step") ["_self", "_weight", "_frequency"] DO {
 	/* Modified Multi-Objective Differential Evolution */
+	if (isNil "_weight") then {
+		_weight = 0.35;
+	};
+	if (isNil "_frequency") then {
+		_frequency = 0.8;
+	};
 	[_self, "moea_step",
-	 "de_candidates", [0.35, 0.8],
+	 "de_candidates", [_weight, _frequency],
  	 "fit_terrain", [],
 	 "non_dominated_sort", [],
 	 "sorted_average_distances_3d", []] call fnc_tell;
-} ENDMETHOD;
+} ENDMETHODV;

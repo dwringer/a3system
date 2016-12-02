@@ -107,8 +107,8 @@ fnc_roads_nearby = [["_x", "_dist"], {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Cost for having [0..10] roads within 10m:
-OPT_fnc_distance_from_roads = [false, 0, 10,
-			       '[_x, 10]',
+OPT_fnc_distance_from_roads = [false, 2, 6,
+			       '[_x, 7.5]',
 			       fnc_roads_nearby]
 	                       call fnc_to_cost_function;
 
@@ -121,7 +121,7 @@ OPT_fnc_building_positions_nearby = [true, 0, 10,
 
 
 // Cost function for not being near [2..5] civs in civArray within 100m:
-OPT_fnc_civilians_nearby = [true, 2, 5,
+OPT_fnc_civilians_nearby = [true, 3, 8,
 			    '[_x, civArray, 100]',
 			    fnc_units_nearby]
 	                    call fnc_to_cost_function;
@@ -158,7 +158,7 @@ OPT_fnc_distance_from_player = [true, 50, 300,
 
 
 // Cost function for being close to designated targets:
-OPT_fnc_distance_from_targets = [true, 50, 300,
+OPT_fnc_distance_from_targets = [true, 35, 200,
 				 '[position _x,
                                    ([[["_t"], {position _t}] call fnc_lambda,
                                      _x getVariable "targets"] 
