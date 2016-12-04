@@ -133,6 +133,42 @@ fnc_get_elevation = [["_x"], {
 }] call fnc_lambda;
 
 
+fnc_check_level = [["_p", "_step", "_steps"], {
+	/* Check a grid over position of _x and return the average delta-z */
+	private ["_group", "_centerPosition", "_offset", "_cornerX",
+		 "_cornerY", "_grid", "_logic", "_sum"];
+	_group = createGroup sideLogic;
+	_centerPosition = getPosATL _p;
+	_offset = _steps * _step;
+	_cornerX = (_centerPosition select 0) - _offset;
+	_cornerY = (_centerPosition select 1) - _offset;
+	_grid = [];
+	for "_i" from 0 to (_steps * 2) do {
+		for "_j" from 0 to (_steps * 2) do {
+			_logic = _group createUnit
+				["LOGIC",
+				 [_cornerX + (_step * _i),
+				  _cornerY + (_step * _j),
+				  _centerPosition select 2],
+				 [], 0, ""];
+			_grid = _grid + [_logic];
+		};
+	};
+	_sum = [[["_a", "_b"], {_a + _b}] call fnc_lambda,
+		[[["_x", "_baseline"], {
+			private ["_diff"];
+			_diff = abs (((getPosASL _x) select 2) - _baseline);
+			//deleteVehicle _x;
+			_diff
+		 }] call fnc_lambda,
+		_grid,
+		[(getPosASL _p) select 2]]
+		call fnc_mapwith] call fnc_reduce;
+	deleteGroup _group;
+	_sum / (_steps * _steps)
+}] call fnc_lambda;
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////
