@@ -1,10 +1,10 @@
-DEFCLASS("ThermalOptimizer") ["_self"] DO {
+DEFCLASS("VariableOptimizer") ["_self"] DO {
 	SUPER("Optimizer", _self);
 	_self
 } ENDCLASS;
 
 
-DEFMETHOD("ThermalOptimizer", "add_objective") ["_self",
+DEFMETHOD("VariableOptimizer", "add_objective") ["_self",
 						"_maximize",
 						"_min_range",
 						"_max_range",

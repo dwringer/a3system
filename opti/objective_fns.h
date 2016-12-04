@@ -55,7 +55,7 @@ fnc_partial_LOS_to_array = [["_p",
 			     "_full_LOS_bias",
 			     "_no_LOS_weight",
 			     "_is_unit_array"], {
-	/* Ratio of occluded LOS to array of positions */
+	/* Ratio of occluded LOS to array of logics or units */
 	private ["_sum", "_visibilityParams", "_v", "_target"];
 	_sum = 0;
 	{
@@ -83,6 +83,32 @@ fnc_partial_LOS_to_array = [["_p",
 }] call fnc_lambda;
 
 
+fnc_LOS_to_array = [["_p",
+		     "_array",
+		     "_eye_height",
+		     "_is_unit_array"], {
+	/* Sum of 0..1 visibility scores for each array member */
+	private ["_sum", "_visibilityParams", "_v", "_target"];
+	_sum = 0;
+	{
+		_visibilityParams = [vehicle _p, "VIEW"];
+		if (_is_unit_array) then {
+			_visibilityParams = _visibilityParams + [vehicle _x];
+			_target = eyePos _x;
+		} else {
+			_target = _x;
+		};
+		_v = _visibilityParams checkVisibility
+			[[(getPosASL _p) select 0,
+			  (getPosASL _p) select 1,
+			  ((getPosASL _p) select 2) + _eye_height],
+			 _target];
+		_sum = _sum + _v;
+	} forEach _array;
+	_sum
+}] call fnc_lambda;
+
+
 fnc_building_positions_nearby = [["_x", "_dist"], {
 	/* Parametric cost for not having building positions nearby */
 	private ["_houses", "_positions"];
@@ -100,6 +126,13 @@ fnc_roads_nearby = [["_x", "_dist"], {
 	count ([_x, _dist] call fnc_find_roads)
 }] call fnc_lambda;
 
+
+fnc_get_elevation = [["_x"], {
+	/* Get elevation (m) of _x */
+	(position _x) select 2
+}] call fnc_lambda;
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////
@@ -115,7 +148,7 @@ OPT_fnc_distance_from_roads = [false, 2, 6,
 
 // Cost for having [0..10] building positions within 35m:
 OPT_fnc_building_positions_nearby = [true, 0, 10,
-				     '[_x, 35]',
+				     '[_x, 15]',
 				     fnc_building_positions_nearby]
 	                             call fnc_to_cost_function;
 
@@ -125,6 +158,12 @@ OPT_fnc_civilians_nearby = [true, 3, 8,
 			    '[_x, civArray, 100]',
 			    fnc_units_nearby]
 	                    call fnc_to_cost_function;
+
+
+// Cost function for not being near [3..8] targets within 100m:
+OPT_fnc_targets_nearby = [true, 3, 8, '[_x, _x getVariable "targets", 100]',
+			  fnc_units_nearby]
+	                  call fnc_to_cost_function;
 
 
 // Cost function for not having occluded LOS to player group:
@@ -138,14 +177,8 @@ OPT_fnc_partial_LOS_to_player_group = [false, 0, 1,
 // Cost function for not having occluded LOS to designated targets:
 OPT_fnc_partial_LOS_to_targets = [false, 0, 1,
 				  '[_x,
-				    [[["_t"], {
-                                             [(position _t) select 0,
-                                              (position _t) select 1,
-                                              1.5 + ((position _t) select 2)]
-                                     }] call fnc_lambda,
-				     _x getVariable "targets"]
-				     call fnc_map,
-                                    1.6, 0, 0.5, false]',
+				    _x getVariable "targets",
+                                    1.6, 0, 0.5, true]',
 				  fnc_partial_LOS_to_array]
                                   call fnc_to_cost_function;
 
