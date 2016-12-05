@@ -21,6 +21,20 @@
 //    fnc_partial_LOS_to_array                                               //
 //    fnc_roads_nearby                                                       //
 //    fnc_units_nearby                                                       //
+//  Normalized functions of a single particle:                               //
+//    OPT_fnc_above_elevation_target                                         //
+//    OPT_fnc_below_elevation_target                                         //
+//    OPT_fnc_building_positions_nearby                                      //
+//    OPT_fnc_civilians_nearby                                               //
+//    OPT_fnc_distance_from_player                                           //
+//    OPT_fnc_distance_from_roads                                            //
+//    OPT_fnc_distance_from_targets                                          //
+//    OPT_fnc_level_surface                                                  //
+//    OPT_fnc_partial_LOS_to_player_group                                    //
+//    OPT_fnc_partial_LOS_to_targets                                         //
+//    OPT_fnc_targets_nearby                                                 //
+//    OPT_fnc_vegetation_clear                                               //
+//    OPT_fnc_vegetation_dense                                               //
 ///////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////
@@ -252,8 +266,8 @@ OPT_fnc_distance_from_roads = [false, 2, 6,
 	                       call fnc_to_cost_function;
 
 
-// Cost for having [0..10] building positions within 35m:
-OPT_fnc_building_positions_nearby = [true, 0, 10,
+// Cost for having [0..5] building positions within 35m:
+OPT_fnc_building_positions_nearby = [true, 0, 5,
 				     '[_x, 15]',
 				     fnc_building_positions_nearby]
 	                             call fnc_to_cost_function;
@@ -278,6 +292,13 @@ OPT_fnc_vegetation_clear = [false, 0, 5,
 			    '[_x, 10]',
 			    fnc_vegetation_nearby]
 	                    call fnc_to_cost_function;
+
+
+// Cost function for not having vegetation within 10m:
+OPT_fnc_vegetation_dense = [true, 2, 10,
+			    '[_x, 10]',
+			    fnc_vegetation_nearby]
+	                    call_fnc_to_cost_function;
 
 
 // Cost function for not being above elevation target:
