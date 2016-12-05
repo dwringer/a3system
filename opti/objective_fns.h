@@ -84,46 +84,44 @@ fnc_to_cost_function = [["_maximize",
 // OBJECTIVE DATA FUNCTIONS: //  Parameterized functions for objective data
 ///////////////////////////////////////////////////////////////////////////////
 
-/////////////////////////////////// UNTESTED //////////////////////////////////
 fnc_average_distance_to_nearest_terrain_objects = [["_x",
-						    "_n",
-						    "_types",
-						    "_search_step"], {
-	/* Return the avg dist to nearest _n terrainObjects matching _types */
-	private ["_r", "_found", "_nearest"];
-	_r = _search_step;
-	_found = [];
-	while {(count _found) < _n} do {
-		_nearest = nearestTerrainObjects [_x, _types, _r, true];
-		_found = _found + ([_nearest, 0,
-				    (count _nearest) min
-				    (_n - (count _found))] call fnc_subseq);
-		_r += _search_step;
+ 						    "_n",
+ 						    "_types",
+ 						    "_search_step"], {
+ 	/* Return the avg dist to nearest _n terrainObjects matching _types */
+ 	private ["_r", "_found", "_nearest"];
+ 	_r = _search_step;
+ 	_found = [];
+ 	while {(count _found) < _n} do {
+ 		_nearest = nearestTerrainObjects [_x, _types, _r, true];
+ 		_found = _found + ([_nearest, 0,
+ 				    (count _nearest) min
+ 				    (_n - (count _found))] call fnc_subseq);
+ 		_r = _r + _search_step;
 	};
-	[[["_a", "_b"], {_a + _b}] call fnc_lambda,
-	 [[["_terrainObject", "_p", "_length"], {
-			(_p distance _terrainObject) / _length
-	  }] call fnc_lambda,
-	 _found,
-	 [_x, _n]] call fnc_mapwith] call fnc_reduce
+ 	[[["_a", "_b"], {_a + _b}] call fnc_lambda,
+ 	 [[["_terrainObject", "_p", "_length"], {
+ 			(_p distance _terrainObject) / _length
+ 	  }] call fnc_lambda,
+ 	 _found,
+ 	 [_x, _n]] call fnc_mapwith] call fnc_reduce
 }] call fnc_lambda;
-/////////////////////////////////// UNTESTED //////////////////////////////////
 
 
 /////////////////////////////////// UNTESTED //////////////////////////////////
 fnc_average_distance_to_nearest_array_members = [["_x", "_n", "_array"], {
-	/* Return the avg dist to nearest _n members of _array */
-	_distances = [[] call fnc_lambda,
-		      _array,
-		      [_x]] call fnc_mapwith;
-	_sorted = [_distances,
-		   [] call fnc_lambda] call fnc_sorted;
-	[[["_a", "_b"], {_a + _b}] call fnc_lambda,
-	 [[["_distance", "_length"], {
-		 _distance / _length
-	  }] call fnc_lambda,
-	  [_sorted, 0, _n] call fnc_subseq,
-	  [_n]] call fnc_mapwith] call fnc_reduce
+ 	/* Return the avg dist to nearest _n members of _array */
+ 	_distances = [[] call fnc_lambda,
+ 		      _array,
+ 		      [_x]] call fnc_mapwith;
+ 	_sorted = [_distances,
+ 		   [] call fnc_lambda] call fnc_sorted;
+ 	[[["_a", "_b"], {_a + _b}] call fnc_lambda,
+ 	 [[["_distance", "_length"], {
+ 		 _distance / _length
+ 	  }] call fnc_lambda,
+ 	  [_sorted, 0, _n] call fnc_subseq,
+ 	  [_n]] call fnc_mapwith] call fnc_reduce
 }] call fnc_lambda;
 /////////////////////////////////// UNTESTED //////////////////////////////////
 
@@ -369,13 +367,11 @@ OPT_fnc_distance_from_targets = [true, 35, 200,
                                  call fnc_to_cost_function;
 
 
-/////////////////////////////////// UNTESTED //////////////////////////////////
 // Cost function for not being near a fuel station:
-OPT_fnc_fuel_station_nearby = [false, 0, 5000,
-			       '[_x, 1, ["FUELSTATION"], 300]',
-			       fnc_average_distance_to_nearest_terrain_objects]
-	                       call fnc_to_cost_function;
-/////////////////////////////////// UNTESTED //////////////////////////////////
+OPT_fnc_fuel_station_nearby = [false, 0, 2500,
+ 			       '[_x, 1, ["FUELSTATION"], 300]',
+ 			       fnc_average_distance_to_nearest_terrain_objects]
+ 	                       call fnc_to_cost_function;
 
 
 // Cost function for not being fairly level at a 10m radius:
