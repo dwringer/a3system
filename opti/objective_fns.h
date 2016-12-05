@@ -159,7 +159,7 @@ fnc_get_elevation = [["_x"], {
 
 fnc_get_elevation_target_height = [["_x"], {
 	/* Return height of elevation_target relative to _x */
-	(_x getVariable "elevation_target") -
+	([_x getVariable "elevation_target"] call fnc_get_elevation) -
 	([_x] call fnc_get_elevation)
 }] call fnc_lambda;
 
@@ -298,7 +298,7 @@ OPT_fnc_vegetation_clear = [false, 0, 5,
 OPT_fnc_vegetation_dense = [true, 2, 10,
 			    '[_x, 10]',
 			    fnc_vegetation_nearby]
-	                    call_fnc_to_cost_function;
+	                    call fnc_to_cost_function;
 
 
 // Cost function for not being above elevation target:
