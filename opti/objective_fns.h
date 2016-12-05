@@ -143,6 +143,13 @@ fnc_get_elevation = [["_x"], {
 }] call fnc_lambda;
 
 
+fnc_get_elevation_target_height = [["_x"], {
+	/* Return height of elevation_target relative to _x */
+	(_x getVariable "elevation_target") -
+	([_x] call fnc_get_elevation)
+}] call fnc_lambda;
+
+
 fnc_intersections_nearby = [["_x", "_dist"], {
 	/* Count intersections near _x within _dist */
 	count ([_x, _dist] call fnc_find_intersections)
@@ -257,6 +264,34 @@ OPT_fnc_civilians_nearby = [true, 3, 8,
 			    '[_x, civArray, 100]',
 			    fnc_units_nearby]
 	                    call fnc_to_cost_function;
+
+
+// Cost function for not being fairly level at a 10m radius:
+OPT_fnc_level_surface = [false, 0.35, 1.5,
+			 '[_x, 5, 2]',
+			 fnc_check_level]
+                         call fnc_to_cost_function;
+
+
+// Cost function for not being clear of vegetation at a 10m radius:
+OPT_fnc_vegetation_clear = [false, 0, 5,
+			    '[_x, 10]',
+			    fnc_vegetation_nearby]
+	                    call fnc_to_cost_function;
+
+
+// Cost function for not being above elevation target:
+OPT_fnc_above_elevation_target = [true, -5000, 5000,
+				  '[_x]',
+				  fnc_get_elevation_target_height]
+                                  call fnc_to_cost_function;
+
+
+// Cost function for not being below elevation target:
+OPT_fnc_below_elevation_target = [false, -5000, 5000,
+				  '[_x]',
+				  fnc_get_elevation_target_height]
+                                  call fnc_to_cost_function;
 
 
 // Cost function for not being near [3..8] targets within 100m:
