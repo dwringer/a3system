@@ -64,7 +64,7 @@ fnc_to_cost_function = [["_maximize",
 ///////////////////////////////////////////////////////////////////////////////
 
 fnc_building_positions_nearby = [["_x", "_dist"], {
-	/* Parametric cost for not having building positions nearby */
+	/* Return the number of building positions nearby */
 	private ["_houses", "_positions"];
 	_houses = _x nearObjects ["house", _dist];
 	_positions = [];
@@ -72,6 +72,12 @@ fnc_building_positions_nearby = [["_x", "_dist"], {
 		_positions = _positions + ((_houses select _i) buildingPos -1);
 	};
 	count _positions
+}] call fnc_lambda;
+
+
+fnc_buildings_nearby = [["_x", "_radius"], {
+	/* Return the number of buildings nearby */
+	count ((position _x) nearObjects ["House", _radius])
 }] call fnc_lambda;
 
 
@@ -108,6 +114,26 @@ fnc_check_level = [["_p", "_step", "_steps"], {
 		call fnc_mapwith] call fnc_reduce;
 	deleteGroup _group;
 	sqrt (_sum / (_steps * _steps))
+}] call fnc_lambda;
+
+
+fnc_closeset_building = [["_x"], {
+	/* Get distance to the nearest building */
+	private ["_building"];
+	_building = nearestBuilding _x;
+	_x distance _building
+}] call fnc_lambda;
+
+
+fnc_forests_nearby = [["_x", "_radius"], {
+	/* Return count of nearby forest objects within radius */
+	count (nearestTerrainObjects [_x,
+				      ["Forest Border",
+				       "Forest Triangle",
+				       "Forest Square",
+				       "Forest"],
+				      _radius,
+				      false])
 }] call fnc_lambda;
 
 
@@ -192,6 +218,17 @@ fnc_roads_nearby = [["_x", "_dist"], {
 fnc_units_nearby = [["_x", "_units", "_dist"], {
 	/* Count members of _units within _dist of _x */
 	count ([_x, _units, _dist] call fnc_neighbors)
+}] call fnc_lambda;
+
+
+fnc_vegetation_nearby = [["_x", "_radius"], {
+	/* Count nearby trees and bushes within radius */
+	count (nearestTerrainObjects [_x,
+				      ["Tree",
+				       "Small Tree",
+				       "Bush"],
+				      _radius,
+				      false])
 }] call fnc_lambda;
 
 
