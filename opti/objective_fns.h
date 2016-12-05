@@ -1,7 +1,7 @@
 ////////////////////////////// OBJECTIVE_FNS.H ////////////////////////////////
 //  A set of cost/objective functions and utilities for creating new ones    //
 ///////////////////////////////////////////////////////////////////////////////
-//  Utilities                                                                //
+//  Utilities:                                                               //
 //    fnc_normalizer                                                         //
 //        particle_function                                                  //
 //        min                                                                //
@@ -13,6 +13,8 @@
 //        param_arr_str                                                      //
 //        function                                                           //
 //  Available parameterized particle functions:                              //
+//    fnc_average_distance_to_nearest_terrain_objects                        //
+//    fnc_average_distance_to_nearest_array_members                          //
 //    fnc_building_positions_nearby                                          //
 //    fnc_check_level                                                        //
 //    fnc_get_elevation                                                      //
@@ -20,7 +22,9 @@
 //    fnc_LOS_to_array                                                       //
 //    fnc_partial_LOS_to_array                                               //
 //    fnc_roads_nearby                                                       //
+//    fnc_surface_is_water                                                   //
 //    fnc_units_nearby                                                       //
+//    fnc_vegetation_nearby                                                  //
 //  Normalized functions of a single particle:                               //
 //    OPT_fnc_above_elevation_target                                         //
 //    OPT_fnc_below_elevation_target                                         //
@@ -29,9 +33,12 @@
 //    OPT_fnc_distance_from_player                                           //
 //    OPT_fnc_distance_from_roads                                            //
 //    OPT_fnc_distance_from_targets                                          //
+//    OPT_fnc_fuel_station_nearby                                            //
 //    OPT_fnc_level_surface                                                  //
 //    OPT_fnc_partial_LOS_to_player_group                                    //
 //    OPT_fnc_partial_LOS_to_targets                                         //
+//    OPT_fnc_surface_is_water                                               //
+//    OPT_fnc_surface_is_not_water                                           //
 //    OPT_fnc_targets_nearby                                                 //
 //    OPT_fnc_vegetation_clear                                               //
 //    OPT_fnc_vegetation_dense                                               //
@@ -77,6 +84,50 @@ fnc_to_cost_function = [["_maximize",
 // OBJECTIVE DATA FUNCTIONS: //  Parameterized functions for objective data
 ///////////////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////// UNTESTED //////////////////////////////////
+fnc_average_distance_to_nearest_terrain_objects = [["_x",
+						    "_n",
+						    "_types",
+						    "_search_step"], {
+	/* Return the avg dist to nearest _n terrainObjects matching _types */
+	private ["_r", "_found", "_nearest"];
+	_r = _search_step;
+	_found = [];
+	while {(count _found) < _n} do {
+		_nearest = nearestTerrainObjects [_x, _types, _r, true];
+		_found = _found + ([_nearest, 0,
+				    (count _nearest) min
+				    (_n - (count _found))] call fnc_subseq);
+		_r += _search_step;
+	};
+	[[["_a", "_b"], {_a + _b}] call fnc_lambda,
+	 [[["_terrainObject", "_p", "_length"], {
+			(_p distance _terrainObject) / _length
+	  }] call fnc_lambda,
+	 _found,
+	 [_x, _n]] call fnc_mapwith] call fnc_reduce
+}] call fnc_lambda;
+/////////////////////////////////// UNTESTED //////////////////////////////////
+
+
+/////////////////////////////////// UNTESTED //////////////////////////////////
+fnc_average_distance_to_nearest_array_members = [["_x", "_n", "_array"], {
+	/* Return the avg dist to nearest _n members of _array */
+	_distances = [[] call fnc_lambda,
+		      _array,
+		      [_x]] call fnc_mapwith;
+	_sorted = [_distances,
+		   [] call fnc_lambda] call fnc_sorted;
+	[[["_a", "_b"], {_a + _b}] call fnc_lambda,
+	 [[["_distance", "_length"], {
+		 _distance / _length
+	  }] call fnc_lambda,
+	  [_sorted, 0, _n] call fnc_subseq,
+	  [_n]] call fnc_mapwith] call fnc_reduce
+}] call fnc_lambda;
+/////////////////////////////////// UNTESTED //////////////////////////////////
+
+
 fnc_building_positions_nearby = [["_x", "_dist"], {
 	/* Return the number of building positions nearby */
 	private ["_houses", "_positions"];
@@ -121,7 +172,7 @@ fnc_check_level = [["_p", "_step", "_steps"], {
 			private ["_diff"];
 			_diff = abs (((getPosASL _x) select 2) - _baseline);
 			deleteVehicle _x;
-			_diff
+			(_diff * _diff)
 		 }] call fnc_lambda,
 		_grid,
 		[(getPosASL _p) select 2]]
@@ -131,7 +182,7 @@ fnc_check_level = [["_p", "_step", "_steps"], {
 }] call fnc_lambda;
 
 
-fnc_closeset_building = [["_x"], {
+fnc_closest_building = [["_x"], {
 	/* Get distance to the nearest building */
 	private ["_building"];
 	_building = nearestBuilding _x;
@@ -236,6 +287,14 @@ fnc_roads_nearby = [["_x", "_dist"], {
 }] call fnc_lambda;
 
 
+/////////////////////////////////// UNTESTED //////////////////////////////////
+fnc_surface_is_water = [["_x"], {
+	/* If surface is water, returns 1, otherwise 0 */
+	if (surfaceIsWater (position _x)) then {1} else {0}
+}] call fnc_lambda;
+/////////////////////////////////// UNTESTED //////////////////////////////////
+
+
 fnc_units_nearby = [["_x", "_units", "_dist"], {
 	/* Count members of _units within _dist of _x */
 	count ([_x, _units, _dist] call fnc_neighbors)
@@ -252,54 +311,11 @@ fnc_vegetation_nearby = [["_x", "_radius"], {
 				      false])
 }] call fnc_lambda;
 
-
 ///////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////
 // NORMALIZED OBJECTIVE FUNCTIONS OF A SINGLE PARTICLE: //  Starter/Examples
 ///////////////////////////////////////////////////////////////////////////////
-
-// Cost for having [2..6] roads within 7.5m:
-OPT_fnc_distance_from_roads = [false, 2, 6,
-			       '[_x, 7.5]',
-			       fnc_roads_nearby]
-	                       call fnc_to_cost_function;
-
-
-// Cost for having [0..5] building positions within 35m:
-OPT_fnc_building_positions_nearby = [true, 0, 5,
-				     '[_x, 15]',
-				     fnc_building_positions_nearby]
-	                             call fnc_to_cost_function;
-
-
-// Cost function for not being near [3..8] civs in civArray within 100m:
-OPT_fnc_civilians_nearby = [true, 3, 8,
-			    '[_x, civArray, 100]',
-			    fnc_units_nearby]
-	                    call fnc_to_cost_function;
-
-
-// Cost function for not being fairly level at a 10m radius:
-OPT_fnc_level_surface = [false, 0.35, 1.5,
-			 '[_x, 5, 2]',
-			 fnc_check_level]
-                         call fnc_to_cost_function;
-
-
-// Cost function for not being clear of vegetation at a 10m radius:
-OPT_fnc_vegetation_clear = [false, 0, 5,
-			    '[_x, 10]',
-			    fnc_vegetation_nearby]
-	                    call fnc_to_cost_function;
-
-
-// Cost function for not having vegetation within 10m:
-OPT_fnc_vegetation_dense = [true, 2, 10,
-			    '[_x, 10]',
-			    fnc_vegetation_nearby]
-	                    call fnc_to_cost_function;
-
 
 // Cost function for not being above elevation target:
 OPT_fnc_above_elevation_target = [true, -5000, 5000,
@@ -315,10 +331,94 @@ OPT_fnc_below_elevation_target = [false, -5000, 5000,
                                   call fnc_to_cost_function;
 
 
-// Cost function for not being near [3..8] targets within 100m:
-OPT_fnc_targets_nearby = [true, 3, 8, '[_x, _x getVariable "targets", 100]',
-			  fnc_units_nearby]
-	                  call fnc_to_cost_function;
+// Cost for not having [0..5] building positions within 15m:
+OPT_fnc_building_positions_nearby = [true, 0, 5,
+				     '[_x, 15]',
+				     fnc_building_positions_nearby]
+	                             call fnc_to_cost_function;
+
+
+// Cost function for not being near [3..8] civs in civArray within 100m:
+OPT_fnc_civilians_nearby = [true, 3, 8,
+			    '[_x, civArray, 100]',
+			    fnc_units_nearby]
+	                    call fnc_to_cost_function;
+
+
+// Cost function for being close (w/in 50-300m) to player position:
+OPT_fnc_distance_from_player = [true, 50, 300,
+				'[position _x, position player]',
+				fnc_euclidean_distance]
+                                call fnc_to_cost_function;
+
+
+// Cost for having [0..6] roads within 7.5m:
+OPT_fnc_distance_from_roads = [false, 0, 6,
+			       '[_x, 7.5]',
+			       fnc_roads_nearby]
+	                       call fnc_to_cost_function;
+
+
+// Cost function for being close to designated targets:
+OPT_fnc_distance_from_targets = [true, 35, 200,
+				 '[position _x,
+                                   ([[["_t"], {position _t}] call fnc_lambda,
+                                     _x getVariable "targets"] 
+                                     call fnc_map) call fnc_vector_mean]',
+				 fnc_euclidean_distance]
+                                 call fnc_to_cost_function;
+
+
+/////////////////////////////////// UNTESTED //////////////////////////////////
+// Cost function for not being near a fuel station:
+OPT_fnc_fuel_station_nearby = [false, 0, 5000,
+			       '[_x, 1, ["FUELSTATION"], 300]',
+			       fnc_average_distance_to_nearest_terrain_objects]
+	                       call fnc_to_cost_function;
+/////////////////////////////////// UNTESTED //////////////////////////////////
+
+
+// Cost function for not being fairly level at a 10m radius:
+OPT_fnc_level_surface = [false, 0.35, 1.5,
+			 '[_x, 5, 2]',
+			 fnc_check_level]
+                         call fnc_to_cost_function;
+
+
+/////////////////////////////////// UNTESTED //////////////////////////////////
+// Cost function for not having LOS to player group:
+OPT_fnc_LOS_to_player_group = [false, 0, 1,
+			       '[_x, units group player, 1.6, true]',
+			       fnc_LOS_to_array]
+	                       call fnc_to_cost_function;
+/////////////////////////////////// UNTESTED //////////////////////////////////
+
+
+/////////////////////////////////// UNTESTED //////////////////////////////////
+// Cost function for not having LOS to targets:
+OPT_fnc_LOS_to_targets = [false, 0, 1,
+			  '[_x, _x getVariable "targets", 1.6, false]',
+			  fnc_LOS_to_array]
+                          call fnc_to_cost_function;
+/////////////////////////////////// UNTESTED //////////////////////////////////
+
+
+/////////////////////////////////// UNTESTED //////////////////////////////////
+// Cost function for having LOS to player group:
+OPT_fnc_no_LOS_to_player_group = [true, 0, 1,
+				  '[_x, units group player, 1.6, true]',
+				  fnc_LOS_to_array]
+                                  call fnc_to_cost_function;
+/////////////////////////////////// UNTESTED //////////////////////////////////
+
+
+/////////////////////////////////// UNTESTED //////////////////////////////////
+// Cost function for having LOS to targets:
+OPT_fnc_no_LOS_to_targets = [true, 0, 1,
+			     '[_x, _x getVariable "targets", 1.6, false]',
+			     fnc_LOS_to_array]
+                             call fnc_to_cost_function;
+/////////////////////////////////// UNTESTED //////////////////////////////////
 
 
 // Cost function for not having occluded LOS to player group:
@@ -333,25 +433,45 @@ OPT_fnc_partial_LOS_to_player_group = [false, 0, 1,
 OPT_fnc_partial_LOS_to_targets = [false, 0, 1,
 				  '[_x,
 				    _x getVariable "targets",
-                                    1.6, 0, 0.5, true]',
+                                    1.6, 0, 0.5, false]',
 				  fnc_partial_LOS_to_array]
                                   call fnc_to_cost_function;
 
 
-// Cost function for being close (w/in 50-300m) to player position:
-OPT_fnc_distance_from_player = [true, 50, 300,
-				'[position _x, position player]',
-				fnc_euclidean_distance]
+/////////////////////////////////// UNTESTED //////////////////////////////////
+// Cost function for being on water [binary]:
+OPT_fnc_surface_is_water = [false, 0, 1, '[_x]',
+			    fnc_surface_is_water]
+                            call fnc_to_cost_function;
+/////////////////////////////////// UNTESTED //////////////////////////////////
+
+
+/////////////////////////////////// UNTESTED //////////////////////////////////
+// Cost function for not being on water [binary]:
+OPT_fnc_surface_is_not_water = [true, 0, 1, '[_x]',
+				fnc_surface_is_water]
                                 call fnc_to_cost_function;
+/////////////////////////////////// UNTESTED //////////////////////////////////
 
 
-// Cost function for being close to designated targets:
-OPT_fnc_distance_from_targets = [true, 35, 200,
-				 '[position _x,
-                                   ([[["_t"], {position _t}] call fnc_lambda,
-                                     _x getVariable "targets"] 
-                                     call fnc_map) call fnc_vector_mean]',
-				 fnc_euclidean_distance]
-                                 call fnc_to_cost_function;
+// Cost function for not being near [3..8] targets within 100m:
+OPT_fnc_targets_nearby = [true, 3, 8,
+                          '[_x, _x getVariable "targets", 100]',
+			  fnc_units_nearby]
+	                  call fnc_to_cost_function;
+
+
+// Cost function for not being clear of vegetation at a 15m radius:
+OPT_fnc_vegetation_clear = [false, 0, 5,
+			    '[_x, 15]',
+			    fnc_vegetation_nearby]
+	                    call fnc_to_cost_function;
+
+
+// Cost function for not having vegetation within 10m:
+OPT_fnc_vegetation_dense = [true, 2, 10,
+			    '[_x, 10]',
+			    fnc_vegetation_nearby]
+	                    call fnc_to_cost_function;
 
 ///////////////////////////////////////////////////////////////////////////////
