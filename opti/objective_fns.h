@@ -1,6 +1,27 @@
 ////////////////////////////// OBJECTIVE_FNS.H ////////////////////////////////
 //  A set of cost/objective functions and utilities for creating new ones    //
 ///////////////////////////////////////////////////////////////////////////////
+//  Utilities                                                                //
+//    fnc_normalizer                                                         //
+//        particle_function                                                  //
+//        min                                                                //
+//        max                                                                //
+//    fnc_to_cost_function                                                   //
+//        maximize?                                                          //
+//        min                                                                //
+//        max                                                                //
+//        param_arr_str                                                      //
+//        function                                                           //
+//  Available parameterized particle functions:                              //
+//    fnc_building_positions_nearby                                          //
+//    fnc_check_level                                                        //
+//    fnc_get_elevation                                                      //
+//    fnc_intersections_nearby                                               //
+//    fnc_LOS_to_array                                                       //
+//    fnc_partial_LOS_to_array                                               //
+//    fnc_roads_nearby                                                       //
+//    fnc_units_nearby                                                       //
+///////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////
 // UTILITY FUNCTIONS: //  For creating arbitrary normalized cost functions
@@ -23,10 +44,9 @@ fnc_to_cost_function = [["_maximize",
 			 "_max",
 			 "_x_parameter_string",
 			 "_function"], {
-	/* Turn f("[_x_parameter_string]") to [min|max]imization f(_x) */
+	/* Turn f(<"[_x_parameter_string]">) to [min|max]imization f([_x]) */
 	private ["_pf", "_cf", "_prefix"];
-	_pf = [["_x"],
-	               format ["%1 call %2", _x_parameter_string, _function]]
+	_pf = [["_x"], format ["%1 call %2", _x_parameter_string, _function]]
  	       call fnc_lambdastr;
 	if (_maximize) then {_prefix = "1 - "} else {_prefix = ""};
 	_cf = [["_x"],
@@ -43,9 +63,89 @@ fnc_to_cost_function = [["_maximize",
 // OBJECTIVE DATA FUNCTIONS: //  Parameterized functions for objective data
 ///////////////////////////////////////////////////////////////////////////////
 
-fnc_units_nearby = [["_x", "_units", "_dist"], {
-	/* Count members of _units within _dist of _x */
-	count ([_x, _units, _dist] call fnc_neighbors)
+fnc_building_positions_nearby = [["_x", "_dist"], {
+	/* Parametric cost for not having building positions nearby */
+	private ["_houses", "_positions"];
+	_houses = _x nearObjects ["house", _dist];
+	_positions = [];
+	for "_i" from 0 to ((count _houses) - 1) do {
+		_positions = _positions + ((_houses select _i) buildingPos -1);
+	};
+	count _positions
+}] call fnc_lambda;
+
+
+fnc_check_level = [["_p", "_step", "_steps"], {
+	/* Check a grid over position of _x and return the average delta-z */
+	private ["_group", "_centerPosition", "_offset", "_cornerX",
+		 "_cornerY", "_grid", "_logic", "_sum"];
+	_group = createGroup sideLogic;
+	_centerPosition = getPosATL _p;
+	_offset = _steps * _step;
+	_cornerX = (_centerPosition select 0) - _offset;
+	_cornerY = (_centerPosition select 1) - _offset;
+	_grid = [];
+	for "_i" from 0 to (_steps * 2) do {
+		for "_j" from 0 to (_steps * 2) do {
+			_logic = _group createUnit
+				["LOGIC",
+				 [_cornerX + (_step * _i),
+				  _cornerY + (_step * _j),
+				  _centerPosition select 2],
+				 [], 0, ""];
+			_grid = _grid + [_logic];
+		};
+	};
+	_sum = [[["_a", "_b"], {_a + _b}] call fnc_lambda,
+		[[["_x", "_baseline"], {
+			private ["_diff"];
+			_diff = abs (((getPosASL _x) select 2) - _baseline);
+			deleteVehicle _x;
+			_diff
+		 }] call fnc_lambda,
+		_grid,
+		[(getPosASL _p) select 2]]
+		call fnc_mapwith] call fnc_reduce;
+	deleteGroup _group;
+	sqrt (_sum / (_steps * _steps))
+}] call fnc_lambda;
+
+
+fnc_get_elevation = [["_x"], {
+	/* Get elevation (m) of _x */
+	(getPosASL _x) select 2
+}] call fnc_lambda;
+
+
+fnc_intersections_nearby = [["_x", "_dist"], {
+	/* Count intersections near _x within _dist */
+	count ([_x, _dist] call fnc_find_intersections)
+}] call fnc_lambda;
+
+
+fnc_LOS_to_array = [["_p",
+		     "_array",
+		     "_eye_height",
+		     "_is_unit_array"], {
+	/* Sum of 0..1 visibility scores for each array member */
+	private ["_sum", "_visibilityParams", "_v", "_target"];
+	_sum = 0;
+	{
+		_visibilityParams = [vehicle _p, "VIEW"];
+		if (_is_unit_array) then {
+			_visibilityParams = _visibilityParams + [vehicle _x];
+			_target = eyePos _x;
+		} else {
+			_target = _x;
+		};
+		_v = _visibilityParams checkVisibility
+			[[(getPosASL _p) select 0,
+			  (getPosASL _p) select 1,
+			  ((getPosASL _p) select 2) + _eye_height],
+			 _target];
+		_sum = _sum + _v;
+	} forEach _array;
+	_sum
 }] call fnc_lambda;
 
 
@@ -83,96 +183,22 @@ fnc_partial_LOS_to_array = [["_p",
 }] call fnc_lambda;
 
 
-fnc_LOS_to_array = [["_p",
-		     "_array",
-		     "_eye_height",
-		     "_is_unit_array"], {
-	/* Sum of 0..1 visibility scores for each array member */
-	private ["_sum", "_visibilityParams", "_v", "_target"];
-	_sum = 0;
-	{
-		_visibilityParams = [vehicle _p, "VIEW"];
-		if (_is_unit_array) then {
-			_visibilityParams = _visibilityParams + [vehicle _x];
-			_target = eyePos _x;
-		} else {
-			_target = _x;
-		};
-		_v = _visibilityParams checkVisibility
-			[[(getPosASL _p) select 0,
-			  (getPosASL _p) select 1,
-			  ((getPosASL _p) select 2) + _eye_height],
-			 _target];
-		_sum = _sum + _v;
-	} forEach _array;
-	_sum
-}] call fnc_lambda;
-
-
-fnc_building_positions_nearby = [["_x", "_dist"], {
-	/* Parametric cost for not having building positions nearby */
-	private ["_houses", "_positions"];
-	_houses = _x nearObjects ["house", _dist];
-	_positions = [];
-	for "_i" from 0 to ((count _houses) - 1) do {
-		_positions = _positions + ((_houses select _i) buildingPos -1);
-	};
-	count _positions
-}] call fnc_lambda;
-
-
 fnc_roads_nearby = [["_x", "_dist"], {
 	/* Count roads near _x within _dist */
 	count ([_x, _dist] call fnc_find_roads)
 }] call fnc_lambda;
 
 
-fnc_get_elevation = [["_x"], {
-	/* Get elevation (m) of _x */
-	(position _x) select 2
-}] call fnc_lambda;
-
-
-fnc_check_level = [["_p", "_step", "_steps"], {
-	/* Check a grid over position of _x and return the average delta-z */
-	private ["_group", "_centerPosition", "_offset", "_cornerX",
-		 "_cornerY", "_grid", "_logic", "_sum"];
-	_group = createGroup sideLogic;
-	_centerPosition = getPosATL _p;
-	_offset = _steps * _step;
-	_cornerX = (_centerPosition select 0) - _offset;
-	_cornerY = (_centerPosition select 1) - _offset;
-	_grid = [];
-	for "_i" from 0 to (_steps * 2) do {
-		for "_j" from 0 to (_steps * 2) do {
-			_logic = _group createUnit
-				["LOGIC",
-				 [_cornerX + (_step * _i),
-				  _cornerY + (_step * _j),
-				  _centerPosition select 2],
-				 [], 0, ""];
-			_grid = _grid + [_logic];
-		};
-	};
-	_sum = [[["_a", "_b"], {_a + _b}] call fnc_lambda,
-		[[["_x", "_baseline"], {
-			private ["_diff"];
-			_diff = abs (((getPosASL _x) select 2) - _baseline);
-			//deleteVehicle _x;
-			_diff
-		 }] call fnc_lambda,
-		_grid,
-		[(getPosASL _p) select 2]]
-		call fnc_mapwith] call fnc_reduce;
-	deleteGroup _group;
-	_sum / (_steps * _steps)
+fnc_units_nearby = [["_x", "_units", "_dist"], {
+	/* Count members of _units within _dist of _x */
+	count ([_x, _units, _dist] call fnc_neighbors)
 }] call fnc_lambda;
 
 
 ///////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////
-// NORMALIZED OBJECTIVE FUNCTIONS OF A SINGLE PARTICLE: //
+// NORMALIZED OBJECTIVE FUNCTIONS OF A SINGLE PARTICLE: //  Starter/Examples
 ///////////////////////////////////////////////////////////////////////////////
 
 // Cost for having [2..6] roads within 7.5m:
