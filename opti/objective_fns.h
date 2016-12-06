@@ -17,6 +17,9 @@
 //    fnc_average_distance_to_nearest_array_members                          //
 //    fnc_building_positions_nearby                                          //
 //    fnc_check_level                                                        //
+//    fnc_check_LOS_grid                                                     //
+//    fnc_cover_nearby                                                       //
+//    fnc_forests_nearby                                                     //
 //    fnc_get_elevation                                                      //
 //    fnc_intersections_nearby                                               //
 //    fnc_LOS_to_array                                                       //
@@ -27,12 +30,18 @@
 //    fnc_vegetation_nearby                                                  //
 //  Normalized functions of a single particle:                               //
 //    OPT_fnc_above_elevation_target                                         //
+//    OPT_fnc_area_LOS_clear                                                 //
+//    OPT_fnc_area_LOS_not_clear                                             //
 //    OPT_fnc_below_elevation_target                                         //
 //    OPT_fnc_building_positions_nearby                                      //
 //    OPT_fnc_civilians_nearby                                               //
+//    OPT_fnc_cover_available                                                //
+//    OPT_fnc_cover_unavailable                                              //
 //    OPT_fnc_distance_from_player                                           //
 //    OPT_fnc_distance_from_roads                                            //
 //    OPT_fnc_distance_from_targets                                          //
+//    OPT_fnc_forests_clear                                                  //
+//    OPT_fnc_forests_dense                                                  //
 //    OPT_fnc_fuel_station_nearby                                            //
 //    OPT_fnc_level_surface                                                  //
 //    OPT_fnc_partial_LOS_to_player_group                                    //
@@ -108,14 +117,15 @@ fnc_average_distance_to_nearest_terrain_objects = [["_x",
 }] call fnc_lambda;
 
 
-/////////////////////////////////// UNTESTED //////////////////////////////////
 fnc_average_distance_to_nearest_array_members = [["_x", "_n", "_array"], {
  	/* Return the avg dist to nearest _n members of _array */
- 	_distances = [[] call fnc_lambda,
+	_distances = [[["_object", "_origin"], {
+				_object distance _origin
+			}] call fnc_lambda,
  		      _array,
  		      [_x]] call fnc_mapwith;
  	_sorted = [_distances,
- 		   [] call fnc_lambda] call fnc_sorted;
+ 		   [["_a", "_b"], {_a < _b}] call fnc_lambda] call fnc_sorted;
  	[[["_a", "_b"], {_a + _b}] call fnc_lambda,
  	 [[["_distance", "_length"], {
  		 _distance / _length
@@ -123,7 +133,6 @@ fnc_average_distance_to_nearest_array_members = [["_x", "_n", "_array"], {
  	  [_sorted, 0, _n] call fnc_subseq,
  	  [_n]] call fnc_mapwith] call fnc_reduce
 }] call fnc_lambda;
-/////////////////////////////////// UNTESTED //////////////////////////////////
 
 
 fnc_building_positions_nearby = [["_x", "_dist"], {
@@ -176,7 +185,50 @@ fnc_check_level = [["_p", "_step", "_steps"], {
 		[(getPosASL _p) select 2]]
 		call fnc_mapwith] call fnc_reduce;
 	deleteGroup _group;
-	sqrt (_sum / (_steps * _steps))
+	sqrt (_sum / (((2 * _steps) + 1) ^ 2))
+}] call fnc_lambda;
+
+
+fnc_check_LOS_grid = [["_p", "_step", "_steps", "_elevation"], {
+	private ["_group", "_centerPosition", "_offset", "_cornerX",
+		 "_cornerY", "_grid", "_logic", "_sum"];
+	_group = createGroup sideLogic;
+	_centerPosition = getPosATL _p;
+	_offset = _steps * _step;
+	_cornerX = (_centerPosition select 0) - _offset;
+	_cornerY = (_centerPosition select 1) - _offset;
+	_grid = [];
+	for "_i" from 0 to (_steps * 2) do {
+		for "_j" from 0 to (_steps * 2) do {
+			_logic = _group createUnit
+				["LOGIC",
+				 [_cornerX + (_step * _i),
+				  _cornerY + (_step * _j),
+				  _centerPosition select 2],
+				 [], 0, ""];
+			_grid = _grid + [_logic];
+		};
+	};
+	_sum = [[["_a", "_b"], {_a + _b}] call fnc_lambda,
+		[[["_x", "_origin", "_height"], {
+			private ["_visible", "_xPos", "_oPos"];
+			_xPos = getPosASL _x;
+			_oPos = getPosASL _origin;
+			_visible = [vehicle _origin, "VIEW"] checkVisibility
+			           [[_xPos select 0,
+				     _xPos select 1,
+				     (_xPos select 2) + _height],
+				    [_oPos select 0,
+				     _oPos select 1,
+				     (_oPos select 2) + _height]];
+			deleteVehicle _x;
+			_visible
+		 }] call fnc_lambda,
+		_grid,
+		[_p, _elevation]]
+		call fnc_mapwith] call fnc_reduce;
+	deleteGroup _group;
+	_sum / (((2 * _steps) + 1) ^ 2)
 }] call fnc_lambda;
 
 
@@ -185,6 +237,17 @@ fnc_closest_building = [["_x"], {
 	private ["_building"];
 	_building = nearestBuilding _x;
 	_x distance _building
+}] call fnc_lambda;
+
+
+fnc_cover_nearby = [["_x", "_radius"], {
+	count (nearestTerrainObjects [_x,
+				      ["Building", "House", "Church", "Chapel",
+				       "Rock", "Bunker", "Fortress", "Fountain",
+				       "Lighthouse", "Fuelstation", "Hospital",
+				       "Wall", "Busstop", "Ruin", "Rocks"],
+				      _radius,
+				      false])
 }] call fnc_lambda;
 
 
@@ -232,7 +295,7 @@ fnc_LOS_to_array = [["_p",
 			_visibilityParams = _visibilityParams + [vehicle _x];
 			_target = eyePos _x;
 		} else {
-			_target = _x;
+			_target = getPosASL _x;
 		};
 		_v = _visibilityParams checkVisibility
 			[[(getPosASL _p) select 0,
@@ -241,7 +304,7 @@ fnc_LOS_to_array = [["_p",
 			 _target];
 		_sum = _sum + _v;
 	} forEach _array;
-	_sum
+	(_sum / (count _array))
 }] call fnc_lambda;
 
 
@@ -285,12 +348,10 @@ fnc_roads_nearby = [["_x", "_dist"], {
 }] call fnc_lambda;
 
 
-/////////////////////////////////// UNTESTED //////////////////////////////////
 fnc_surface_is_water = [["_x"], {
 	/* If surface is water, returns 1, otherwise 0 */
 	if (surfaceIsWater (position _x)) then {1} else {0}
 }] call fnc_lambda;
-/////////////////////////////////// UNTESTED //////////////////////////////////
 
 
 fnc_units_nearby = [["_x", "_units", "_dist"], {
@@ -322,6 +383,20 @@ OPT_fnc_above_elevation_target = [true, -5000, 5000,
                                   call fnc_to_cost_function;
 
 
+// Cost function for broken LOS in a grid projected around area:
+OPT_fnc_area_LOS_clear = [true, 0.15, .85,
+			  '[_x, 1.5, 4, 0.75]',
+			  fnc_check_LOS_grid]
+	                  call fnc_to_cost_function;
+
+
+// Cost function for having LOS in a grid projected around area:
+OPT_fnc_area_LOS_not_clear = [false, 0.15, .85,
+			      '[_x, 1.5, 4, 0.75]',
+			      fnc_check_LOS_grid]
+                              call fnc_to_cost_function;
+
+
 // Cost function for not being below elevation target:
 OPT_fnc_below_elevation_target = [false, -5000, 5000,
 				  '[_x]',
@@ -341,6 +416,20 @@ OPT_fnc_civilians_nearby = [true, 3, 8,
 			    '[_x, civArray, 100]',
 			    fnc_units_nearby]
 	                    call fnc_to_cost_function;
+
+
+// Cost function for not having cover objects nearby:
+OPT_fnc_cover_available = [true, 1, 8,
+			   '[_x, 25]',
+			   fnc_cover_nearby]
+                           call fnc_to_cost_function;
+
+
+// Cost function for having cover nearby:
+OPT_fnc_cover_unavailable = [false, 1, 10,
+			     '[_x, 25]',
+			     fnc_cover_nearby]
+                             call fnc_to_cost_function;
 
 
 // Cost function for being close (w/in 50-300m) to player position:
@@ -367,6 +456,20 @@ OPT_fnc_distance_from_targets = [true, 35, 200,
                                  call fnc_to_cost_function;
 
 
+// Cost function for being near forest objects:
+OPT_fnc_forests_clear = [false, 0, 5,
+			 '[_x, 25]',
+			 fnc_forests_nearby]
+	                 call fnc_to_cost_function;
+
+
+// Cost function for not being near forest objects:
+OPT_fnc_forests_dense = [true, 2, 10,
+			 '[_x, 25]',
+			 fnc_forests_nearby]
+	                 call fnc_to_cost_function;
+
+
 // Cost function for not being near a fuel station:
 OPT_fnc_fuel_station_nearby = [false, 0, 2500,
  			       '[_x, 1, ["FUELSTATION"], 300]',
@@ -381,40 +484,32 @@ OPT_fnc_level_surface = [false, 0.35, 1.5,
                          call fnc_to_cost_function;
 
 
-/////////////////////////////////// UNTESTED //////////////////////////////////
 // Cost function for not having LOS to player group:
-OPT_fnc_LOS_to_player_group = [false, 0, 1,
+OPT_fnc_LOS_to_player_group = [true, 0, 1,
 			       '[_x, units group player, 1.6, true]',
 			       fnc_LOS_to_array]
 	                       call fnc_to_cost_function;
-/////////////////////////////////// UNTESTED //////////////////////////////////
 
 
-/////////////////////////////////// UNTESTED //////////////////////////////////
 // Cost function for not having LOS to targets:
-OPT_fnc_LOS_to_targets = [false, 0, 1,
+OPT_fnc_LOS_to_targets = [true, 0, 1,
 			  '[_x, _x getVariable "targets", 1.6, false]',
 			  fnc_LOS_to_array]
                           call fnc_to_cost_function;
-/////////////////////////////////// UNTESTED //////////////////////////////////
 
 
-/////////////////////////////////// UNTESTED //////////////////////////////////
 // Cost function for having LOS to player group:
-OPT_fnc_no_LOS_to_player_group = [true, 0, 1,
+OPT_fnc_no_LOS_to_player_group = [false, 0, 1,
 				  '[_x, units group player, 1.6, true]',
 				  fnc_LOS_to_array]
                                   call fnc_to_cost_function;
-/////////////////////////////////// UNTESTED //////////////////////////////////
 
 
-/////////////////////////////////// UNTESTED //////////////////////////////////
 // Cost function for having LOS to targets:
-OPT_fnc_no_LOS_to_targets = [true, 0, 1,
+OPT_fnc_no_LOS_to_targets = [false, 0, 1,
 			     '[_x, _x getVariable "targets", 1.6, false]',
 			     fnc_LOS_to_array]
                              call fnc_to_cost_function;
-/////////////////////////////////// UNTESTED //////////////////////////////////
 
 
 // Cost function for not having occluded LOS to player group:
@@ -434,20 +529,16 @@ OPT_fnc_partial_LOS_to_targets = [false, 0, 1,
                                   call fnc_to_cost_function;
 
 
-/////////////////////////////////// UNTESTED //////////////////////////////////
-// Cost function for being on water [binary]:
-OPT_fnc_surface_is_water = [false, 0, 1, '[_x]',
+// Cost function for not being on water [binary]:
+OPT_fnc_surface_is_water = [true, 0, 1, '[_x]',
 			    fnc_surface_is_water]
                             call fnc_to_cost_function;
-/////////////////////////////////// UNTESTED //////////////////////////////////
 
 
-/////////////////////////////////// UNTESTED //////////////////////////////////
-// Cost function for not being on water [binary]:
-OPT_fnc_surface_is_not_water = [true, 0, 1, '[_x]',
+// Cost function for being on water [binary]:
+OPT_fnc_surface_is_not_water = [false, 0, 1, '[_x]',
 				fnc_surface_is_water]
                                 call fnc_to_cost_function;
-/////////////////////////////////// UNTESTED //////////////////////////////////
 
 
 // Cost function for not being near [3..8] targets within 100m:
