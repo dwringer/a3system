@@ -323,7 +323,7 @@ fnc_partial_LOS_to_array = [["_p",
 			_visibilityParams = _visibilityParams + [vehicle _x];
 			_target = eyePos _x;
 		} else {
-			_target = _x;
+			_target = getPosASL _x;
 		};			
 		_v = (1 - (_visibilityParams checkVisibility
 		            [[(getPosASL _p) select 0, 
@@ -562,3 +562,32 @@ OPT_fnc_vegetation_dense = [true, 2, 10,
 	                    call fnc_to_cost_function;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+[OPT_fnc_above_elevation_target,
+OPT_fnc_area_LOS_clear,
+OPT_fnc_area_LOS_not_clear,
+OPT_fnc_below_elevation_target,
+OPT_fnc_building_positions_nearby,
+OPT_fnc_civilians_nearby,
+OPT_fnc_cover_available,
+OPT_fnc_cover_unavailable,
+OPT_fnc_distance_from_player,
+OPT_fnc_distance_from_roads,
+OPT_fnc_distance_from_targets,
+OPT_fnc_forests_clear,
+OPT_fnc_forests_dense,
+OPT_fnc_fuel_station_nearby,
+OPT_fnc_level_surface,
+OPT_fnc_LOS_to_player_group,
+OPT_fnc_LOS_to_targets,
+OPT_fnc_no_LOS_to_player_group,
+OPT_fnc_no_LOS_to_targets,
+OPT_fnc_partial_LOS_to_player_group,
+OPT_fnc_partial_LOS_to_targets, 
+OPT_fnc_surface_is_water,
+OPT_fnc_surface_is_not_water,
+OPT_fnc_targets_nearby,
+OPT_fnc_vegetation_clear,
+OPT_fnc_vegetation_dense]
+*/
