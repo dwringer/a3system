@@ -1,13 +1,12 @@
-fnc_unload_helicopters = [["_position",
-			   "_helicopters",
-			   "_enemies",
-			   "_search_radius",
-			   "_search_steps",
-			   "_search_population",
-			   "_include_center"], {
+fnc_unload_helicopters = [["_position",           /* Start search here */
+			   "_helicopters",        /* Vehicles to be landed */
+			   "_enemies",            /* Array to avoid */
+			   "_search_radius",      /* Size of search area */
+			   "_search_steps",       /* Number of evolutions */
+			   "_search_population",  /* Size of population */
+			   "_include_center"], {  /* Scatter over full area? */
 	private ["_pad", "_solutions", "_group", "_solutionIndex", "_wp",
-		 "_pads", "_helicopterIndex", "_confirmed", "_assignments",
-		 "_optimizations"];
+		 "_pads", "_confirmed", "_assignments", "_optimizations"];
 	_assignments = [];
 	_optimizations = [[false, 0, 5, '[_x, 15]', fnc_vegetation_nearby]
 			   call fnc_to_cost_function,
@@ -49,9 +48,8 @@ fnc_unload_helicopters = [["_position",
 	};
 	_solutions = [];
 	_solutionIndex = 0;
-	_helicopterIndex = 0;
 	_pads = [];
-	while {_helicopterIndex < (count _helicopters)} do {
+	while {(count _pads) < (count _helicopters)} do {
 		_confirmed = false;
 		while {not _confirmed} do {
 			_confirmed = true;
@@ -86,7 +84,6 @@ fnc_unload_helicopters = [["_position",
 			_pad = "Land_HelipadEmpty_F" createVehicle
 			       (position (_solutions select _solutionIndex));
 			_solutionIndex = _solutionIndex + 1;
-			_helicopterIndex = _helicopterIndex + 1;
 			_pads = _pads + [_pad];
 		};
 	};
