@@ -1,6 +1,10 @@
-fnc_unload_helicopters = [["_position", "_helicopters", "_enemies",
-			   "_search_radius", "_search_steps",
-			   "_search_population", "_include_center"], {
+fnc_unload_helicopters = [["_position",
+			   "_helicopters",
+			   "_enemies",
+			   "_search_radius",
+			   "_search_steps",
+			   "_search_population",
+			   "_include_center"], {
 	private ["_pad", "_solutions", "_group", "_solutionIndex", "_wp",
 		 "_pads", "_helicopterIndex", "_confirmed", "_assignments",
 		 "_optimizations"];
@@ -15,7 +19,7 @@ fnc_unload_helicopters = [["_position", "_helicopters", "_enemies",
 			   call fnc_to_cost_function,
 			  [false, 0, 1, '[_x]', fnc_surface_is_water]
 			   call fnc_to_cost_function,
-			  [false, 0.15, .85, '[_x, 1.5, 4, 0.75]',
+			  [true, 0.15, .85, '[_x, 1.5, 4, 0.75]',
 			   fnc_check_los_grid] call fnc_to_cost_function];
 	if (not isNil "_enemies") then {
 		_assignments = [["targets", _enemies]];
@@ -38,7 +42,7 @@ fnc_unload_helicopters = [["_position", "_helicopters", "_enemies",
 		_search_steps = 2;
 	};
 	if (isNil "_search_population") then {
-		_search_population = 7;
+		_search_population = floor (7 * (sqrt (count _helicopters)));
 	};
 	if (isNil "_include_center") then {
 		_include_center = true;
@@ -69,7 +73,9 @@ fnc_unload_helicopters = [["_position", "_helicopters", "_enemies",
 				      _optimizations,
 				      _search_population,
 				      _search_steps,
-				      _include_center] call fnc_find_positions;
+				      _include_center
+				      ceil ((count _helicopters) / .618)]
+				      call fnc_find_positions;
 			_solutions = [_solutions,
 				      [["_a", "_b"], {
 				          ((_a distance (nearestBuilding _a)) >
