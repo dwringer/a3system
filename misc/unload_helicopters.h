@@ -15,9 +15,23 @@
 
 fnc_unload_helicopters = [["_position", "_helicopters", "_enemies",
 			   "_search_radius", "_search_steps",
-			   "_search_population"], {
+			   "_search_population", "_include_center"], {
 	private ["_pad", "_solutions", "_group", "_solutionIndex", "_wp",
-		 "_pads", "_helicopterIndex", "_confirmed"];
+		 "_pads", "_helicopterIndex", "_confirmed", "_assignments",
+		 "_optimizations"];
+	_assignments = [];
+	_optimizations = [OPT_fnc_vegetation_clear,
+			  OPT_fnc_forests_clear,
+			  OPT_fnc_cover_unavailable,
+			  OPT_fnc_level_surface,
+			  OPT_fnc_surface_is_not_water,
+			  OPT_fnc_area_LOS_clear];
+	if (not isNil "_enemies") then {
+		_assignments = [["targets", _enemies]];
+		_optimizations = _optimizations +
+			         [OPT_fnc_no_LOS_to_targets,
+				  OPT_fnc_distance_from_targets];
+	};
 	if (isNil "_search_radius") then {
 		_search_radius = 100;
 	};
@@ -27,12 +41,10 @@ fnc_unload_helicopters = [["_position", "_helicopters", "_enemies",
 	if (isNil "_search_population") then {
 		_search_population = 7;
 	};
-	_solutions = COMPUTE_SOLUTIONS;
-	_solutions = [_solutions,
-		      [["_a", "_b"], {
-			      ((_a distance (nearestBuilding _a)) >
-			       (_b distance (nearestBuilding _b)))
-		       }] call fnc_lambda] call fnc_sorted;
+	if (isNil "_include_center") then {
+		_include_center = true;
+	};
+	_solutions = [];
 	_solutionIndex = 0;
 	_helicopterIndex = 0;
 	_pads = [];
@@ -52,7 +64,18 @@ fnc_unload_helicopters = [["_position", "_helicopters", "_enemies",
 			};
 		};
 		if (_solutionIndex >= (count _solutions)) then {
-			_solutions = COMPUTE_SOLUTIONS;
+			_solutions = [_search_radius,
+				      [_position],
+				      _assignments,
+				      _optimizations,
+				      _search_population,
+				      _search_steps,
+				      _include_center] call fnc_find_positions;
+			_solutions = [_solutions,
+				      [["_a", "_b"], {
+				          ((_a distance (nearestBuilding _a)) >
+				           (_b distance (nearestBuilding _b)))
+				      }] call fnc_lambda] call fnc_sorted;
 			_solutionIndex = 0;
 		} else {
 			_pad = "Land_HelipadEmpty_F" createVehicle
