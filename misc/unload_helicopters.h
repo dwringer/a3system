@@ -15,7 +15,7 @@ fnc_unload_helicopters = [["_position", "_helicopters", "_enemies",
 			   call fnc_to_cost_function,
 			  [false, 0, 1, '[_x]', fnc_surface_is_water]
 			   call fnc_to_cost_function,
-			  [false, 0.15, .85, '[_x, 1.5, 4, 0.75]',
+			  [true, 0.15, .85, '[_x, 1.5, 4, 0.75]',
 			   fnc_check_los_grid] call fnc_to_cost_function];
 	if (not isNil "_enemies") then {
 		_assignments = [["targets", _enemies]];
