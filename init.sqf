@@ -5,6 +5,7 @@
 #include <misc\include\directed_graph.h>
 #include <misc\include\weapon_shop.h>
 #include <misc\include\asinc.h>
+#include <misc\unload_helicopters.h>
 
 // ObjectRoot class (REQUIRED):
 #include <classdef\ObjectRoot.hpp>

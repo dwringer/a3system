@@ -447,7 +447,7 @@ OPT_fnc_distance_from_roads = [false, 0, 6,
 
 
 // Cost function for being close to designated targets:
-OPT_fnc_distance_from_targets = [true, 35, 200,
+OPT_fnc_distance_from_targets = [true, 25, 50,
 				 '[position _x,
                                    ([[["_t"], {position _t}] call fnc_lambda,
                                      _x getVariable "targets"] 
@@ -493,7 +493,7 @@ OPT_fnc_LOS_to_player_group = [true, 0, 1,
 
 // Cost function for not having LOS to targets:
 OPT_fnc_LOS_to_targets = [true, 0, 1,
-			  '[_x, _x getVariable "targets", 1.6, false]',
+			  '[_x, _x getVariable "targets", 1.6, true]',
 			  fnc_LOS_to_array]
                           call fnc_to_cost_function;
 
@@ -507,7 +507,7 @@ OPT_fnc_no_LOS_to_player_group = [false, 0, 1,
 
 // Cost function for having LOS to targets:
 OPT_fnc_no_LOS_to_targets = [false, 0, 1,
-			     '[_x, _x getVariable "targets", 1.6, false]',
+			     '[_x, _x getVariable "targets", 1.6, true]',
 			     fnc_LOS_to_array]
                              call fnc_to_cost_function;
 
