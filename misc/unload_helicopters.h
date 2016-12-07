@@ -1,18 +1,3 @@
-#define COMPUTE_SOLUTIONS [_search_radius,  \
-			   [_position],	\
-			   [["targets", _enemies]],	\
-			   [OPT_fnc_no_LOS_to_targets,  \
-			    OPT_fnc_vegetation_clear,	\
-			    OPT_fnc_forests_clear,	\
-			    OPT_fnc_cover_unavailable,  \
-			    OPT_fnc_level_surface,	\
-			    OPT_fnc_surface_is_not_water,	\
-			    OPT_fnc_area_LOS_clear,		\
-			    OPT_fnc_distance_from_targets],	\
-			   _search_population,			\
-			   _search_steps,			\
-			   true] call fnc_find_positions
-
 fnc_unload_helicopters = [["_position", "_helicopters", "_enemies",
 			   "_search_radius", "_search_steps",
 			   "_search_population", "_include_center"], {
@@ -20,17 +5,31 @@ fnc_unload_helicopters = [["_position", "_helicopters", "_enemies",
 		 "_pads", "_helicopterIndex", "_confirmed", "_assignments",
 		 "_optimizations"];
 	_assignments = [];
-	_optimizations = [OPT_fnc_vegetation_clear,
-			  OPT_fnc_forests_clear,
-			  OPT_fnc_cover_unavailable,
-			  OPT_fnc_level_surface,
-			  OPT_fnc_surface_is_not_water,
-			  OPT_fnc_area_LOS_clear];
+	_optimizations = [[false, 0, 5, '[_x, 15]', fnc_vegetation_nearby]
+			   call fnc_to_cost_function,
+			  [false, 0, 5, '[_x, 25]', fnc_forests_nearby]
+			   call fnc_to_cost_function,
+			  [false, 1, 10, '[_x, 25]', fnc_cover_nearby]
+			   call fnc_to_cost_function,
+			  [false, 0.35, 1.5, '[_x, 5, 2]', fnc_check_level]
+			   call fnc_to_cost_function,
+			  [false, 0, 1, '[_x]', fnc_surface_is_water]
+			   call fnc_to_cost_function,
+			  [false, 0.15, .85, '[_x, 1.5, 4, 0.75]',
+			   fnc_check_los_grid] call fnc_to_cost_function];
 	if (not isNil "_enemies") then {
 		_assignments = [["targets", _enemies]];
 		_optimizations = _optimizations +
-			         [OPT_fnc_no_LOS_to_targets,
-				  OPT_fnc_distance_from_targets];
+			         [[false, 0, 1,
+				   '[_x, _x getVariable "targets", 1.6, true]',
+				   fnc_LOS_to_array] call fnc_to_cost_function,
+				  [true, 25, 50,
+				   '[position _x,
+                                     ([[["_t"], {position _t}] call fnc_lambda,
+                                       _x getVariable "targets"] 
+                                       call fnc_map) call fnc_vector_mean]',
+				   fnc_euclidean_distance]
+				   call fnc_to_cost_function];
 	};
 	if (isNil "_search_radius") then {
 		_search_radius = 100;
