@@ -71,7 +71,7 @@ fnc_unload_helicopters = [["_position",           /* Start search here */
 				      _optimizations,
 				      _search_population,
 				      _search_steps,
-				      _include_center
+				      _include_center,
 				      ceil ((count _helicopters) / .618)]
 				      call fnc_find_positions;
 			_solutions = [_solutions,
@@ -97,4 +97,4 @@ fnc_unload_helicopters = [["_position",           /* Start search here */
 		_wp setWaypointBehaviour "CARELESS";
 		_group setCurrentWaypoint _wp;
 	};
-}] call fnc_vlambda;
+	}] call fnc_vlambda;
