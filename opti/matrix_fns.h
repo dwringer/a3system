@@ -58,16 +58,15 @@ fnc_matrix_multiply = [["_matrix_1", "_matrix_2"], {
 	if ((count (_matrix_1 select 0)) == (count _matrix_2)) then {
 		for "_i" from 0 to ((count _matrix_1) - 1) do {
 			_row = [];
-			for "_j" from 0 to ((count _matrix_2) - 1) do {
+			for "_j" from 0
+			 to ((count (_matrix_2 select 0)) - 1) do {
 				_elt = 0;
-				for "_k" from 0 to ((count _matrix_1) - 1) do {
-					for "_l" from 0 to
-					 ((count _matrix_2) - 1) do {
-						_elt = _elt +
-							(((_matrix_1 select _i)
-							  select _l) *
-							 ((_matrix_2 select _j)
-							  select _k));
+				for "_k" from 0 to ((count _matrix_2) - 1) do {
+					_elt = _elt +
+						(((_matrix_1 select _i)
+						  select _k) *
+						 ((_matrix_2 select _k)
+						  select _j));
 					};
 				};
 				_row = _row + [_elt];
