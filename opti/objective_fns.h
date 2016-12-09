@@ -456,6 +456,16 @@ OPT_fnc_distance_from_targets = [true, 25, 50,
                                  call fnc_to_cost_function;
 
 
+// Cost function for being close to designated targets:
+OPT_fnc_long_distance_from_targets = [true, 100, 300,
+				 '[position _x,
+                                   ([[["_t"], {position _t}] call fnc_lambda,
+                                     _x getVariable "targets"] 
+                                     call fnc_map) call fnc_vector_mean]',
+				 fnc_euclidean_distance]
+                                 call fnc_to_cost_function;
+
+
 // Cost function for being near forest objects:
 OPT_fnc_forests_clear = [false, 0, 5,
 			 '[_x, 25]',
