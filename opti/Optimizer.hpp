@@ -281,6 +281,34 @@ DEFMETHOD("Optimizer", "radial_scatter_2d") ["_self",
 } ENDMETHOD;
 
 
+DEFMETHOD("Optimizer", "displace_shape") ["_self",
+					  "_points",
+					  "_heading",
+					  "_scale"] DO {
+	/* Displace population as into a given shape of points */
+	private ["_angle"];
+	_angle = 90 - _heading;
+	_points = [_points, _scale, _angle] call fnc_scale_and_rotate;
+	{
+		_i = _x select 0;
+		_p = _x select 1;
+		[_p, "set_position",
+		 [[["_a", "_b"], {_a + _b}] call fnc_lambda,
+		  position _p,
+		  _points select (_i mod (count _points))] call fnc_map]
+		 call fnc_tell;
+	} forEach ((_self getVariable "population") call fnc_enumerate);
+} ENDMETHOD;
+
+
+DEFMETHOD("Optimizer", "ring_out") ["_self", "_radius"] DO {
+	/* Move population members as into a ring around current positions */
+	_population = _self getVariable "population";
+	_ring = [count _population] call fnc_make_ring;
+	[_self, "displace_shape", _ring, 0, _radius] call fnc_tell;
+} ENDMETHOD;
+
+
 DEFMETHOD("Optimizer", "add_objective") ["_self", "_objective_fn"] DO {
 	/* Add objective function to each population member */
 	{

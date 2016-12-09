@@ -1,27 +1,5 @@
 ////////////////////////////////// ALL UNTESTED ///////////////////////////////
 
-fnc_rotation_matrix = [["_axis", "_angle"], {
-	/* Generate rotation matrix given axis-vector and angle (in degrees) */
-	private ["_axis_norm", "_x", "_y", "_z", "_c", "_s", "_t"];
-	_axis_norm = [[0, 0, 0], _axis] call fnc_euclidean_distance;
-	_x = (_axis select 0) / _axis_norm;
-	_y = (_axis select 1) / _axis_norm;
-	_z = (_axis select 2) / _axis_norm;
-	_c = cos _angle;
-	_s = sin _angle;
-	_t = 1.0 - _c;
-	[[(_t * _x * _x) + _c,
-	  (_t * _x * _y) - (_s * _z),
-	  (_t * _x * _z) + (_s * _y)],
-	 [(_t * _x * _y) + (_s * _z),
-	  (_t * _y * _y) + _c,
-	  (_t * _y * _z) - (_s * _x)],
-	 [(_t * _x * _z) - (_s * _y),
-	  (_t * _y * _z) + (_s * _x),
-	  (_t * _z * _z) + _c]]
-}] call fnc_lambda;
-
-
 fnc_matrix_add = [["_matrix_1", "_matrix_2"], {
 	/* Add two matrices, piecewise */
 	private ["_result", "_row"];
@@ -80,22 +58,73 @@ fnc_matrix_multiply = [["_matrix_1", "_matrix_2"], {
 }] call fnc_lambda;
 
 
-fnc_transformation_matrix = [["_translation", "_scale", "_axis", "_angle"], {
+fnc_rotation_matrix = [["_axis", "_angle"], {
+	/* Generate rotation matrix given axis-vector and angle (in degrees) */
+	private ["_axis_norm", "_x", "_y", "_z", "_c", "_s", "_d"];
+	_axis_norm = [[0, 0, 0], _axis] call fnc_euclidean_distance;
+	_x = (_axis select 0) / _axis_norm;
+	_y = (_axis select 1) / _axis_norm;
+	_z = (_axis select 2) / _axis_norm;
+	_c = cos _angle;
+	_s = sin _angle;
+	_d = 1.0 - _c;
+	[[(_d * _x * _x) + _c,
+	  (_d * _x * _y) - (_s * _z),
+	  (_d * _x * _z) + (_s * _y)],
+	 [(_d * _x * _y) + (_s * _z),
+	  (_d * _y * _y) + _c,
+	  (_d * _y * _z) - (_s * _x)],
+	 [(_d * _x * _z) - (_s * _y),
+	  (_d * _y * _z) + (_s * _x),
+	  (_d * _z * _z) + _c]]
+}] call fnc_lambda;
+
+
+fnc_transformation_matrix = [["_scale", "_axis", "_angle"], {
 	/* Make a transformation matrix given 3 component vectors and angle */
-	private [];
-	_rotation = [_axis, _angle] call fnc_rotation_matrix;
-	_dgx = (_rotation select 0) select 0;
-	_dgy = (_rotation select 1) select 1;
-	_dgy = (_rotation select 2) select 2;
-	_rotation = [_rotation, [[((_scale select 0) * _dgx) - _dgx, 0, 0],
-				 [0, ((_scale select 1) * _dgy) - _dgy, 0],
-				 [0, 0, ((_scale select 2) * _dgz) - _dgz]]]
-                     call fnc_matrix_add;
-	_result = [];
-	for "_i" from 0 to ((count _rotation) - 1) do {
-		_result = _result + ((_rotation select _i) +
-				     [_translation select _i]);
+	private ["_rotation"];
+	_rotation = (([_axis, _angle] call fnc_rotation_matrix)
+ 		      call fnc_homogenize) + [[0, 0, 0, 1]];
+	_scale = [[_scale select 0, 0, 0, 0],
+		  [0, _scale select 1, 0, 0],
+		  [0, 0, _scale select 2, 0],
+		  [0, 0, 0, 1]];
+	[_scale, _rotation] call fnc_matrix_multiply
+}] call fnc_lambda;
+
+
+fnc_scale = [["_position_matrix", "_scale"], {
+	if ((typeName _scale) != "ARRAY") then {
+		_scale = [_scale, _scale, _scale];
 	};
-	_result = _result + [0, 0, 0, 1];
-	_result
+	_scale = [[_scale select 0, 0, 0, 0],
+		  [0, _scale select 1, 0, 0],
+		  [0, 0, _scale select 2, 0],
+		  [0, 0, 0, 1]];
+	(([_position_matrix call fnc_homogenize,
+	   _scale] call fnc_matrix_multiply)
+	  call fnc_dehomogenize)
+}] call fnc_lambda;
+
+
+fnc_rotate = [["_position_matrix", "_angle", "_axis"], {
+	if (isNil "_axis") then {
+		_axis = [0, 0, 1];
+	};
+	(([_position_matrix call fnc_homogenize,
+	   [_axis, _angle] call fnc_rotation_matrix] call fnc_matrix_multiply)
+	  call fnc_dehomogenize)
+}];
+
+
+fnc_scale_and_rotate = [["_position_matrix", "_scale", "_angle", "_axis"], {
+	if ((typeName _scale != "ARRAY") then {
+		_scale = [_scale, _scale, _scale];
+	};
+	if (isNil "_axis") then {
+		_axis = [0, 0, 1];
+	};
+	((([_position_matrix call fnc_homogenize,
+	    [_scale, _axis, _angle] call fnc_transformation_matrix]
+	    call fnc_matrix_multiply) call fnc_dehomogenize)
 }] call fnc_lambda;
