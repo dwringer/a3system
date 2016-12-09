@@ -69,21 +69,24 @@ fnc_rotation_matrix = [["_axis", "_angle"], {
 	_d = 1.0 - _c;
 	[[(_d * _x * _x) + _c,
 	  (_d * _x * _y) - (_s * _z),
-	  (_d * _x * _z) + (_s * _y)],
+	  (_d * _x * _z) + (_s * _y),
+	  0],
 	 [(_d * _x * _y) + (_s * _z),
 	  (_d * _y * _y) + _c,
-	  (_d * _y * _z) - (_s * _x)],
+	  (_d * _y * _z) - (_s * _x),
+	  0],
 	 [(_d * _x * _z) - (_s * _y),
 	  (_d * _y * _z) + (_s * _x),
-	  (_d * _z * _z) + _c]]
+	  (_d * _z * _z) + _c,
+	  0],
+	 [0, 0, 0, 1]]
 }] call fnc_lambda;
 
 
 fnc_transformation_matrix = [["_scale", "_axis", "_angle"], {
 	/* Make a transformation matrix given 3 component vectors and angle */
 	private ["_rotation"];
-	_rotation = (([_axis, _angle] call fnc_rotation_matrix)
- 		      call fnc_homogenize) + [[0, 0, 0, 1]];
+	_rotation = [_axis, _angle] call fnc_rotation_matrix;
 	_scale = [[_scale select 0, 0, 0, 0],
 		  [0, _scale select 1, 0, 0],
 		  [0, 0, _scale select 2, 0],
@@ -111,19 +114,20 @@ fnc_rotate = [["_position_matrix", "_angle", "_axis"], {
 		_axis = [0, 0, 1];
 	};
 	(([_position_matrix call fnc_homogenize,
-	   [_axis, _angle] call fnc_rotation_matrix] call fnc_matrix_multiply)
-	  call fnc_dehomogenize)
-}];
+	   [_axis, _angle] call fnc_rotation_matrix]
+	  call fnc_matrix_multiply)
+	 call fnc_dehomogenize)
+}] call fnc_lambda;
 
 
 fnc_scale_and_rotate = [["_position_matrix", "_scale", "_angle", "_axis"], {
-	if ((typeName _scale != "ARRAY") then {
+	if ((typeName _scale) != "ARRAY") then {
 		_scale = [_scale, _scale, _scale];
 	};
 	if (isNil "_axis") then {
 		_axis = [0, 0, 1];
 	};
-	((([_position_matrix call fnc_homogenize,
+	(([_position_matrix call fnc_homogenize,
 	    [_scale, _axis, _angle] call fnc_transformation_matrix]
 	    call fnc_matrix_multiply) call fnc_dehomogenize)
 }] call fnc_lambda;

@@ -393,7 +393,7 @@ DEFMETHOD("Optimizer", "non_dominated_sort") ["_self"] DO {
 		};
 		_x setVariable ["_NSGA_domByN", _domByN];
 		if (_domByN == 0) then {
-			_bins set [0, (_bins select 0) pushBack _x];
+			_bins set [0, (_bins select 0) + [_x]];
 		};
 	} forEach _population;
 	{
