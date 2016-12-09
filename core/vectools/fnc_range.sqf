@@ -29,7 +29,7 @@ switch (count _this) do {
 _acc = [];
 _index = _lower_bound;
 while {_index < _upper_bound} do {
-        _acc = _acc + [_index];
+        _acc pushBack _index;
         _index = _index + _step;
 };
 _acc;  // RETURN //////////////////////////////////////////////////////////////

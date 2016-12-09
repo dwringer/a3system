@@ -28,6 +28,6 @@ if (_upper_bound <= 0) then {
 };
 _acc = [];
 for "_i" from _lower_bound to (_upper_bound - 1) do {
-	_acc = _acc + [_arr select _i];
+	_acc pushBack (_arr select _i);
 };
 _acc;  // RETURN //////////////////////////////////////////////////////////////

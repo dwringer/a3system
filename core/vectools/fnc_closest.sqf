@@ -13,7 +13,7 @@ _obj = _this select 0;
 _arr = _this select 1;
 _acopy = [];
 for "_i" from 0 to ((count _arr) - 1) do {
-	_acopy = _acopy + [_arr select _i];
+	_acopy pushBack (_arr select _i);
 };
 if ((count _this) == 3) then {
 	_num = _this select 2;
@@ -25,6 +25,6 @@ _cmp = [["_a", "_b", "_obj"],
 _acopy  = [_acopy, _cmp, [_obj]] call fnc_sorted;
 _acc = [];
 for "_i" from 0 to (_num - 1) do {
-	_acc = _acc + [_acopy select _i];
+	_acc pushBack (_acopy select _i);
 };
 _acc;  // RETURN //////////////////////////////////////////////////////////////

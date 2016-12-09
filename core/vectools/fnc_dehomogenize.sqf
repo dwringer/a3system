@@ -18,6 +18,6 @@ for "_i" from 0 to ((count _coord_list) - 1) do {
 	_coord = [[["_x", "_last"], "(_x / _last)"] call fnc_lambdastr,
                   _coord,
 	          [_last]] call fnc_mapwith;
-	_acc = _acc + [_coord];
+	_acc pushBack _coord;
 };
 _acc;  // RETURN //////////////////////////////////////////////////////////////

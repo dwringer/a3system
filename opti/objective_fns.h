@@ -171,7 +171,7 @@ fnc_check_level = [["_p", "_step", "_steps"], {
 				  _cornerY + (_step * _j),
 				  _centerPosition select 2],
 				 [], 0, ""];
-			_grid = _grid + [_logic];
+			_grid pushBack _logic;
 		};
 	};
 	_sum = [[["_a", "_b"], {_a + _b}] call fnc_lambda,
@@ -206,7 +206,7 @@ fnc_check_LOS_grid = [["_p", "_step", "_steps", "_elevation"], {
 				  _cornerY + (_step * _j),
 				  _centerPosition select 2],
 				 [], 0, ""];
-			_grid = _grid + [_logic];
+			_grid pushBack _logic;
 		};
 	};
 	_sum = [[["_a", "_b"], {_a + _b}] call fnc_lambda,
@@ -292,7 +292,7 @@ fnc_LOS_to_array = [["_p",
 	{
 		_visibilityParams = [vehicle _p, "VIEW"];
 		if (_is_unit_array) then {
-			_visibilityParams = _visibilityParams + [vehicle _x];
+			_visibilityParams pushBack (vehicle _x);
 			_target = eyePos _x;
 		} else {
 			_target = getPosASL _x;
@@ -320,7 +320,7 @@ fnc_partial_LOS_to_array = [["_p",
 	{
 		_visibilityParams = [vehicle _p, "VIEW"];
 		if (_is_unit_array) then {
-			_visibilityParams = _visibilityParams + [vehicle _x];
+			_visibilityParams pushBack (vehicle _x);
 			_target = eyePos _x;
 		} else {
 			_target = getPosASL _x;

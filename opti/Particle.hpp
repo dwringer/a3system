@@ -89,7 +89,7 @@ DEFMETHOD("Particle", "evaluate_objectives") ["_self"] DO {
 	if (isNil "_computed") then {
 		_computed = [];
 		{
-			_computed = _computed + [[_self] call _x];
+			_computed pushBack ([_self] call _x);
 		} forEach (_self getVariable "objectives");
 		_self setVariable ["computedObjectives", _computed];
 	};
@@ -110,11 +110,11 @@ DEFMETHOD("Particle", "differential_evolve") ["_self", "_other",
 	_acc = [];
 	for "_i" from 0 to ((count _posX) - 1) do {
 		if ((random 1) < _frequency) then {
-			_acc = _acc + [(_posA select _i) +
+			_acc pushBack ((_posA select _i) +
 				       (_weight * ((_posB select _i) -
-                                                   (_posC select _i)))];
+						   (_posC select _i))));
 		} else {
-			_acc = _acc + [_posX select _i];
+			_acc pushBack (_posX select _i);
 		};
 	};
 	_candidate = ["Particle"] call fnc_new;

@@ -1,4 +1,4 @@
-///////////////////////////// fnc_alist_set //////////////////////// 2016-10-22
+///////////////////////////// fnc_alist_set //////////////////////// 2016-12-09
 /*  Return copy of pair-array with a given key/val pair set  */
 ///////////////////////////////////////////////////////////////
 private [           //                                         
@@ -18,5 +18,5 @@ if (not isNil "_test") then {
 } else {
 	_copy = _alist;
 };
-_copy = _copy + [[_key, _value]];
+_copy pushBack [_key, _value];
 _copy;  // RETURN ////////////////////////////////////////////////////////////

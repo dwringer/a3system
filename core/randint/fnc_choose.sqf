@@ -19,7 +19,7 @@ switch (_argc) do {
 	case 2: {
 		_choice = [];
 		for "_i" from 0 to ((_this select 1) - 1) do {
-			_choice = _choice + [_shuffled select _i];
+			_choice pushBack (_shuffled select _i);
 		}
 	};
 };

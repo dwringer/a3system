@@ -51,7 +51,7 @@ DEFMETHOD("ObjectRoot", "_setf") ["_self", "_var_name", "_value"] DO {
 	_locals = _self getVariable "__locals__";
 	if (not isNil "_value") then {
 	        if (({_x == _var_name} count _locals) == 0) then {
-  	                _locals = _locals + [_var_name];
+			_locals pushBack _var_name;
 		};
 		_self setVariable [_var_name, _value];
 	} else {
@@ -80,7 +80,7 @@ DEFMETHOD("ObjectRoot", "_locals") ["_self"] DO {
 DEFMETHOD("ObjectRoot", "_push_attr") ["_self", "_attribute", "_value"] DO {
 	/* Append a value to attribute variable that is an array */
 	_self setVariable [_attribute,
-			   (_self getVariable _attribute) + [_value]];
+			   (_self getVariable _attribute) pushBack _value];
 	// [_self, "_setf", _attribute,
 	//  ([_self, "_getf", _attribute] call fnc_tell) +
 	//  [_value]] call fnc_tell

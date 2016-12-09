@@ -14,6 +14,6 @@ _columns = _coord_list call fnc_zip;
 _newcol = [[["_", "_last"], "_last"] call fnc_lambdastr,
            [count _coord_list] call fnc_range,
            [1]] call fnc_mapwith;
-_columns = _columns + [_newcol];
+_columns pushBack _newcol;
 _coords = _columns call fnc_zip;
 _coords;  // RETURN ///////////////////////////////////////////////////////////

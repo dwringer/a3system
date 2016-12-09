@@ -15,7 +15,7 @@ _dist = _this select 2;
 _neighbors = [];
 {
 	if ((_obj distance _x) <= _dist) then {
-		_neighbors = _neighbors + [_x];
+		_neighbors pushBack _x;
 	};
 } forEach _candidates;
 _neighbors = [_neighbors,

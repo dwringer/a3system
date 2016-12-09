@@ -22,7 +22,7 @@ if (isNil "Group_ClassLogic") then {
 };
 _instance = Group_ClassLogic createUnit ["LOGIC", [0.0, 0.0, 0.0], [], 0, ""];
 _curClasses = _instance getVariable ["class_names", []];
-_curClasses = _curClasses + [_class_name];
+_curClasses pushBack _class_name;
 _instance setVariable ["class_names", _curClasses];
 _init_ = ["__init__",
           [_class_name, Classes] call fnc_alist_get] call fnc_alist_get;

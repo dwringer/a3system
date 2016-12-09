@@ -14,14 +14,14 @@ _arg_lists = [];
 _extra_vars = _this select ((count _this) - 1);
 _array_count = (count _this) - 2;
 for "_i" from 1 to _array_count do {
-	_arg_lists = _arg_lists + [_this select _i];
+	_arg_lists pushBack (_this select _i);
 };
 _acc = [];
 for "_i" from 0 to ((count (_arg_lists select 0)) - 1) do {
 	_params = [];
 	for "_j" from 0 to (_array_count - 1) do {
-		_params = _params + [(_arg_lists select _j) select _i];
+		_params pushBack ((_arg_lists select _j) select _i);
 	};
-	_acc = _acc + [(_params + _extra_vars) call _fn];
+	_acc pushBack ((_params + _extra_vars) call _fn);
 };
 _acc;  // RETURN //////////////////////////////////////////////////////////////

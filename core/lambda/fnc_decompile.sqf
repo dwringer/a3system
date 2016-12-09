@@ -16,7 +16,7 @@ _code = toArray _code;
 _acc = [];
 for "_i" from 1 to ((count _code) - 2) do {
 	_char = _code select _i;
-	_acc = _acc + [_char];
+	_acc pushBack _char;
 };
 _code = toString _acc;
 _code;

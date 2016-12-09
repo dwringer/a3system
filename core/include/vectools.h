@@ -22,7 +22,7 @@ fnc_vector_mean = {
 			_component = _component +
 				(((_vectors select _j) select _i) / _alen);
 		};
-		_mean = _mean + [_component];
+		_mean pushBack _component;
 	};
 	_mean
 };

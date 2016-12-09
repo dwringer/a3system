@@ -118,7 +118,7 @@ DEFMETHOD("Optimizer", "get_position") ["_self"] DO {
 			_component = _component +
 			        (((_positions select _j) select _i) / _alen);
 		};
-		_position = _position + [_component];
+		_position pushBack _component;
 	};
 	_self setPos ([_position, 0, 3] call fnc_subseq);
 	_position
@@ -138,7 +138,7 @@ DEFMETHOD("Optimizer", "position_offsets") ["_self"] DO {
 		_offset = [_fn_getOffset,
 			   [_p, "get_position"] call fnc_tell,
 			   _position] call fnc_map;
-		_offsets = _offsets + [_offset];
+		_offsets pushBack _offset;
 	};
 	_offsets
 } ENDMETHOD;
@@ -303,6 +303,7 @@ DEFMETHOD("Optimizer", "displace_shape") ["_self",
 
 DEFMETHOD("Optimizer", "ring_out") ["_self", "_radius"] DO {
 	/* Move population members as into a ring around current positions */
+	private ["_population", "_ring"];
 	_population = _self getVariable "population";
 	_ring = [count _population] call fnc_make_ring;
 	[_self, "displace_shape", _ring, 0, _radius] call fnc_tell;
@@ -322,7 +323,7 @@ DEFMETHOD("Optimizer", "evaluate_objectives") ["_self"] DO {
 	private ["_acc"];
 	_acc = [];
 	{
-		_acc = _acc + [[_x, "evaluate_objectives"] call fnc_tell];
+		_acc pushBack ([_x, "evaluate_objectives"] call fnc_tell);
 	} forEach ([_self, "_getf", "population"] call fnc_tell);
 	_acc
 } ENDMETHOD;
@@ -392,7 +393,7 @@ DEFMETHOD("Optimizer", "non_dominated_sort") ["_self"] DO {
 		};
 		_x setVariable ["_NSGA_domByN", _domByN];
 		if (_domByN == 0) then {
-			_bins set [0, (_bins select 0) + [_x]];
+			_bins set [0, (_bins select 0) pushBack _x];
 		};
 	} forEach _population;
 	{
@@ -408,13 +409,13 @@ DEFMETHOD("Optimizer", "non_dominated_sort") ["_self"] DO {
 				_domByN = (_y getVariable "_NSGA_domByN") - 1;
 				_y setVariable ["_NSGA_domByN", _domByN];
 				if (_domByN == 0) then {
-					_nextBin = _nextBin + [_y];
+					_nextBin pushBack _y;
 				};
 			};
 		} forEach (_bins select _binIndex);
 		_binIndex = _binIndex + 1;
 		if ((count _nextBin) > 0) then {
-			_bins = _bins + [_nextBin];
+			_bins pushBack _nextBin;
 		};
 	};
 	_bins

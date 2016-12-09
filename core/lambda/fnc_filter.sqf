@@ -21,11 +21,11 @@ for "_i" from 0 to ((count _arr) - 1) do {
 	_elt = _arr select _i;
 	if (not isNil "_elt") then {
 		if (([_elt] + _extra_vars) call _fn) then {
-			_acc = _acc + [_elt];
+			_acc pushBack _elt;
 		};
         } else {
 		if (([nil] + _extra_vars) call _fn) then {
-			_acc = _acc + [_elt];
+			_acc pushBack _elt;
 		};
 	};
 };

@@ -11,13 +11,13 @@ fnc_matrix_add = [["_matrix_1", "_matrix_2"], {
 				_row = [];
 				for "_j" from 0 to
 				 ((count (_matrix_1 select 0)) - 1) do {
-					_row = _row +
-						[((_matrix_1 select _i)
+					_row pushBack
+						(((_matrix_1 select _i)
 						  select _j) +
 						 ((_matrix_2 select _i)
-						  select _j)];
+						  select _j));
 				};
-				_result = _result + [_row];
+				_result pushBack _row;
 			};
 		} else {
 			_result = "Dimension mismatch";
@@ -45,11 +45,10 @@ fnc_matrix_multiply = [["_matrix_1", "_matrix_2"], {
 						  select _k) *
 						 ((_matrix_2 select _k)
 						  select _j));
-					};
 				};
-				_row = _row + [_elt];
+			        _row pushBack _elt;
 			};
-			_result = _result + [_row];
+			_result pushBack _row;
 		};
 	} else {
 		_result = "Dimension mismatch";

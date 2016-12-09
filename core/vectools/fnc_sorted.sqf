@@ -15,7 +15,7 @@ private [                //
 _arr = _this select 0;
 _acopy = [];
 for "_i" from 0 to ((count _arr) - 1) do {
-	_acopy = _acopy + [_arr select _i];
+	_acopy pushBack (_arr select _i);
 };
 _comp = _this select 1;
 _alen = count _arr;
@@ -34,7 +34,7 @@ for "_i" from 0 to (_alen - 1) do {
 			_best = _j;
 		};
 	};
-	_acc = _acc + [_acopy select _best];
+	_acc pushBack (_acopy select _best);
 	_acopy set [_best, "#DELETE!"];
 	_acopy = _acopy - ["#DELETE!"];
 };

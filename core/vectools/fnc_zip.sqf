@@ -15,8 +15,8 @@ _alen = count (_arrays select 0);
 for "_i" from 0 to (_alen - 1) do {
 	_row = [];
 	for "_j" from 0 to ((count _arrays) - 1) do {
-		_row = _row + [(_arrays select _j) select _i];
+		_row pushBack ((_arrays select _j) select _i);
 	};
-	_acc = _acc + [_row];
+	_acc pushBack _row;
 };
 _acc;  // RETURN /////////////////////////////////////////////////////////////
