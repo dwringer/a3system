@@ -1,10 +1,9 @@
-fnc_unload_helicopters = [["_position",           /* Start search here */
-			   "_helicopters",        /* Vehicles to be landed */
-			   "_enemies",            /* Array to avoid */
-			   "_search_radius",      /* Size of search area */
-			   "_search_steps",       /* Number of evolutions */
-			   "_search_population",  /* Size of population */
-			   "_include_center"], {  /* Scatter over full area? */
+fnc_unload_helicopters = [["_position",             /* Start search here */
+			   "_helicopters",          /* Vehicles to be landed */
+			   "_enemies",              /* Array to avoid */
+			   "_search_radius",        /* Size of search area */
+			   "_search_steps",         /* Number of evolutions */
+			   "_search_population"], { /* Size of population */
 	private ["_pad", "_solutions", "_group", "_solutionIndex", "_wp",
 		 "_pads", "_confirmed", "_assignments", "_optimizations"];
 	_assignments = [];
@@ -55,13 +54,10 @@ fnc_unload_helicopters = [["_position",           /* Start search here */
 		_search_radius = 75;
 	};
 	if (isNil "_search_steps") then {
-		_search_steps = count _helicopters;
+		_search_steps = ceil sqrt (2 * count _helicopters);
 	};
 	if (isNil "_search_population") then {
 		_search_population = floor (7 * (sqrt (count _helicopters)));
-	};
-	if (isNil "_include_center") then {
-		_include_center = true;
 	};
 	_solutions = [];
 	_solutionIndex = 0;
@@ -88,7 +84,6 @@ fnc_unload_helicopters = [["_position",           /* Start search here */
 				      _optimizations,
 				      _search_population,
 				      _search_steps,
-				      _include_center,
 				      ceil ((count _helicopters) / .618),
 				      [[.35, .8], [.8, .35]]]
 				      call fnc_find_positions;
