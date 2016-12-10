@@ -14,4 +14,4 @@ fnc_make_ring = [["_n", "_initial_point", "_axis"], {
 			([_p, 360 / _n, _axis] call fnc_rotate);
 	};
 	_points
-}] call fnc_lambda;
+}] call fnc_vlambda;

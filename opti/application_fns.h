@@ -39,10 +39,11 @@ fnc_find_positions = [["_radius",           /* Initial search radius */
 
 	// Handle default/optional arguments:
 	if (isNil "_fill_area") then {
-		[_optimizer, "radial_scatter_2d",
-		 _radius / 1.25, _radius * 1.25] call fnc_tell;
+		/* [_optimizer, "radial_scatter_2d", */
+		/*  _radius / 1.25, _radius * 1.25] call fnc_tell; */
+		[_optimizer, "ring_out", _radius] call fnc_tell;
 	} else {
-		[_optimizer, "perturb", 2, _radius] call fnc_tell;		 
+		[_optimizer, "perturb", 2, _radius] call fnc_tell;
 	};
         if (isNil "_number_expected") then {
 		_number_expected = floor (_pop_size / 5);

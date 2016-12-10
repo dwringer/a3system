@@ -102,19 +102,27 @@ DEFMETHOD("Particle", "differential_evolve") ["_self", "_other",
                                               "_weight", "_frequency"] DO {
 	/* Differential evolve given three other particles and params */
         private ["_posX", "_posA", "_posB", "_posC", "_acc", "_candidate",
-		 "_key", "_value"];
+		 "_key", "_value", "_changes"];
 	_posX = [_self, "get_position"] call fnc_tell;
         _posA = [_other, "get_position"] call fnc_tell;
 	_posB = [_adjunct, "get_position"] call fnc_tell;
 	_posC = [_moderator, "get_position"] call fnc_tell;
+	_changes = 0;
 	_acc = [];
-	for "_i" from 0 to ((count _posX) - 1) do {
-		if ((random 1) < _frequency) then {
-			_acc pushBack ((_posA select _i) +
-				       (_weight * ((_posB select _i) -
-						   (_posC select _i))));
-		} else {
-			_acc pushBack (_posX select _i);
+	while {_changes == 0} do {
+		for "_i" from 0 to ((count _posX) - 1) do {
+			if ((random 1) < _frequency) then {
+				_acc pushBack ((_posA select _i) +
+					       (_weight *
+						((_posB select _i) -
+						 (_posC select _i))));
+				_changes = _changes + 1;
+			} else {
+				_acc pushBack (_posX select _i);
+			};
+		};
+		if (_changes == 0) then {
+			_acc = [];
 		};
 	};
 	_candidate = ["Particle"] call fnc_new;
