@@ -306,7 +306,7 @@ DEFMETHOD("Optimizer", "ring_out") ["_self", "_radius"] DO {
 	private ["_population", "_ring"];
 	_population = _self getVariable "population";
 	_ring = [count _population] call fnc_make_ring;
-	[_self, "displace_shape", _ring, 0, _radius] call fnc_tell;
+	[_self, "displace_shape", _ring, random 360, _radius] call fnc_tell;
 } ENDMETHOD;
 
 

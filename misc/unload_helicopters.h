@@ -5,21 +5,25 @@ fnc_unload_helicopters = [["_position",             /* Start search here */
 			   "_search_steps",         /* Number of evolutions */
 			   "_search_population"], { /* Size of population */
 	private ["_pad", "_solutions", "_group", "_solutionIndex", "_wp",
-		 "_pads", "_confirmed", "_assignments", "_optimizations"];
+		 "_pads", "_confirmed", "_assignments", "_optimizations",
+		 "_fn_distanceSort"];
 	_assignments = [];
-	_optimizations = [[false, 0, 1, '[_x, 30]',
-			   fnc_vegetation_nearby]
-			   call fnc_to_cost_function,
-			  [false, 0, 1, '[_x, 30]',
-			   fnc_cover_nearby]
-			   call fnc_to_cost_function,
-			  [false, 0.35, 1.5, '[_x, 3, 3]',
+	_optimizations = [//[false, 0, 1, '[_x, 30]',
+			  // fnc_vegetation_nearby]
+			  // call fnc_to_cost_function,
+			  //[false, 0, 1, '[_x, 30]',
+			  // fnc_cover_nearby]
+			  // call fnc_to_cost_function,
+			  //			  [false, 0.35, 1.5, '[_x, 1, 2]',
+			  //			   fnc_check_level]
+			  //			   call fnc_to_cost_function,
+			  [false, 0.35, 1.5, '[_x, 3, 2]',
 			   fnc_check_level]
 			   call fnc_to_cost_function,
 			  [false, 0, 1, '[_x]',
 			   fnc_surface_is_water]
 			   call fnc_to_cost_function,
-			  [true, 0, 105,
+			  [true, 0, 40,
 			   '[_x, 1, ["Building", "House", "Church", "Chapel",
 				     "Rock", "Bunker", "Fortress", "Fountain",
 				     "Lighthouse", "Fuelstation", "Hospital",
@@ -27,10 +31,13 @@ fnc_unload_helicopters = [["_position",             /* Start search here */
                                      "Tree", "Small Tree",
                                      "Forest Border", "Forest Triangle", 
                                      "Forest Square", "Forest"],
-                             35]',
+                             20]',
 			   fnc_average_distance_to_nearest_terrain_objects]
 			   call fnc_to_cost_function,
-			  [true, 0.15, .85, '[_x, 2, 4, .75]',
+			  //			  [true, 0.15, .85, '[_x, .5, 2, .75]',
+			  //			   fnc_check_los_grid]
+			  //			   call fnc_to_cost_function,			  
+			  [true, 0.15, .85, '[_x, 2, 2, .75]',
 			   fnc_check_los_grid]
 			   call fnc_to_cost_function];
 	if (not (isNil "_enemies")) then {
@@ -77,6 +84,32 @@ fnc_unload_helicopters = [["_position",             /* Start search here */
 				};
 			};
 		};
+		_fn_distanceSort = [["_a", "_b"], {
+				           ([_a, 1,
+					     ["Building", "House", "Church",
+					      "Chapel", "Rock", "Bunker",
+					      "Fortress", "Fountain",
+					      "Lighthouse", "Fuelstation",
+					      "Hospital", "Wall", "Busstop",
+					      "Ruin", "Rocks", "Tree",
+					      "Forest Border",
+					      "Forest Triangle", 
+					      "Forest Square", "Forest"],
+					     40]
+		       call fnc_average_distance_to_nearest_terrain_objects) >
+					   ([_b, 1,
+					     ["Building", "House", "Church",
+					      "Chapel", "Rock", "Bunker",
+					      "Fortress", "Fountain",
+					      "Lighthouse", "Fuelstation",
+					      "Hospital", "Wall", "Busstop",
+					      "Ruin", "Rocks", "Tree",
+					      "Forest Border",
+					      "Forest Triangle", 
+					      "Forest Square", "Forest"],
+					     40]
+		       call fnc_average_distance_to_nearest_terrain_objects)
+		}] call fnc_lambda;
 		if (_solutionIndex >= (count _solutions)) then {
 			_solutions = [_search_radius,
 				      [_position],
@@ -88,28 +121,7 @@ fnc_unload_helicopters = [["_position",             /* Start search here */
 				      [[.35, .8], [.8, .35]]]
 				      call fnc_find_positions;
 			_solutions = [_solutions,
-				      [["_a", "_b"], {
-					      ([_a, 3,
-					["Building", "House", "Church", "Chapel",
-				     "Rock", "Bunker", "Fortress", "Fountain",
-				     "Lighthouse", "Fuelstation", "Hospital",
-				     "Wall", "Busstop", "Ruin", "Rocks",
-                                     "Tree", "Small Tree", "Bush", 
-                                     "Forest Border", "Forest Triangle", 
-					"Forest Square", "Forest"], 25]
-		       call fnc_average_distance_to_nearest_terrain_objects) >
-					      ([_b, 3,
-					["Building", "House", "Church", "Chapel",
-				     "Rock", "Bunker", "Fortress", "Fountain",
-				     "Lighthouse", "Fuelstation", "Hospital",
-				     "Wall", "Busstop", "Ruin", "Rocks",
-                                     "Tree", "Small Tree", "Bush", 
-                                     "Forest Border", "Forest Triangle", 
-				       "Forest Square", "Forest"], 25]
-		       call fnc_average_distance_to_nearest_terrain_objects)
-						      //				          ((_a distance (nearestBuilding _a)) >
-						      //				           (_b distance (nearestBuilding _b)))
-				      }] call fnc_lambda] call fnc_sorted;
+				      _fn_distanceSort] call fnc_sorted;
 			_solutionIndex = 0;
 		} else {
 			_pad = "Land_HelipadEmpty_F" createVehicle
