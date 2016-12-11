@@ -310,6 +310,15 @@ DEFMETHOD("Optimizer", "ring_out") ["_self", "_radius"] DO {
 } ENDMETHOD;
 
 
+DEFMETHOD("Optimizer", "rings_out") ["_self", "_radius", "_leaves"] DO {
+	/* Move population members as into rings around current positions */
+	private ["_population", "_rings"];
+	_population = _self getVariable "population";
+	_rings = [count _population, _leaves] call fnc_make_ring_cross;
+	[_self, "displace_shape", _rings, random 360, _radius] call fnc_tell;
+} ENDMETHOD;
+
+
 DEFMETHOD("Optimizer", "add_objective") ["_self", "_objective_fn"] DO {
 	/* Add objective function to each population member */
 	{

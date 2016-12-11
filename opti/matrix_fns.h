@@ -1,5 +1,3 @@
-////////////////////////////////// ALL UNTESTED ///////////////////////////////
-
 fnc_matrix_add = [["_matrix_1", "_matrix_2"], {
 	/* Add two matrices, piecewise */
 	private ["_result", "_row"];
@@ -95,7 +93,8 @@ fnc_transformation_matrix = [["_scale", "_axis", "_angle"], {
 }] call fnc_lambda;
 
 
-fnc_scale = [["_position_matrix", "_scale"], {
+fnc_scale = [["_positions", "_scale"], {
+	/* Scale the given list of positions about the origin */
 	if ((typeName _scale) != "ARRAY") then {
 		_scale = [_scale, _scale, _scale];
 	};
@@ -103,31 +102,33 @@ fnc_scale = [["_position_matrix", "_scale"], {
 		  [0, _scale select 1, 0, 0],
 		  [0, 0, _scale select 2, 0],
 		  [0, 0, 0, 1]];
-	(([_position_matrix call fnc_homogenize,
+	(([_positions call fnc_homogenize,
 	   _scale] call fnc_matrix_multiply)
 	  call fnc_dehomogenize)
 }] call fnc_lambda;
 
 
-fnc_rotate = [["_position_matrix", "_angle", "_axis"], {
+fnc_rotate = [["_positions", "_angle", "_axis"], {
+	/* Rotate the given list of positions about the origin */
 	if (isNil "_axis") then {
 		_axis = [0, 0, 1];
 	};
-	(([_position_matrix call fnc_homogenize,
+	(([_positions call fnc_homogenize,
 	   [_axis, _angle] call fnc_rotation_matrix]
 	  call fnc_matrix_multiply)
 	 call fnc_dehomogenize)
 }] call fnc_lambda;
 
 
-fnc_scale_and_rotate = [["_position_matrix", "_scale", "_angle", "_axis"], {
+fnc_scale_and_rotate = [["_positions", "_scale", "_angle", "_axis"], {
+	/* Scale and rotate the given list of positions about the origin */
 	if ((typeName _scale) != "ARRAY") then {
 		_scale = [_scale, _scale, _scale];
 	};
 	if (isNil "_axis") then {
 		_axis = [0, 0, 1];
 	};
-	(([_position_matrix call fnc_homogenize,
+	(([_positions call fnc_homogenize,
 	    [_scale, _axis, _angle] call fnc_transformation_matrix]
 	    call fnc_matrix_multiply) call fnc_dehomogenize)
 }] call fnc_lambda;

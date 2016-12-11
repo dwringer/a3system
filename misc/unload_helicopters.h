@@ -1,23 +1,15 @@
-fnc_unload_helicopters = [["_position",             /* Start search here */
-			   "_helicopters",          /* Vehicles to be landed */
-			   "_enemies",              /* Array to avoid */
-			   "_search_radius",        /* Size of search area */
-			   "_search_steps",         /* Number of evolutions */
-			   "_search_population"], { /* Size of population */
+fnc_unload_helicopters = [["_position",           /* Start search here */
+			   "_helicopters",        /* Vehicles to be landed */
+			   "_enemies",            /* Array to avoid */
+			   "_search_radius",      /* Size of search area */
+			   "_search_steps",       /* Number of evolutions */
+			   "_search_population",  /* Size of population */
+			   "_search_shape"], {    /* Unit shape positions */ 
 	private ["_pad", "_solutions", "_group", "_solutionIndex", "_wp",
 		 "_pads", "_confirmed", "_assignments", "_optimizations",
 		 "_fn_distanceSort"];
 	_assignments = [];
-	_optimizations = [//[false, 0, 1, '[_x, 30]',
-			  // fnc_vegetation_nearby]
-			  // call fnc_to_cost_function,
-			  //[false, 0, 1, '[_x, 30]',
-			  // fnc_cover_nearby]
-			  // call fnc_to_cost_function,
-			  //			  [false, 0.35, 1.5, '[_x, 1, 2]',
-			  //			   fnc_check_level]
-			  //			   call fnc_to_cost_function,
-			  [false, 0.35, 1.5, '[_x, 3, 2]',
+	_optimizations = [[false, 0.35, 1.5, '[_x, 3, 2]',
 			   fnc_check_level]
 			   call fnc_to_cost_function,
 			  [false, 0, 1, '[_x]',
@@ -34,9 +26,6 @@ fnc_unload_helicopters = [["_position",             /* Start search here */
                              20]',
 			   fnc_average_distance_to_nearest_terrain_objects]
 			   call fnc_to_cost_function,
-			  //			  [true, 0.15, .85, '[_x, .5, 2, .75]',
-			  //			   fnc_check_los_grid]
-			  //			   call fnc_to_cost_function,			  
 			  [true, 0.15, .85, '[_x, 2, 2, .75]',
 			   fnc_check_los_grid]
 			   call fnc_to_cost_function];
@@ -66,6 +55,31 @@ fnc_unload_helicopters = [["_position",             /* Start search here */
 	if (isNil "_search_population") then {
 		_search_population = floor (7 * (sqrt (count _helicopters)));
 	};
+	if (isNil "_search_shape") then {
+		_search_shape = [_search_population] call fnc_make_ring;
+	};
+	_fn_distanceSort = [["_a", "_b"], {
+				   ([_a, 1,
+				     ["Building", "House", "Church", "Chapel",
+				      "Rock", "Bunker", "Fortress", "Fountain",
+				      "Lighthouse", "Fuelstation", "Hospital",
+				      "Busstop", "Ruin", "Rocks",
+				      "Tree", "Small Tree", "Forest Border",
+				      "Forest Triangle", "Forest Square",
+				      "Forest"],
+				     40]
+	       call fnc_average_distance_to_nearest_terrain_objects) >
+				   ([_b, 1,
+				     ["Building", "House", "Church", "Chapel",
+				      "Rock", "Bunker", "Fortress", "Fountain",
+				      "Lighthouse", "Fuelstation", "Hospital",
+				      "Busstop", "Ruin", "Rocks",
+				      "Tree", "Small Tree", "Forest Border",
+				      "Forest Triangle", "Forest Square",
+				      "Forest"],
+				     40]
+	       call fnc_average_distance_to_nearest_terrain_objects)
+	}] call fnc_lambda;
 	_solutions = [];
 	_solutionIndex = 0;
 	_pads = [];
@@ -84,32 +98,6 @@ fnc_unload_helicopters = [["_position",             /* Start search here */
 				};
 			};
 		};
-		_fn_distanceSort = [["_a", "_b"], {
-				           ([_a, 1,
-					     ["Building", "House", "Church",
-					      "Chapel", "Rock", "Bunker",
-					      "Fortress", "Fountain",
-					      "Lighthouse", "Fuelstation",
-					      "Hospital", "Wall", "Busstop",
-					      "Ruin", "Rocks", "Tree",
-					      "Forest Border",
-					      "Forest Triangle", 
-					      "Forest Square", "Forest"],
-					     40]
-		       call fnc_average_distance_to_nearest_terrain_objects) >
-					   ([_b, 1,
-					     ["Building", "House", "Church",
-					      "Chapel", "Rock", "Bunker",
-					      "Fortress", "Fountain",
-					      "Lighthouse", "Fuelstation",
-					      "Hospital", "Wall", "Busstop",
-					      "Ruin", "Rocks", "Tree",
-					      "Forest Border",
-					      "Forest Triangle", 
-					      "Forest Square", "Forest"],
-					     40]
-		       call fnc_average_distance_to_nearest_terrain_objects)
-		}] call fnc_lambda;
 		if (_solutionIndex >= (count _solutions)) then {
 			_solutions = [_search_radius,
 				      [_position],
@@ -118,7 +106,8 @@ fnc_unload_helicopters = [["_position",             /* Start search here */
 				      _search_population,
 				      _search_steps,
 				      ceil ((count _helicopters) / .618),
-				      [[.35, .8], [.8, .35]]]
+				      [[.35, .8], [.8, .35]],
+				      _search_shape]
 				      call fnc_find_positions;
 			_solutions = [_solutions,
 				      _fn_distanceSort] call fnc_sorted;

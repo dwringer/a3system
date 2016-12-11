@@ -24,7 +24,8 @@ fnc_find_positions = [["_radius",           /* Initial search radius */
                        "_pop_size",         /* Particle count */
                        "_generations",      /* Number of GA steps */
                        "_number_expected",  /* Done if this many within gens */
-                       "_DE_parameters"], { /* DE parameter[ range]s */
+                       "_DE_parameters",    /* DE parameter[ range]s */
+		       "_seed_form"], {     /* Initialize with shape */
 	/* Evolve positions from initial array */
 	private ["_optimizer", "_result", "_assignment", "_assignments",
 	         "_key", "_value", "_bins", "_retries"];
@@ -35,9 +36,13 @@ fnc_find_positions = [["_radius",           /* Initial search radius */
 	{
 		[_optimizer, "add_objective", _x] call fnc_tell;
 	} forEach _objectives;
-	[_optimizer, "ring_out", _radius] call fnc_tell;
 
 	// Handle default/optional arguments:
+	if (isNil "_seed_form") then {
+		_seed_form = [_pop_size] call fnc_make_ring;
+	};
+	[_optimizer, "displace_shape", _seed_Form, random 360, _radius]
+	 call fnc_tell;
         if (isNil "_number_expected") then {
 		_number_expected = floor (_pop_size / 5);
 	};
