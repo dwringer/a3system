@@ -109,6 +109,14 @@ fnc_unload_helicopters = [["_position",           /* Start search here */
 				      [[.35, .8], [.8, .35]],
 				      _search_shape]
 				      call fnc_find_positions;
+			_solutions = [[["_s"], {
+					([_s] call ([false, 0.35, 1.5,
+						     '[_x, 3, 2]',
+						     fnc_check_level]
+						    call fnc_to_cost_function))
+					< 0.1
+				      }] call fnc_lambda,
+				      _solutions] call fnc_filter;
 			_solutions = [_solutions,
 				      _fn_distanceSort] call fnc_sorted;
 			_solutionIndex = 0;
