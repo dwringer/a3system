@@ -20,6 +20,7 @@ fnc_make_ring = [["_n", "_initial_point", "_axis"], {
 
 
 fnc_make_ring_cross = [["_n", "_leaves"], {
+	/* Create a ring at the center and rings around its perimeter */
 	private ["_rings", "_ring", "_add"];
 	if (isNil "_leaves") then {
 		_leaves = 4;
@@ -40,6 +41,7 @@ fnc_make_ring_cross = [["_n", "_leaves"], {
 
 
 fnc_make_square = [["_n"], {
+	/* Create a 2x2 square centered over the origin */
 	private ["_sides", "_side"];
 	_sides = [];
 	for "_i" from 0 to 3 do {
@@ -58,6 +60,7 @@ fnc_make_square = [["_n"], {
 
 #define RING_INCREMENT (6 * (PI / 3))
 fnc_make_concentric_rings = [["_n"], {
+	/* Create rings around a central point */
 	private ["_rings", "_ring_size", "_i", "_ring", "_designations"];
 	_rings = [];
 	_ring_size = 6;
@@ -81,3 +84,24 @@ fnc_make_concentric_rings = [["_n"], {
 	_designations
 }] call fnc_lambda;
 #undef RING_INCREMENT
+
+
+fnc_make_cross = [["_n", "_lines"], {
+	/* Create a set of lines crossed over the origin */
+	private ["_points", "_row"];
+	_points = [];
+	if (isNil "_lines") then {
+		_lines = 2;
+	};
+	for "_i" from 0 to (_lines - 1) do {
+		_row = [];
+		for "_j" from 0 to (ceil (_n / _lines)) do {
+			_row pushBack [0,
+				       -1 + (_j * (2 / (ceil (_n / _lines)))),
+				       0];
+		};
+		_points = _points + _row;
+		_points = [_points, 360 / _lines] call fnc_rotate;
+	};
+	_points
+}] call fnc_lambda;
