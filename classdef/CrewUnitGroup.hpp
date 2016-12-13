@@ -3,8 +3,10 @@
     :: CrewUnitGroup -> UnitGroup -> ObjectRoot
 
   Methods:
-    assign unit role :: assign unit or vehicle to crew in specified role
-    board_instant    :: instantly assignAs- and moveIn- all designated units 
+    assign unit role  :: assign unit or vehicle to crew in specified role
+    auto_assign units :: assign vehicles and units automatically
+    board             :: assignAs- and orderGetIn for all units
+    board_instant     :: instantly assignAs- and moveIn- all designated units 
 
       This class is used to represent a dynamic vehicle crew (and any assigned
   vehicles).  Add units to the group, assign one or more vehicles, and,

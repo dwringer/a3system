@@ -81,6 +81,125 @@ DEFMETHOD("UnitGroup", "groups") ["_self"] DO {
 } ENDMETHOD;
 
 
+DEFMETHOD("UnitGroup", "sequester") ["_self"] DO {
+	/* Despawn units and record groups/loadouts */
+	private ["_loadouts", "_classnames", "_positions", "_group", "_groups",
+		 "_groupIndices", "_sides", "_i", "_units", "_vehicles"];
+	_loadouts = [];
+	_classnames = [];
+	_positions = [];
+	_groups = [];
+	_groupIndices = [];
+	_sides = [];
+	_units = _self getVariable "units";
+	_vehicles = _self getVariable "vehicles";
+	if (not isNil "_vehicles") then {
+		_units = _units - _vehicles;
+	} else {
+		_vehicles = [];
+	};
+	{
+		_loadouts pushBack (getUnitLoadout _x);
+		_classnames pushBack (typeOf _x);
+		_positions pushBack (position _x);
+		if (not ((group _x) in _groups)) then {
+			_groupIndices pushBack (count _groups);
+			_groups pushBack (group _x);
+		} else {
+			_i = 0;
+			while {(_groups select _i) != (group _x)} do {
+				_i = _i + 1;
+			};
+			_groupIndices pushBack _i;
+		};
+		_sides pushBack (side _x);
+	} forEach _units;
+	{deleteVehicle _x;} forEach _units;
+	[_self, "_setf", "units", _vehicles] call fnc_tell;
+	[_self, "_setf", "_loadouts", _loadouts] call fnc_tell;
+	[_self, "_setf", "_classnames", _classnames] call fnc_tell;
+	[_self, "_setf", "_positions", _positions] call fnc_tell;
+	[_self, "_setf", "_groupIndices", _groupIndices] call fnc_tell;
+	[_self, "_setf", "_sides", _sides] call fnc_tell;
+} ENDMETHOD;
+
+
+DEFMETHOD("UnitGroup", "desequester") ["_self"] DO {
+	/* Respawn sequestered units into replica groups (w/o waypoints) */
+	private ["_groups", "_sides", "_unit", "_vehicles"];
+	_groups = [];
+	_sides = _self getVariable "_sides";
+	{
+		_i = _x select 0;
+		_gi = _x select 1;
+		_side = _sides select _i;
+		if (_gi >= (count _groups)) then {
+			_groups pushBack (createGroup _side);
+		};
+	} forEach ((_self getVariable "_groupIndices") call fnc_enumerate);
+	[[["_loadout", "_classname", "_position", "_group_index"], {
+		_unit = (_groups select _group_index) createUnit [_classname,
+								  _position,
+								  [],
+								  0,
+								  "NONE"];
+		_unit setUnitLoadout _loadout;
+		[_self, "_push_attr", "units", _unit] call fnc_tell;
+	 }] call fnc_lambda,
+ 	 _self getVariable "_loadouts",
+	 _self getVariable "_classnames",
+	 _self getVariable "_positions",
+	 _self getVariable "_groupIndices"] call fnc_map;
+	_vehicles = _self getVariable "vehicles";
+	if (not isNil "_vehicles") then {
+		_self setVariable ["vehicles", []];
+		_self setVariable ["gunners", []];
+		_self setVariable ["drivers", []];
+		_self setVariable ["cargos", []];
+		[_self, "auto_assign", _self getVariable "units"]
+		 call fnc_tell;
+	};
+} ENDMETHOD;
+
+
+DEFMETHOD("UnitGroup", "timed_patrol") ["_self",
+					"_location",
+					"_radius",
+					"_time",
+					"_return_to"] DO {
+	private ["_groups", "_group", "_return_pos", "_wpt", "_waypoint",
+		 "_wpType"];
+	_groups = [_self, "groups"] call fnc_tell;
+	{
+		[_x, _location, _radius] call BIS_fnc_taskPatrol;
+	} forEach _groups;
+	sleep _time;
+	if (isNil "_return_to") then {
+		_return_to = [_self, "center_pos"] call fnc_tell;
+	};
+	if ((typeName _return_to) == "ARRAY") then {
+		_return_pos = _return_to;
+		_wpType = "MOVE";
+	} else {
+		_return_pos = position _return_to;
+		_wpType = "GETOUT";
+	};
+	{
+		_group = createGroup (side _x);
+		_wpt = _group addWaypoint [_return_pos,
+					   currentWaypoint _group];
+		if ((typeName _return_to) != "ARRAY") then {
+			_wpt waypointAttachVehicle _return_to;
+		};
+		_wpt setWaypointType _wpType;
+		_wpt setWaypointBehaviour "SAFE";
+		_group setCurrentWaypoint _wpt;
+		(units _x) joinSilent _group;
+		deleteGroup _x;
+	} forEach _groups;
+} ENDMETHOD;
+
+
 DEFMETHOD("UnitGroup", "add_waypoint") ["_self", "_waypoint", "_index"] DO {
 	/* Add a waypoint instance to every group in the UnitGroup */
 	if (isNil "_index") then {
