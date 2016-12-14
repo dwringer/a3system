@@ -7,6 +7,7 @@
     auto_assign units :: assign vehicles and units automatically
     board             :: assignAs- and orderGetIn for all units
     board_instant     :: instantly assignAs- and moveIn- all designated units 
+    is_serviceable    :: return whether crew has vehicle(s) and driver(s) alive
 
       This class is used to represent a dynamic vehicle crew (and any assigned
   vehicles).  Add units to the group, assign one or more vehicles, and,
@@ -102,8 +103,7 @@ DEFMETHOD("CrewUnitGroup", "auto_assign") ["_self", "_units"] DO {
 		    (not isNil "_arr")) then {
 			[[["_u", "_r", "_g"], {
 				if (not isNil "_u") then {
-						[_g, "assign", _u, _r]
-						 call fnc_tell;
+					[_g, "assign", _u, _r] call fnc_tell;
 				};
 			 }] call fnc_lambda,
 			 _arr,
@@ -285,15 +285,31 @@ DEFMETHOD("CrewUnitGroup", "board_instant") ["_self"] DO {
 							    _monitored];
 					_cargo assignAsCargo _vehicle;
 					_cargo moveInCargo _vehicle;
-					_gunners = [_gunners, 1, 0] call
-					           fnc_subseq;
+					_gunners = [_gunners, 1, 0]
+						    call fnc_subseq;
 					_monitored = _monitored + [_cargo];
 					_monitor = [_cargo, _vehicle] spawn
-						thread_turret_monitor;
+ 						    thread_turret_monitor;
 					_cargo setVariable ["monitor",
 							    _monitor];
 				};
 		        };
 		};
 	};
+} ENDMETHOD;
+
+
+DEFMETHOD("CrewUnitGroup", "is_serviceable") ["_self"] DO {
+	/* Return whether the group can be considered at all serviceable */
+	if (({canMove _x} count (_self getVariable "vehicles")) == 0) then {
+		false
+	} else {
+		if (({alive _x} count (_self getVariable "drivers")) <
+		    ({canMove _x} count (_self getVariable "vehicles"))) then {
+			[_self, "auto_assign", _self getVariable "units"]
+			 call fnc_tell;
+		};
+		(({alive _x} count (_self getVariable "drivers")) <
+		 ({canMove _x} count (_self getVariable "vehicles")))
+	}
 } ENDMETHOD;

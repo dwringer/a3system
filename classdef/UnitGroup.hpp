@@ -3,9 +3,14 @@
     :: UnitGroup -> ObjectRoot
 
   Methods:
-    center_pos  :: Get the mean position of all group units
-    add unit    :: Add a unit to group
-    remove unit :: Remove a unit from group
+    center_pos    :: Get the mean position of all group units
+    add unit      :: Add a unit to group
+    remove unit   :: Remove a unit from group
+    groups        :: Return list of in-game groups represented
+    move          :: Move to a position while blocking [[use fnc_tells]]
+    sequester     :: Record group structure and loadouts, then despawn units
+    desequester   :: Respawn sequestered units into cloned groups w/o waypoints
+    timed_patrol  :: Run BIS_fnc_taskPatrol for a set duration, then move back
 
       This is an abstraction to represent a group of units.  This is distinct
   from unit groups in the typical sense - these groups exist independently and
@@ -82,7 +87,7 @@ DEFMETHOD("UnitGroup", "groups") ["_self"] DO {
 
 
 DEFMETHOD("UnitGroup", "move") ["_self", "_destination"] DO {
-	/* Block until unit group has moved to the new position */
+	/* Block until unit group has moved to the new position or stopped */
 	private ["_pos", "_matches", "_newPos"];
 	{
 		_x move _destination;
@@ -144,6 +149,7 @@ DEFMETHOD("UnitGroup", "sequester") ["_self"] DO {
 	[_self, "_setf", "_positions", _positions] call fnc_tell;
 	[_self, "_setf", "_groupIndices", _groupIndices] call fnc_tell;
 	[_self, "_setf", "_sides", _sides] call fnc_tell;
+	[_self, "_setf", "sequestered", true] call fnc_tell;
 } ENDMETHOD;
 
 
@@ -182,6 +188,7 @@ DEFMETHOD("UnitGroup", "desequester") ["_self"] DO {
 		[_self, "auto_assign", _self getVariable "units"]
 		 call fnc_tell;
 	};
+	[_self, "_setf", "sequestered", nil] call fnc_tell;
 } ENDMETHOD;
 
 
@@ -190,6 +197,7 @@ DEFMETHOD("UnitGroup", "timed_patrol") ["_self",
 					"_radius",
 					"_time",
 					"_return_to"] DO {
+	/* Run BIS_fnc_taskPatrol for a set duration then move back */
 	private ["_groups", "_group", "_return_pos", "_wpt", "_waypoint",
 		 "_wpType"];
 	_groups = [_self, "groups"] call fnc_tell;

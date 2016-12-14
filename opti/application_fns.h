@@ -41,7 +41,7 @@ fnc_find_positions = [["_radius",           /* Initial search radius */
 	if (isNil "_seed_form") then {
 		_seed_form = [_pop_size] call fnc_make_ring;
 	};
-	[_optimizer, "displace_shape", _seed_Form, random 360, _radius]
+	[_optimizer, "displace_shape", _seed_form, random 360, _radius]
 	 call fnc_tell;
         if (isNil "_number_expected") then {
 		_number_expected = floor (_pop_size / 5);
