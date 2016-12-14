@@ -81,6 +81,29 @@ DEFMETHOD("UnitGroup", "groups") ["_self"] DO {
 } ENDMETHOD;
 
 
+DEFMETHOD("UnitGroup", "move") ["_self", "_destination"] DO {
+	/* Block until unit group has moved to the new position */
+	private ["_pos", "_matches", "_newPos"];
+	{
+		_x move _destination;
+	} forEach ([_self, "groups"] call fnc_tell);
+	_pos = [_self, "center_pos"] call fnc_tell;
+	_matches = 0;
+	waitUntil {
+		sleep 1;
+		_newPos = [_self, "center_pos"] call fnc_tell;
+		if (_pos isEqualTo _newPos) then {
+			_matches = _matches + 1;
+		} else {
+			_matches = 0;
+		};
+		_pos = _newPos;
+		(((_pos distance _destination) < 15) or
+		 (_matches > 5))
+	};
+} ENDMETHOD;
+
+
 DEFMETHOD("UnitGroup", "sequester") ["_self"] DO {
 	/* Despawn units and record groups/loadouts */
 	private ["_loadouts", "_classnames", "_positions", "_group", "_groups",
