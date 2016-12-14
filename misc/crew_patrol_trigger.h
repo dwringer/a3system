@@ -9,17 +9,17 @@ _nil = [thisList,
 */
 
 
-fnc_crew_patrol_trigger = ["_this_list",
+fnc_crew_patrol_trigger = [["_this_list",
                            "_sentinel",
 			   "_crew_unit_groups",
 			   "_time",
 			   "_return_to"], {
 	private ["_crews", "_crew", "_pos", "_nonVehicles",
 		 "_sequestered"];
-	_crews = [_crew_unit_groups,
-		  [["_x"], {
+	_crews = [[["_x"], {
 			  [_x, "is_serviceable"] call fnc_tell
-		  }] call fnc_lambda] call fnc_filter;
+		  }] call fnc_lambda,
+		  _crew_unit_groups] call fnc_filter;
 	_crew = _crews select floor random count _crews;
 	_sequestered = _crew getVariable "sequestered";
 	if (not isNil "_crew") then {	  
@@ -32,7 +32,7 @@ fnc_crew_patrol_trigger = ["_this_list",
 		       (_crew getVariable "vehicles");
 	_pos = position (_nonVehicles select 0);
 	[_crew, "board"] call fnc_tell;
-	[_crew, "timed_patrol", position (thisList select 0), 150, _time,
+	[_crew, "timed_patrol", position (_this_list select 0), 150, _time,
 	 _return_to] call fnc_tell;
 	waitUntil {({(alive _x) and
 		     (_x != (vehicle _x))} count _nonVehicles) == 0};
@@ -40,7 +40,7 @@ fnc_crew_patrol_trigger = ["_this_list",
 	if (_sequestered) then {
 		[_crew, "sequester"] call fnc_tell;
 	};
-	call compile format ["%s = false;", _sentinel];
+	call compile format ["%1 = nil;", _sentinel];
 }] call fnc_lambda;
 
 
