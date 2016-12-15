@@ -120,7 +120,9 @@ thread_turret_monitor = [["_man", "_vehicle"], {
 	/* Watch stored list of gunners and man turret once all are dead */
 	waitUntil {([[["_a", "_b"], {_a * _b}] call fnc_lambda,
  		     [[["_x"], {
-			     if (alive _x) then {0} else {1}
+			     if (isNil "_x") then {1} else {
+				     if (alive _x) then {0} else {1}
+			     }
 		      }] call fnc_lambda,
 		     _man getVariable "monitored"] call fnc_map
 		    ] call fnc_reduce) == 1
@@ -173,7 +175,7 @@ DEFMETHOD("CrewUnitGroup", "board") ["_self"] DO {
 				};
 			};
 		};
-		_assignmentIndex = 0;
+		_assignmentIndex = 0;		
 		while {_assignmentIndex < ((count _gunners) min
 					   (count _turretPositions))} do {
 			(_gunners select _assignmentIndex) assignAsTurret
@@ -301,15 +303,29 @@ DEFMETHOD("CrewUnitGroup", "board_instant") ["_self"] DO {
 
 DEFMETHOD("CrewUnitGroup", "is_serviceable") ["_self"] DO {
 	/* Return whether the group can be considered at all serviceable */
+	private ["_sequestered", "_result"];
 	if (({canMove _x} count (_self getVariable "vehicles")) == 0) then {
 		false
 	} else {
-		if (({alive _x} count (_self getVariable "drivers")) <
-		    ({canMove _x} count (_self getVariable "vehicles"))) then {
-			[_self, "auto_assign", _self getVariable "units"]
-			 call fnc_tell;
+		_sequestered = _self getVariable "sequestered";
+		if (isNil "_sequestered") then {_sequestered = false;};
+		if (_sequestered) then {
+			_result = (count (_self getVariable "drivers")) >=
+				  ({canMove _x}
+                                    count (_self getVariable "vehicles"));
+		} else {
+			if (({alive _x}
+                              count (_self getVariable "drivers")) <
+			    ({canMove _x}
+                              count (_self getVariable "vehicles"))) then {
+				[_self, "auto_assign",
+				 _self getVariable "units"] call fnc_tell;
+			};
+			_result = ({alive _x}
+                                    count (_self getVariable "drivers")) >=
+				  ({canMove _x}
+                                    count (_self getVariable "vehicles"));
 		};
-		(({alive _x} count (_self getVariable "drivers")) <
-		 ({canMove _x} count (_self getVariable "vehicles")))
+		_result
 	}
 } ENDMETHOD;

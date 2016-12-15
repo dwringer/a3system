@@ -112,7 +112,8 @@ DEFMETHOD("UnitGroup", "move") ["_self", "_destination"] DO {
 DEFMETHOD("UnitGroup", "sequester") ["_self"] DO {
 	/* Despawn units and record groups/loadouts */
 	private ["_loadouts", "_classnames", "_positions", "_group", "_groups",
-		 "_groupIndices", "_sides", "_i", "_units", "_vehicles"];
+		 "_groupIndices", "_sides", "_i", "_units", "_vehicles",
+		 "_monitor"];
 	_loadouts = [];
 	_classnames = [];
 	_positions = [];
@@ -141,6 +142,11 @@ DEFMETHOD("UnitGroup", "sequester") ["_self"] DO {
 			_groupIndices pushBack _i;
 		};
 		_sides pushBack (side _x);
+		_monitor = _x getVariable "monitor";
+		if (not isNil "_monitor") then {
+			terminate _monitor;
+		};
+		unassignVehicle _x;
 	} forEach _units;
 	{deleteVehicle _x;} forEach _units;
 	[_self, "_setf", "units", _vehicles] call fnc_tell;
@@ -184,7 +190,7 @@ DEFMETHOD("UnitGroup", "desequester") ["_self"] DO {
 		_self setVariable ["vehicles", []];
 		_self setVariable ["gunners", []];
 		_self setVariable ["drivers", []];
-		_self setVariable ["cargos", []];
+		_self setVariable ["cargo", []];
 		[_self, "auto_assign", _self getVariable "units"]
 		 call fnc_tell;
 	};
@@ -199,7 +205,7 @@ DEFMETHOD("UnitGroup", "timed_patrol") ["_self",
 					"_return_to"] DO {
 	/* Run BIS_fnc_taskPatrol for a set duration then move back */
 	private ["_groups", "_group", "_return_pos", "_wpt", "_waypoint",
-		 "_wpType"];
+		 "_wpType", "_vehicles"];
 	_groups = [_self, "groups"] call fnc_tell;
 	{
 		[_x, _location, _radius] call BIS_fnc_taskPatrol;
@@ -210,9 +216,13 @@ DEFMETHOD("UnitGroup", "timed_patrol") ["_self",
 	};
 	if ((typeName _return_to) == "ARRAY") then {
 		_return_pos = _return_to;
-		_wpType = "MOVE";
 	} else {
 		_return_pos = position _return_to;
+	};
+	_vehicles = _self getVariable "vehicles";
+	if (isNil "_vehicles") then {
+		_wpType = "MOVE";
+	} else {
 		_wpType = "GETOUT";
 	};
 	{
