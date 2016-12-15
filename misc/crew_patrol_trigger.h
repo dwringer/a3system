@@ -30,8 +30,11 @@ fnc_crew_patrol_trigger = [["_this_list",
 			       (_crew getVariable "vehicles");
 		_pos = position (_nonVehicles select 0);
 		[_crew, "board"] call fnc_tell;
+		waitUntil {({_x == (vehicle _x)}
+                             count (_crew getVariable "units")) ==
+			   (count (_crew getVariable "vehicles"))};
 		[_crew, "timed_patrol",
-		 position (_this_list select 0), 200, _time, _return_to]
+		 position (_this_list select 0), 150, _time, _return_to]
 		 call fnc_tell;
 		waitUntil {({(alive _x) and
 			     (_x != (vehicle _x))} count _nonVehicles) == 0};

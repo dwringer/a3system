@@ -128,20 +128,22 @@ DEFMETHOD("UnitGroup", "sequester") ["_self"] DO {
 		_vehicles = [];
 	};
 	{
-		_loadouts pushBack (getUnitLoadout _x);
-		_classnames pushBack (typeOf _x);
-		_positions pushBack (position _x);
-		if (not ((group _x) in _groups)) then {
-			_groupIndices pushBack (count _groups);
-			_groups pushBack (group _x);
-		} else {
-			_i = 0;
-			while {(_groups select _i) != (group _x)} do {
-				_i = _i + 1;
+		if (alive _x) then {
+			_loadouts pushBack (getUnitLoadout _x);
+			_classnames pushBack (typeOf _x);
+			_positions pushBack (position _x);
+			if (not ((group _x) in _groups)) then {
+				_groupIndices pushBack (count _groups);
+				_groups pushBack (group _x);
+			} else {
+				_i = 0;
+				while {(_groups select _i) != (group _x)} do {
+					_i = _i + 1;
+				};
+				_groupIndices pushBack _i;
 			};
-			_groupIndices pushBack _i;
+			_sides pushBack (side _x);
 		};
-		_sides pushBack (side _x);
 		_monitor = _x getVariable "monitor";
 		if (not isNil "_monitor") then {
 			terminate _monitor;
