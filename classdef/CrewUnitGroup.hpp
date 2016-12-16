@@ -102,7 +102,9 @@ DEFMETHOD("CrewUnitGroup", "auto_assign") ["_self", "_units"] DO {
 		if (((count _arr) > 0) and
 		    (not isNil "_arr")) then {
 			[[["_u", "_r", "_g"], {
-				if (not isNil "_u") then {
+				if ((not isNil "_u") and
+				    (not isNil "_r") and
+				    (not isNil "_g")) then {
 					[_g, "assign", _u, _r] call fnc_tell;
 				};
 			 }] call fnc_lambda,

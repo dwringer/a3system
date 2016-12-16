@@ -209,9 +209,13 @@ DEFMETHOD("UnitGroup", "timed_patrol") ["_self",
 	private ["_groups", "_group", "_return_pos", "_wpt", "_waypoint",
 		 "_wpType", "_vehicles"];
 	_groups = [_self, "groups"] call fnc_tell;
-	{
-		[_x, _location, _radius] call BIS_fnc_taskPatrol;
-	} forEach _groups;
+	for "_i" from 0 to ((count _groups) - 1) do {
+		if ((({alive _x} count (units (_groups select _i))) > 0) and
+		    (not isNil "_location")) then {
+			[_groups select _i, _location, _radius]
+			 call BIS_fnc_taskPatrol;
+		};
+	};
 	sleep _time;
 	if (isNil "_return_to") then {
 		_return_to = [_self, "center_pos"] call fnc_tell;
