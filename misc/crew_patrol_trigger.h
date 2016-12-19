@@ -34,7 +34,8 @@ fnc_crew_patrol_trigger = [["_this_list",
                              count (_crew getVariable "units")) ==
 			   (count (_crew getVariable "vehicles"))};
 		[_crew, "timed_patrol",
-		 position (_this_list select 0), 150, _time, _return_to]
+		 position (_this_list select floor random count _this_list),
+		 200, _time, _return_to]
 		 call fnc_tell;
 		waitUntil {({(alive _x) and
 			     (_x != (vehicle _x))} count _nonVehicles) == 0};
@@ -81,7 +82,8 @@ thread_patrol = [["_this_list", "_unit_group", "_sequestered", "_time"], {
 	};
 	_pos = position (_units select 0);
 	[_unit_group, "timed_patrol",
-	 position (_this_list select 0), 200, _time, _pos] call fnc_tell;
+	 position (_this_list select floor random count _this_list),
+	 150, _time, _pos] call fnc_tell;
 	[_unit_group, "move", _pos] call fnc_tell;
 	[_unit_group, "sequester"] call fnc_tell;
 	if (not _sequestered) then {

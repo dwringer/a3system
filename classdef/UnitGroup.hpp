@@ -86,6 +86,33 @@ DEFMETHOD("UnitGroup", "groups") ["_self"] DO {
 } ENDMETHOD;
 
 
+DEFMETHOD("UnitGroup", "reinitialize_groups") ["_self", "_next_waypoint"] DO {
+	private ["_group"];
+	{
+		_group = createGroup (side _x);
+		_group copyWaypoints _x;
+		if (not isNil "_next_waypoint") then {
+			switch (_next_waypoint) do {
+				case true: {
+					_group setCurrentWaypoint
+					       [_group,
+						(currentWaypoint _x) + 1];
+				};
+				default {
+					_group setCurrentWaypoint
+					       [_group, _next_waypoint];
+				};
+			};
+		} else {
+			_group setCurrentwaypoint
+			       [_group, (currentWaypoint _group)];
+		};
+		(units _x) joinSilent _group;
+		deleteGroup _x;
+	} forEach ([_self, "groups"] call fnc_tell);
+} ENDMETHOD;
+
+
 DEFMETHOD("UnitGroup", "move") ["_self", "_destination"] DO {
 	/* Block until unit group has moved to the new position or stopped */
 	private ["_pos", "_matches", "_newPos"];

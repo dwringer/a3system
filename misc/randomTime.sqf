@@ -118,7 +118,7 @@ if ((count _this) == 1) then {
 	setDate [_y, _m, _d, _h, _n];}
 else {
 
-	setDate [_y, _m, _d, _h, _n];
+	setDate [_y, _m, _d, _h, _n];};
 
 
 	_ts = "S";
@@ -129,4 +129,4 @@ else {
 	// NEEDS DEBUGGED:
 	publicVariable "isDay";
 	publicVariable "isNight";
-};
+//};
