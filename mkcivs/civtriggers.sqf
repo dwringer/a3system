@@ -38,7 +38,7 @@ _spawnTrigger setTriggerStatements [
         format ["(player in thisList) and !Bool_civSpawn_%1_%2", _lo, _hi],
         format ["_nil = [%1, %2, %3, %4, %5]",
                 _lo, _hi, _size, _logic, _rPlacement] +
-               " call fnc_mkcivs; " +
+               " spawn fnc_mkcivs; " +
         format ["Bool_civSpawn_%1_%2 = true;", _lo, _hi],
         ""
 ];
