@@ -9,6 +9,7 @@ fnc_homogenize = compile preprocessfile "core\vectools\fnc_homogenize.sqf";
 fnc_dehomogenize = compile preprocessfile "core\vectools\fnc_dehomogenize.sqf";
 fnc_neighbors = compile preprocessfile "core\vectools\fnc_neighbors.sqf";
 fnc_closest = compile preprocessfile "core\vectools\fnc_closest.sqf";
+fnc_collect_sequence = compile preProcessFile "core\vectools\fnc_collect_sequence.sqf";
 
 fnc_vector_mean = {
 	/* Find the mean vector of a list of vectors */

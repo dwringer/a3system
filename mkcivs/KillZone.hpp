@@ -5,6 +5,10 @@ DEFCLASS("KillZone") ["_self", "_type", "_radius"] DO {
 					   [_self, _radius]
 					    call fnc_find_intersections];
 		};
+		case "roads": {
+			_self setVariable ["targets",
+					   (position _self) nearRoads _radius];
+		};
 	};
 	_self setVariable ["radius", _radius];
 	_self
