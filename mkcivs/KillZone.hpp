@@ -1,4 +1,4 @@
-DEFCLASS("KillZone") ["_self", "_type", "_radius"] DO {
+DEFCLASS("KillZone") ["_self", "_type", "_radius", "_probability"] DO {
 	switch (_type) do {
 		case "intersections": {
 			_self setVariable ["targets",
@@ -11,6 +11,11 @@ DEFCLASS("KillZone") ["_self", "_type", "_radius"] DO {
 		};
 	};
 	_self setVariable ["radius", _radius];
+	if (not isNil "_probability") then {
+		_self setVariable ["probability", _probability];
+	} else {
+		_self setVariable ["probability", 1.0];
+	};
 	_self
 } ENDCLASS;
 
@@ -38,6 +43,8 @@ DEFMETHOD("KillZone", "arm") ["_self", "_population_size", "_generations"] DO {
 
 
 DEFMETHOD("KillZone", "engage") ["_self", "_pull_radius"] DO {
-	[_pull_radius, _self getVariable "positions"]
-	 execVM "mkcivs\layAmbush.sqf";
+	if ((random 1) <= (_self getVariable "probability")) then {
+		[_pull_radius, _self getVariable "positions"]
+		 execVM "mkcivs\layAmbush.sqf";
+	};
 } ENDMETHOD;
