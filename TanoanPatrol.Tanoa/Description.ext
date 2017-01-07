@@ -1,0 +1,44 @@
+#include "misc\include\weapon_shop_defines.h" 
+#include "misc\include\weapon_shop_dialogs.h" 
+#include "misc\include\asinc_defines.h"
+#include "misc\include\asinc_dialogs.h"
+
+/*
+class CfgMusic
+{
+  tracks[]={calm,sturm};
+  class musCalm
+  {
+    name = "musCalm";
+    sound[] = {\Music\musCalm.ogg, db+1, 1.0};
+  };
+  class musSturm
+  {
+    name = "musSturm";
+    sound[] = {\Music\musSturm.ogg,db+1, 1.0};
+  };
+};
+*/
+/*
+class cfgSounds
+{
+	sounds[] = {};
+	class shopHi
+	{
+		// how the sound is referred to in the editor (e.g. trigger effects)
+		name = "shopHi";
+		// filename, volume, pitch
+		sound[] = {"Sounds\shopHI.ogg", db-7, 1};
+		titles[] = {};
+	};
+	class shopBye
+	{
+		// how the sound is referred to in the editor (e.g. trigger effects)
+		name = "shopBye";
+		// filename, volume, pitch
+		sound[] = {"Sounds\shopBYE.ogg", db-7, 1};
+		titles[] = {};
+	};
+
+};
+*/

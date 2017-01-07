@@ -183,6 +183,14 @@ function so it can be plugged-in at call time.  The typical pattern can be seen
 in mkcivs\fnc_closest and vectools\fnc_sorted, and an extra-parameters argument
 is available in fnc_mapwith, fnc_reduce, and fnc_filter.
 
+In case that wasn't already unclear enough, there is also a fnc_vlambda that
+implements a very limited form of variable-argument-count support.  In effect,
+any function that was created with fnc_vlambda can be designed to dynamically
+accept any number of parameters in sequence.  The only caveat is that passing
+nil to a function signals the end of the parameter list, so you cannot call a
+function with non-nil arguments following any nil arguments.  Every subsequent
+parameter will be defaulted to nil.
+
 Files needed:
 ```html
         init.sqf
