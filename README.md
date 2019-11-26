@@ -1,34 +1,56 @@
 # Mission overview
-This mission is dependent on the Marksman and Apex DLC's, as well as the
-following third-party content:
-CUP_WheeledVehicles_HMMWV (Community Upgrade Project - Vehicles)
-rhsusf_c_weapons (RHS Armed Forces of the United States - Weapons)
-rhsusf_c_troops (RHS Armed Forces of the United States - Units)
+These are single player missions only, though it might be possible to adapt
+the systems used for a networked game environment.
 
-This is a single player mission only, though it might be possible to adapt
-the systems used for a networked game environment.  Currently that is not an
-option because it would require extensive testing and experience with such an
-environment.
+The included missions, Sahrani Civ Zones and Altis Civ Zones, are
+designed to demonstrate procedural mission generation using a genetic
+algorithm derived from the process of differential evolution (Price
+and Storn, 1997) and the multiobjective non-dominated sort from
+NSGA-II (Deb, Pratap, Agarwal, and Meyarivan, 2002).
 
-The intent of this mission is to demonstrate dynamic functionality realized by
-utilizing various object instances supporting a basic method interface on top
-of the game's variable namespace features (class instances are either tied to
-an existing game object or a unique GameLogic created for each, so they can
-work like mixins to existing objects, Editor Modules, or completely
-virtual entities.
+The missions begin with the player in an infantry squad on board a
+helicopter.  The helicopter may come to a stop before the mission is
+generated - this process can take up to around 3 minutes (but often
+completes within 45 seconds).  Once a suitable landing area has been
+computed for a randomly chosen location on the map, the helicopter
+will fly there and let the squad disembark.  As the helicopter
+approaches, strategically advantageous locations will be sought at
+which weapon crates will be placed.  The dynamic civilians found
+inhabiting the map will then be compelled to go to these weapon
+crates, if in range, and then arm themselves and switch to side OPFOR.
 
-The mission itself is simply a patrol around the southeastern-most island in
-the Tanoa map (shipped with Arma 3 Apex).  Each city visited is populated by
-dynamically generated civilians, and at various chokepoints there is a chance
-for some of the civilians in the area to congregate at certain surrounding
-locations (computed dynamically as the player approaches the chokepoint) and
-arm themselves, subsequently beginning a seek-and-destroy waypoint as [a]
-new OPFOR group(s).  Detected OPFOR will in turn trigger the player's group
-to execute a temporary seek-and-destroy waypoint at the enemy's location.
+This creates a variety of tactical situations, but in theory the idea
+is for the player squad to be engaged rather quickly with the enemies,
+but with enough cover that the battle lasts for at least a few
+minutes.  Sometimes the random position generation doesn't work out
+exactly this way, but that's part of what keeps things interesting (it
+is occassionally the case that the helicopter will crash when trying
+to land in the event the pilot is killed or the chosen landing spot
+is extraordinarily poor - but such choices are relatively infrequent due
+to the genetic algorithm used to compute the landing zones).
 
-There are more class definitions and functions here than implemented in the
-mission itself, some of which may not function as intended and if not
-outlined below are mostly experimental.
+The mission Altis Civ Zones is extended in that the player is given a
+green smoke grenade to use when the enemies have all been defeated (a
+hint will appear that says "watching for smoke").  When the grenade is
+launched and comes to rest, it is interpreted as a signal to the
+helicopter (now orbiting the player's group) to land at that position
+until the player squad reembarks, at which point the entire mission
+recycles to a new location.
+
+Almost everything is in a WIP/debug state, so markers are drawn on the
+map as positions are being computed and some hints are provided that
+may break immersion.  Watching the evolution of these positions can
+provide some insight into how the genetic algorithm works, but it is
+strongly advised to peruse the code in the classdef/Insurgency.hpp and
+classdef/Headquarters.hpp class files (and the files in the opti/
+folder) to get more details on the process.  This algorithm is highly
+customizable and can be used to develop any conceivable type of
+position, given enough time.
+
+There are plenty of gains to be had from optimizing various functions
+with the latest SQF commands and best practices, but this has not been
+a priority during development thus far (which has been highly
+experimental).
 
 # Modules overview
 This repository contains a variety of scripts, functions, and classes to
