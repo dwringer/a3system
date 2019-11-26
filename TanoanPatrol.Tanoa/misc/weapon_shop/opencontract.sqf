@@ -1,1 +1,0 @@
-_nil = createDialog "DWR_ContractClass";
