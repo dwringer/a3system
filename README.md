@@ -41,11 +41,12 @@ Almost everything is in a WIP/debug state, so markers are drawn on the
 map as positions are being computed and some hints are provided that
 may break immersion.  Watching the evolution of these positions can
 provide some insight into how the genetic algorithm works, but it is
-strongly advised to peruse the code in the classdef/Insurgency.hpp and
-classdef/Headquarters.hpp class files (and the files in the opti/
-folder) to get more details on the process.  This algorithm is highly
-customizable and can be used to develop any conceivable type of
-position, given enough time.
+strongly advised to peruse the code in the
+classdef/LocationFinder.hpp, classdef/Insurgency.hpp and
+classdef/Headquarters.hpp class files (and also the classes/files in
+the opti/ folder) to get more details on the process.  This algorithm
+is highly customizable and can be used to develop any conceivable type
+of position, given enough time.
 
 There are plenty of gains to be had from optimizing various functions
 with the latest SQF commands and best practices, but this has not been
