@@ -1,3 +1,7 @@
+PLEASE NOTE:
+
+This repository is no longer maintained, and has been superseded by https://github.com/dwringer/ANIMA/, which is kept up-to-date with newer versions of many of the same scripts found here.
+
 # Mission overview
 These are single player missions only, though it might be possible to adapt
 the systems used for a networked game environment.
